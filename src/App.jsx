@@ -7,7 +7,7 @@ import dialogueData from './dialogue.json';
 import { audioManager } from './utils/audio';
 
 const RESOURCES = [
-  { id: 1, name: 'Crisis Hotline', description: 'Immediate clinical support via phone or text.' },
+  { id: 1, name: 'Free Crisis Resource', description: 'Immediate clinical support via phone or text (Free & Confidential).' },
   { id: 2, name: 'Professional Therapist', description: 'Long-term psychological treatment and support.' },
   { id: 3, name: 'A Trusted Friend', description: 'Immediate emotional support and social connection.' },
   { id: 4, name: 'Confidential Counselor', description: 'Private, professional guidance for sensitive personal issues.' }
@@ -92,6 +92,7 @@ const App = () => {
   const [resolutionPhase, setResolutionPhase] = useState(0); // 0: Call, 1: Arrive, 2: Hug, 3: Speech
   const [npcAction, setNpcAction] = useState('idle'); // idle, phone, sitting, pacing
   const [camera, setCamera] = useState({ scale: 1, x: 0, y: 0 });
+  const [isNpcSpeaking, setIsNpcSpeaking] = useState(false);
 
   // Progression & Save System
   const [completedLevels, setCompletedLevels] = useState(() => {
@@ -484,9 +485,19 @@ const App = () => {
       audioManager.playPop();
       // Stop any previous speech to ensure only current chapter's voice plays
       audioManager.stopSpeaking();
+
+      // Delay response options until speech starts
+      setIsNpcSpeaking(true);
+
       // Add a natural 500ms pause before NPC responds
       setTimeout(() => {
-        audioManager.speak(currentNode.npc_text, false, selectedLevel.npc.gender, selectedLevel.npc.voice);
+        audioManager.speak(
+          currentNode.npc_text,
+          false,
+          selectedLevel.npc.gender,
+          selectedLevel.npc.voice,
+          () => setIsNpcSpeaking(false) // Callback when speech ends
+        );
       }, 500);
     }
   }, [currentNodeId, gameState, selectedLevel]);
@@ -1334,14 +1345,14 @@ const App = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-center mt-2 mb-auto">
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-2 text-2xl shadow-inner">
+            <div className="flex flex-col items-center mt-1 mb-auto">
+              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-1 text-2xl shadow-inner">
                 🆘
               </div>
               <h2 className="text-lg font-bold text-slate-800">Emergency SOS</h2>
 
               {/* Input Display */}
-              <div className="mt-4 mb-4 h-12 flex items-center justify-center border-b-2 border-slate-100 w-full">
+              <div className="mt-2 mb-2 h-12 flex items-center justify-center border-b-2 border-slate-100 w-full">
                 <span className="text-3xl font-light tracking-widest text-slate-900">
                   {dialedNumber.length > 0 ? dialedNumber.join('') : <span className="text-slate-200">...</span>}
                 </span>
@@ -1353,7 +1364,7 @@ const App = () => {
             </div>
 
             {/* Keypad */}
-            <div className="grid grid-cols-3 gap-y-3 gap-x-4 w-full max-w-[240px] mx-auto mb-4">
+            <div className="grid grid-cols-3 gap-y-2 gap-x-4 w-full max-w-[240px] mx-auto mb-2">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                 <button
                   key={num}
@@ -1815,7 +1826,7 @@ const App = () => {
         </div>
       )}
 
-      {gameState === 'DIALOGUE' && !playerLastSaid && (
+      {gameState === 'DIALOGUE' && !playerLastSaid && !isNpcSpeaking && (
         <DialogueBox
           options={currentNode.options}
           onSelect={handleSelectOption}

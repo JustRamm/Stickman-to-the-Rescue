@@ -413,8 +413,11 @@ class SoundEngine {
     }
 
     // Voice Synthesis (TTS)
-    speak(text, isSam = true, gender = 'guy', voiceParams = null) {
-        if (!this.ttsEnabled || !window.speechSynthesis) return;
+    speak(text, isSam = true, gender = 'guy', voiceParams = null, onEnd = null) {
+        if (!this.ttsEnabled || !window.speechSynthesis) {
+            if (onEnd) onEnd();
+            return;
+        }
 
         // Prevent error logging for intentional interruptions
         if (this.utterance) {
@@ -435,6 +438,7 @@ class SoundEngine {
         // --- CRITICAL FIX FOR LONG SENTENCES ---
         this.utterance.onend = () => {
             this.utterance = null;
+            if (onEnd) onEnd();
         };
 
         this.utterance.onerror = (event) => {
