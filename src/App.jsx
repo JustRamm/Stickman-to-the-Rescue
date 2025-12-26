@@ -186,29 +186,25 @@ const App = () => {
   }, [completedLevels]);
 
   const isMissionLocked = (missionId) => {
-    // DEV MODE: All levels unlocked for testing
-    return false;
+    // Tutorial is always unlocked
+    if (missionId === 'tutorial') return false;
 
-    // ORIGINAL PROGRESSION LOGIC (Commented out for dev):
-    // // Tutorial is always unlocked
-    // if (missionId === 'tutorial') return false;
-    //
-    // // Park and Office require Tutorial completion
-    // if (missionId === 'park' || missionId === 'office') {
-    //   return !completedLevels.includes('tutorial');
-    // }
-    //
-    // // Campus requires Park & Office
-    // if (missionId === 'campus') {
-    //   return !(completedLevels.includes('park') && completedLevels.includes('office'));
-    // }
-    //
-    // // Rainy (Expert) requires Campus
-    // if (missionId === 'rainy') {
-    //   return !completedLevels.includes('campus');
-    // }
-    //
-    // return false;
+    // Park and Office require Tutorial completion
+    if (missionId === 'park' || missionId === 'office') {
+      return !completedLevels.includes('tutorial');
+    }
+
+    // Campus requires Park & Office
+    if (missionId === 'campus') {
+      return !(completedLevels.includes('park') && completedLevels.includes('office'));
+    }
+
+    // Rainy (Expert) requires Campus
+    if (missionId === 'rainy') {
+      return !completedLevels.includes('campus');
+    }
+
+    return true;
   };
 
   // Settings & Accessibility System
