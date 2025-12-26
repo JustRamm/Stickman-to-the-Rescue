@@ -44,6 +44,16 @@ const Stickman = ({
 
     // Determine which SVG to use
     const getAssetUrl = () => {
+        // Check if this is a specific NPC character
+        const npcNames = ['Alex', 'Grace', 'David', 'Maya', 'Raj'];
+        const isNPC = npcNames.includes(speaker);
+
+        if (isNPC) {
+            // Use NPC-specific SVG from /npc folder
+            return `/npc/${speaker.toLowerCase()}.svg`;
+        }
+
+        // Default player character assets
         const base = `/stickman_assets/${gender}`;
 
         if (isJumping) return `${base}_jump.svg`;

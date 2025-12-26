@@ -40,52 +40,97 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
     if (theme === 'office') {
         return (
             <div
-                className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-slate-900 border-b-[20vh] border-slate-800 transition-all duration-1000"
+                className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[#0f172a] border-b-[20vh] border-slate-900 transition-all duration-1000"
                 style={{ filter: worldFilter }}
             >
-                {/* Ceiling Lights - Flicker if low trust */}
-                <div className="absolute top-0 inset-x-0 flex justify-around px-20">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className={`w-32 h-2 bg-white/50 shadow-[0_0_50px_rgba(255,255,255,0.2)] ${isLowTrust ? 'animate-pulse' : ''}`} />
+                {/* Midnight City Window Views */}
+                <div className="absolute top-10 inset-x-0 flex justify-between px-10 h-64">
+                    {[1, 2].map(windowId => (
+                        <div key={windowId} className="w-[45%] md:w-[40%] h-full bg-slate-950 border-[6px] border-slate-800 rounded-sm relative overflow-hidden shadow-[inset_0_0_30px_rgba(0,0,0,1)]">
+                            {/* Sky inside window */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-[#020617] to-[#1e1b4b] opacity-80" />
+
+                            {/* Distant City Skyline */}
+                            <div className="absolute bottom-0 left-0 right-0 flex items-end opacity-40">
+                                {[...Array(20)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-black flex flex-wrap content-end justify-center p-[1px] gap-[1px]"
+                                        style={{
+                                            width: `${10 + Math.random() * 20}px`,
+                                            height: `${30 + Math.random() * 100}px`,
+                                            marginRight: '2px'
+                                        }}
+                                    >
+                                        {[...Array(Math.floor(Math.random() * 12))].map((__, j) => (
+                                            <div key={j} className={`w-[2px] h-[2px] ${Math.random() > 0.8 ? 'bg-yellow-200/60 shadow-[0_0_2px_yellow]' : 'bg-transparent'}`} />
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Faint rain on window if low trust */}
+                            {isLowTrust && (
+                                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dust.png')] mix-blend-screen" />
+                            )}
+                        </div>
                     ))}
                 </div>
 
-                {/* Background Cubicles */}
-                <div className="absolute bottom-[30%] inset-x-0 flex justify-around items-end opacity-40">
+                {/* Ceiling Lights - Flicker if low trust */}
+                <div className="absolute top-0 inset-x-0 flex justify-around px-20">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className={`w-32 h-1.5 bg-white/40 shadow-[0_0_60px_rgba(255,255,255,0.15)] ${isLowTrust ? 'animate-pulse' : ''}`} />
+                    ))}
+                </div>
+
+                {/* Background Cubicles & Equipment */}
+                <div className="absolute bottom-[30%] inset-x-0 flex justify-around items-end opacity-60">
                     {[...Array(5)].map((_, i) => (
                         <div key={i} className="flex flex-col items-center">
-                            <div className="w-40 h-24 bg-slate-700 border-t border-slate-600 rounded-t-lg relative">
-                                {/* Computer Monitor */}
-                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-16 h-10 bg-slate-800 border border-slate-600 rounded-sm flex items-center justify-center">
-                                    <div className={`w-full h-full bg-blue-400/10 ${i % 2 === 0 ? 'animate-pulse' : ''}`} />
+                            <div className="w-48 h-24 bg-slate-800 border-t border-slate-700 rounded-t-lg relative shadow-2xl">
+                                {/* Glowing Monitor */}
+                                <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-16 h-10 bg-slate-900 border border-slate-700 rounded-sm flex items-center justify-center overflow-hidden">
+                                    <div className={`w-full h-full ${i % 2 === 0 ? 'bg-blue-400/20' : 'bg-teal-400/15'} animate-shimmer`} />
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent" />
                                 </div>
-                                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800" />
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-2.5 h-3 bg-slate-900" />
+
+                                {/* Faint Office Supplies */}
+                                <div className="absolute top-2 left-4 w-6 h-1 bg-slate-700 rounded-full opacity-30" />
+                                <div className="absolute top-2 right-4 w-4 h-4 bg-slate-700 rounded-sm opacity-20" />
                             </div>
-                            <div className="w-1 h-32 bg-slate-400/20" /> {/* Desk leg */}
+                            <div className="w-1.5 h-32 bg-slate-400/5" />
                         </div>
                     ))}
                 </div>
 
                 {/* Server Rack with Blinking Lights */}
-                <div className="absolute top-20 left-[10%] w-24 h-64 bg-slate-950 border border-slate-700 shadow-2xl flex flex-col p-2 gap-1 overflow-hidden">
+                <div className="absolute top-24 left-[5%] w-20 h-72 bg-slate-950 border border-slate-800 shadow-[0_0_40px_rgba(0,0,0,0.5)] flex flex-col p-2 gap-1 overflow-hidden opacity-90">
+                    <div className="flex justify-between px-1 mb-1 border-b border-slate-800 pb-1">
+                        <div className="w-1 h-1 bg-red-500 rounded-full" />
+                        <div className="w-1 h-1 bg-green-500 rounded-full" />
+                    </div>
                     {[...Array(40)].map((_, i) => (
                         <div
                             key={i}
-                            className={`w-1.5 h-1.5 rounded-full ${Math.random() > 0.5 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}
-                            style={{ animationDuration: `${Math.random() * 2 + 0.5}s`, alignSelf: Math.random() > 0.5 ? 'flex-start' : 'flex-end' }}
+                            className={`w-1.5 h-1.5 rounded-full ${Math.random() > 0.6 ? 'bg-green-500' : 'bg-blue-500'} animate-pulse`}
+                            style={{ animationDuration: `${Math.random() * 2 + 0.5}s`, alignSelf: Math.random() > 0.5 ? 'flex-start' : 'flex-end', opacity: Math.random() * 0.5 + 0.5 }}
                         />
                     ))}
                 </div>
 
-                {/* Water Cooler */}
-                <div className="absolute bottom-[30%] right-[15%] flex flex-col items-center opacity-80">
-                    <div className="w-8 h-10 bg-blue-300/50 rounded-t-xl backdrop-blur-sm shadow-[0_0_10px_rgba(59,130,246,0.3)] animate-[bounce_4s_infinite]" />
-                    <div className="w-10 h-24 bg-slate-200 rounded-b-lg border-l-4 border-slate-300" />
+                {/* Water Cooler with Glow */}
+                <div className="absolute bottom-[30%] right-[10%] flex flex-col items-center opacity-70">
+                    <div className="w-7 h-9 bg-blue-300/30 rounded-t-xl backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.2)]" />
+                    <div className="w-9 h-20 bg-slate-800 rounded-b-lg border-l-2 border-slate-700" />
                 </div>
 
-                {/* Floor Reflection */}
-                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-b from-slate-800 to-slate-900 opacity-90" />
-                <GodRays />
+                {/* Floor Reflections */}
+                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-b from-slate-900 to-black opacity-100">
+                    <div className="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full opacity-20 translate-y-20" />
+                </div>
+
                 <LowTrustVignette />
             </div>
         );

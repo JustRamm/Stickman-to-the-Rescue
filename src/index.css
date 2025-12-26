@@ -184,7 +184,7 @@ body {
 /* Responsiveness & Mobile HUD */
 @media (max-width: 768px) {
   .resource-wallet {
-    width: 100%;
+    width: 90%;
     right: -100%;
     z-index: 200;
   }
@@ -520,6 +520,7 @@ input {
   background: #ccfbf1;
   box-shadow: 0 0 0 2px var(--primary);
 }
+
 /* RESOURCE WALLET STYLES (OVERRIDE) */
 .resource-wallet {
   position: absolute;
@@ -568,3 +569,12 @@ input {
   box-shadow: 0 0 0 2px #0d9488 !important;
 }
 
+.camera-viewport {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center 70%;
+  will-change: transform;
+}

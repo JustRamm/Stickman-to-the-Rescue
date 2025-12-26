@@ -39,15 +39,16 @@ const BACKGROUND_NPCS = [
 ];
 
 const MISSIONS = [
-  { id: 'tutorial', name: 'Interactive Intro', desc: 'New to life-saving? Start here to learn the basics.', difficulty: 'Training', theme: 'park' },
-  { id: 'park', name: 'The Sunset Park', desc: 'A regular evening in the park. Sam is alone.', difficulty: 'Easy', theme: 'park' },
-  { id: 'office', name: 'Midnight Office', desc: 'Sam is working late. The vibe is stark and cold.', difficulty: 'Medium', theme: 'office' },
-  { id: 'campus', name: 'Alumni Square', desc: 'A high-pressure university campus environment.', difficulty: 'Hard', theme: 'campus' },
-  { id: 'rainy', name: 'Rainy Sidewalk', desc: 'A moody street scene. Weather adds to the tension.', difficulty: 'Expert', theme: 'rainy_street' }
+  { id: 'tutorial', name: 'Interactive Intro', desc: 'Learn basic life-saving skills.', difficulty: 'Training', theme: 'park', npc: { name: 'Alex', gender: 'guy', voice: { pitch: 1.0, rate: 0.95 } } },
+  { id: 'park', name: 'The Sunset Park', desc: 'An elderly resident is sitting alone.', difficulty: 'Easy', theme: 'park', npc: { name: 'Grace', gender: 'girl', voice: { pitch: 1.15, rate: 0.65 } } },
+  { id: 'office', name: 'Midnight Office', desc: 'A manager is working late in a stark, cold office.', difficulty: 'Medium', theme: 'office', npc: { name: 'David', gender: 'guy', voice: { pitch: 0.65, rate: 0.7 } } },
+  { id: 'campus', name: 'Alumni Square', desc: 'A student athlete is sitting in the quad.', difficulty: 'Hard', theme: 'campus', npc: { name: 'Maya', gender: 'girl', voice: { pitch: 1.35, rate: 1.05 } } },
+  { id: 'rainy', name: 'Rainy Sidewalk', desc: 'A young man is standing near the street.', difficulty: 'Expert', theme: 'rainy_street', npc: { name: 'Raj', gender: 'guy', voice: { pitch: 0.75, rate: 0.8 } } }
 ];
 
 const App = () => {
-  const [gameState, setGameState] = useState('START');
+  const [gameState, setGameState] = useState('SPLASH');
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [playerName, setPlayerName] = useState('You');
   const [playerGender, setPlayerGender] = useState('guy'); // guy or girl
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]); // Default to Tutorial
@@ -88,6 +89,7 @@ const App = () => {
   const [dialedNumber, setDialedNumber] = useState([]);
   const [resolutionPhase, setResolutionPhase] = useState(0); // 0: Call, 1: Arrive, 2: Hug, 3: Speech
   const [npcAction, setNpcAction] = useState('idle'); // idle, phone, sitting, pacing
+  const [camera, setCamera] = useState({ scale: 1, x: 0, y: 0 });
 
   // Progression & Save System
   const [completedLevels, setCompletedLevels] = useState(() => {
@@ -98,6 +100,33 @@ const App = () => {
       return [];
     }
   });
+
+  useEffect(() => {
+    if (gameState !== 'SPLASH') return;
+
+    const timer = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          return 100;
+        }
+        // Slower loading progress
+        return prev + Math.random() * 5;
+      });
+    }, 150);
+
+    return () => clearInterval(timer);
+  }, [gameState]);
+
+  // Handle auto-transition from splash
+  useEffect(() => {
+    if (gameState === 'SPLASH' && loadingProgress >= 100) {
+      const timer = setTimeout(() => {
+        setGameState('START');
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingProgress, gameState]);
 
   useEffect(() => {
     localStorage.setItem('qpr_completed_missions', JSON.stringify(completedLevels));
@@ -142,6 +171,15 @@ const App = () => {
     // Update prevGameState whenever it's not RESOURCES
     if (gameState !== 'RESOURCES') {
       prevGameState.current = gameState;
+    }
+
+    // Camera Logic
+    if (gameState === 'DIALOGUE') {
+      // Zoom in on interaction
+      setCamera({ scale: 1.15, x: -10, y: -5 });
+    } else if (gameState === 'APPROACH') {
+      // Normal view
+      setCamera({ scale: 1, x: 0, y: 0 });
     }
   }, [gameState]);
   useEffect(() => {
@@ -216,9 +254,16 @@ const App = () => {
     setFoundClues([]);
     setTrust(25);
     setPlayerPos({ x: 10, y: 70 });
+    // Cinematic Start: Pan in from further left
+    setCamera({ scale: 1.2, x: 100, y: 0 });
     // Start Game
     setGameState('APPROACH');
     audioManager.startAmbient(mission.theme);
+
+    // Smoothly pan to center after a tiny delay to trigger CSS transition
+    setTimeout(() => {
+      setCamera({ scale: 1, x: 0, y: 0 });
+    }, 50);
   };
 
   useEffect(() => {
@@ -361,6 +406,14 @@ const App = () => {
         const nextX = prev.x + (dir * 0.05);
         if (nextX > 82) dir = -1;
         if (nextX < 68) dir = 1;
+
+        // Check proximity even while NPC is moving
+        const dist = Math.abs(playerPos.x - nextX);
+        if (dist < 10 && gameState === 'APPROACH') {
+          setGameState('DIALOGUE');
+          audioManager.playDing();
+        }
+
         return { ...prev, x: nextX };
       });
     }, 50);
@@ -371,6 +424,7 @@ const App = () => {
   useEffect(() => {
     if (gameState !== 'RESOLUTION') return;
 
+    audioManager.stopMusic(); // Stop ambient mission music immediately
     // Phase 0: Start (0s)
 
     // Phase 1: Help Arrives (2s)
@@ -415,12 +469,12 @@ const App = () => {
   useEffect(() => {
     if (gameState === 'DIALOGUE') {
       audioManager.playPop();
-      // Add a natural 500ms pause before Sam responds
+      // Add a natural 500ms pause before NPC responds
       setTimeout(() => {
-        audioManager.speak(currentNode.npc_text, true, 'guy');
+        audioManager.speak(currentNode.npc_text, false, selectedLevel.npc.gender, selectedLevel.npc.voice);
       }, 500);
     }
-  }, [currentNodeId, gameState]);
+  }, [currentNodeId, gameState, selectedLevel]);
 
   useEffect(() => {
     if (trust <= 0 && currentNodeId !== 'leave_failure') {
@@ -437,9 +491,11 @@ const App = () => {
   // Auto-Redirect to Menu after 10s on End Screen
   useEffect(() => {
     if (currentNode?.isEnd) {
-      // Play Victory Audio if Successful
+      // Play Victory Audio if Successful, otherwise stop all music
       if (currentNode.result === 'success') {
         audioManager.playVictory();
+      } else {
+        audioManager.stopMusic();
       }
 
       const timer = setTimeout(() => {
@@ -613,12 +669,12 @@ const App = () => {
   const renderSettingsUI = () => (
     <>
       {/* Settings Button (Top Right) */}
-      <div className="fixed top-6 right-6 z-[400] pointer-events-auto">
+      <div className="fixed top-4 md:top-6 right-4 md:right-6 z-[400] pointer-events-auto">
         <button
           onClick={() => { audioManager.init(); setIsSettingsOpen(true); }}
-          className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-lg transition-all border border-white/50 shadow-sm"
+          className="w-8 h-8 md:w-10 md:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-lg transition-all border border-white/50 shadow-sm"
         >
-          <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -629,59 +685,59 @@ const App = () => {
       {isSettingsOpen && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsSettingsOpen(false)} />
-          <div className="relative w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
-            <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-xl font-black uppercase text-slate-800 tracking-tight">Settings</h3>
-              <button onClick={() => setIsSettingsOpen(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all">✕</button>
+          <div className="relative w-full max-w-[280px] md:max-w-sm bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
+            <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-lg md:text-xl font-black uppercase text-slate-800 tracking-tight">Settings</h3>
+              <button onClick={() => setIsSettingsOpen(false)} className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all">✕</button>
             </div>
 
-            <div className="p-8 space-y-8">
+            <div className="p-6 md:p-8 space-y-6 md:space-y-8">
               {/* Volume */}
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 <div className="flex justify-between items-end">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Master Volume</label>
-                  <span className="text-sm font-bold text-teal-600">{Math.round(settings.audioVolume * 100)}%</span>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Master Volume</label>
+                  <span className="text-xs md:text-sm font-bold text-teal-600">{Math.round(settings.audioVolume * 100)}%</span>
                 </div>
                 <input
                   type="range" min="0" max="1" step="0.01"
                   value={settings.audioVolume}
                   onChange={(e) => setSettings(s => ({ ...s, audioVolume: parseFloat(e.target.value) }))}
-                  className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                  className="w-full h-1.5 md:h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-500"
                 />
               </div>
 
               {/* TTS Toggle */}
               <div className="flex justify-between items-center group">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block group-hover:text-teal-600 transition-colors">Narrator (TTS)</label>
-                  <p className="text-[10px] text-slate-500 font-medium">Read dialogue out loud</p>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 block group-hover:text-teal-600 transition-colors">Narrator (TTS)</label>
+                  <p className="text-[9px] md:text-[10px] text-slate-500 font-medium">Read dialogue out loud</p>
                 </div>
                 <button
                   onClick={() => setSettings(s => ({ ...s, ttsEnabled: !s.ttsEnabled }))}
-                  className={`w-12 h-6 rounded-full transition-all relative ${settings.ttsEnabled ? 'bg-teal-500 shadow-lg shadow-teal-500/30' : 'bg-slate-200'}`}
+                  className={`w-10 md:w-12 h-5 md:h-6 rounded-full transition-all relative ${settings.ttsEnabled ? 'bg-teal-500 shadow-lg shadow-teal-500/30' : 'bg-slate-200'}`}
                 >
-                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${settings.ttsEnabled ? 'translate-x-6' : ''}`} />
+                  <div className={`absolute top-0.5 md:top-1 left-0.5 md:left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${settings.ttsEnabled ? 'translate-x-5 md:translate-x-6' : ''}`} />
                 </button>
               </div>
 
               {/* Text Speed */}
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 <div className="flex justify-between items-end">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Text Flow Speed</label>
-                  <span className="text-sm font-bold text-teal-600">
+                  <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Text Flow Speed</label>
+                  <span className="text-xs md:text-sm font-bold text-teal-600">
                     {settings.textSpeed === 0 ? 'Instant' : settings.textSpeed > 75 ? 'Relaxed' : settings.textSpeed > 30 ? 'Normal' : 'Rapid'}
                   </span>
                 </div>
-                <div className="relative py-2">
+                <div className="relative py-1 md:py-2">
                   <input
                     type="range" min="0" max="100" step="5"
                     value={100 - settings.textSpeed}
                     onChange={(e) => setSettings(s => ({ ...s, textSpeed: 100 - parseInt(e.target.value) }))}
-                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                    className="w-full h-1.5 md:h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-500"
                   />
-                  <div className="flex justify-between mt-2 px-1">
-                    <span className="text-[8px] font-bold text-slate-300 uppercase">Slow</span>
-                    <span className="text-[8px] font-bold text-slate-300 uppercase">Fast</span>
+                  <div className="flex justify-between mt-1 md:mt-2 px-1">
+                    <span className="text-[7px] md:text-[8px] font-bold text-slate-300 uppercase">Slow</span>
+                    <span className="text-[7px] md:text-[8px] font-bold text-slate-300 uppercase">Fast</span>
                   </div>
                 </div>
               </div>
@@ -689,13 +745,14 @@ const App = () => {
 
             <button
               onClick={() => setIsSettingsOpen(false)}
-              className="w-full py-5 bg-teal-600 text-white font-black uppercase text-xs tracking-widest hover:bg-teal-700 transition-colors shadow-inner"
+              className="w-full py-4 md:py-5 bg-teal-600 text-white font-black uppercase text-[10px] md:text-xs tracking-widest hover:bg-teal-700 transition-colors shadow-inner"
             >
               Apply Changes
             </button>
           </div>
         </div>
       )}
+
     </>
   );
 
@@ -707,65 +764,65 @@ const App = () => {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full" />
 
         {/* Header */}
-        <div className="w-full max-w-4xl flex justify-between items-center mb-12 relative z-10">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-2">Mental Health Resources</h2>
-            <p className="text-teal-400 font-bold uppercase tracking-widest text-xs">Kochi, Kerala & Beyond</p>
+        <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center mb-8 md:mb-12 relative z-10 gap-4">
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-2">Mental Health Resources</h2>
+            <p className="text-teal-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">Kochi, Kerala & Beyond</p>
           </div>
           <button
             onClick={() => setGameState(prevGameState.current)}
-            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-all border border-white/20"
+            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-all border border-white/20 text-sm"
           >
             ← Back
           </button>
         </div>
 
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 pb-20">
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 relative z-10 pb-20">
           {/* Helplines Column */}
           <div className="space-y-6">
-            <h3 className="text-xl font-black text-white/50 uppercase tracking-widest px-2">Immediate Support</h3>
+            <h3 className="text-lg md:text-xl font-black text-white/50 uppercase tracking-widest px-2">Immediate Support</h3>
             {REAL_RESOURCES.helplines.map((item, i) => (
-              <div key={i} className="group p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:border-teal-500/50 transition-all duration-300">
+              <div key={i} className="group p-5 md:p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[1.5rem] md:rounded-[2rem] hover:border-teal-500/50 transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
-                  <h4 className="text-xl font-bold text-white group-hover:text-teal-400 transition-colors">{item.name}</h4>
-                  <span className="text-[10px] font-black bg-teal-500/20 text-teal-400 px-2 py-0.5 rounded-full uppercase">{item.hours}</span>
+                  <h4 className="text-lg md:text-xl font-bold text-white group-hover:text-teal-400 transition-colors">{item.name}</h4>
+                  <span className="text-[8px] md:text-[10px] font-black bg-teal-500/20 text-teal-400 px-2 py-0.5 rounded-full uppercase">{item.hours}</span>
                 </div>
-                <p className="text-slate-400 text-sm mb-4 leading-relaxed">{item.desc}</p>
+                <p className="text-slate-400 text-xs md:text-sm mb-4 leading-relaxed">{item.desc}</p>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-teal-500 rounded-lg">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
+                    <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
                   </div>
-                  <span className="text-lg font-black text-teal-500 group-hover:scale-110 transition-transform origin-left">{item.phone}</span>
+                  <span className="text-base md:text-lg font-black text-teal-500 group-hover:scale-110 transition-transform origin-left">{item.phone}</span>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Hospitals and Self Care Column */}
-          <div className="space-y-12">
-            <div className="space-y-6">
-              <h3 className="text-xl font-black text-white/50 uppercase tracking-widest px-2">Professional Care (Kochi)</h3>
+          <div className="space-y-8 md:space-y-12">
+            <div className="space-y-4 md:space-y-6">
+              <h3 className="text-lg md:text-xl font-black text-white/50 uppercase tracking-widest px-2">Professional Care (Kochi)</h3>
               <div className="space-y-4">
                 {REAL_RESOURCES.hospitals.map((hosp, i) => (
-                  <div key={i} className="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl">
-                    <h5 className="font-bold text-white text-lg">{hosp.name}</h5>
-                    <p className="text-xs text-slate-500 font-medium mb-2">{hosp.location} • {hosp.dept || hosp.type}</p>
+                  <div key={i} className="p-4 md:p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl md:rounded-3xl">
+                    <h5 className="font-bold text-white text-base md:text-lg">{hosp.name}</h5>
+                    <p className="text-[10px] text-slate-500 font-medium mb-2">{hosp.location} • {hosp.dept || hosp.type}</p>
                     <p className="text-sm font-black text-teal-500">{hosp.contact}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-6">
-              <h3 className="text-xl font-black text-white/50 uppercase tracking-widest px-2">Self-Care for You</h3>
-              <div className="p-8 bg-gradient-to-br from-teal-500/20 to-blue-500/20 rounded-[2.5rem] border border-teal-500/30">
-                <div className="grid grid-cols-1 gap-6">
+            <div className="space-y-4 md:space-y-6">
+              <h3 className="text-lg md:text-xl font-black text-white/50 uppercase tracking-widest px-2">Self-Care for You</h3>
+              <div className="p-6 md:p-8 bg-gradient-to-br from-teal-500/20 to-blue-500/20 rounded-[1.5rem] md:rounded-[2.5rem] border border-teal-500/30">
+                <div className="grid grid-cols-1 gap-4 md:gap-6">
                   {REAL_RESOURCES.selfcare.map((sc, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="w-2 h-2 mt-2 bg-teal-400 rounded-full flex-shrink-0" />
+                    <div key={i} className="flex gap-3 md:gap-4">
+                      <div className="w-1.5 h-1.5 mt-2 bg-teal-400 rounded-full flex-shrink-0" />
                       <div>
-                        <h6 className="font-bold text-teal-400 text-sm mb-1">{sc.title}</h6>
-                        <p className="text-slate-300 text-xs leading-relaxed">{sc.tip}</p>
+                        <h6 className="font-bold text-teal-400 text-xs md:text-sm mb-1">{sc.title}</h6>
+                        <p className="text-slate-300 text-[10px] md:text-xs leading-relaxed">{sc.tip}</p>
                       </div>
                     </div>
                   ))}
@@ -787,6 +844,48 @@ const App = () => {
 
   if (gameState === 'RESOURCES') return renderResourcesUI();
 
+  const renderSplashScreen = () => (
+    <div className="game-container min-h-screen w-full bg-slate-900 text-white overflow-hidden relative flex flex-col items-center justify-center p-6">
+      <div className="absolute inset-0 z-0">
+        <Scenery theme="park" trust={50} />
+        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
+      </div>
+
+      <div className="relative z-20 flex flex-col items-center text-center max-w-sm w-full animate-fade-in p-4">
+        <div className="mb-8 md:mb-12 relative">
+          <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center shadow-2xl relative z-10 animate-float">
+            <img src="/logo.svg" alt="Stickman Logo" className="w-16 h-16 md:w-20 md:h-20" />
+          </div>
+          <div className="absolute inset-0 bg-teal-500/30 blur-2xl rounded-full animate-pulse-slow" />
+        </div>
+
+        <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">STICKMAN</h1>
+        <p className="text-teal-400 font-black uppercase tracking-[0.3em] text-[8px] md:text-[10px] mb-8 md:mb-12">To The Rescue</p>
+
+        <div className="w-full h-16 flex items-center justify-center">
+          <div className="w-full px-4">
+            <div className="flex justify-between text-[8px] md:text-[10px] uppercase font-black tracking-widest text-slate-500 mb-2">
+              <span>{loadingProgress >= 100 ? 'Ready to Start' : 'Loading Experience'}</span>
+              <span>{Math.round(loadingProgress)}%</span>
+            </div>
+            <div className="h-1 md:h-1.5 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+              <div
+                className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-300 ease-out shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-8 md:mt-12 text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-slate-600 animate-pulse">
+          Connecting to Empathy...
+        </p>
+      </div>
+    </div>
+  );
+
+  if (gameState === 'SPLASH') return renderSplashScreen();
+
   if (gameState === 'START') {
     return (
       <div className="game-container min-h-screen w-full bg-slate-900 text-white overflow-hidden relative flex flex-col items-center justify-center p-6">
@@ -799,41 +898,41 @@ const App = () => {
         </div>
 
         {/* Floating Content */}
-        <div className="relative z-20 flex flex-col items-center text-center max-w-4xl animate-slide-up">
+        <div className="relative z-20 flex flex-col items-center text-center max-w-4xl animate-slide-up px-4">
 
           {/* Top Badge: Mind Empowered Logo */}
-          <div className="mb-8 flex flex-col items-center gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-            <div className="relative group w-24 h-24 rounded-full overflow-hidden shadow-2xl border-4 border-slate-800 ring-4 ring-teal-500/50 transition-transform duration-500 hover:scale-110 hover:rotate-3">
+          <div className="mb-6 md:mb-8 flex flex-col items-center gap-2 md:gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+            <div className="relative group w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden shadow-2xl border-2 md:border-4 border-slate-800 ring-4 ring-teal-500/50 transition-transform duration-500 hover:scale-110 hover:rotate-3">
               <img src="/ME.jpeg" alt="Mind Empowered" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
               <div className="absolute inset-0 bg-teal-500/0 group-hover:bg-teal-500/10 transition-colors" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-teal-400/80 text-shadow-sm">Presented By Mind Empowered</span>
+            <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] text-teal-400/80 text-shadow-sm">Presented By Mind Empowered</span>
           </div>
 
           {/* Main Title Group */}
-          <div className="mb-12 relative">
+          <div className="mb-8 md:mb-12 relative">
             <div className="absolute -inset-10 bg-teal-500/20 blur-3xl rounded-full animate-pulse-slow pointer-events-none" />
 
-            <h1 className="relative text-6xl md:text-8xl font-black tracking-tighter text-white drop-shadow-2xl mb-2 leading-none">
+            <h1 className="relative text-5xl md:text-8xl font-black tracking-tighter text-white drop-shadow-2xl mb-2 leading-none">
               STICKMAN
             </h1>
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-white to-teal-300 animate-shimmer">
+            <h2 className="text-xl md:text-3xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-white to-teal-300 animate-shimmer">
               TO THE RESCUE
             </h2>
 
             {/* Decorative Elements */}
-            <div className="absolute -right-16 -top-12 animate-float delay-700 opacity-90 rotate-12">
-              <img src="/stickman_assets/guy_idle.svg" alt="Stickman" className="w-24 h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+            <div className="absolute -right-8 md:-right-16 -top-8 md:-top-12 animate-float delay-700 opacity-90 rotate-12 pointer-events-none">
+              <img src="/stickman_assets/guy_idle.svg" alt="Stickman" className="w-16 h-16 md:w-24 md:h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
             </div>
-            <div className="absolute -left-16 -bottom-8 animate-float delay-1000 opacity-90 -rotate-12">
-              <img src="/stickman_assets/group_hug.svg" alt="Support" className="w-32 h-24 drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]" />
+            <div className="absolute -left-12 md:-left-16 -bottom-6 md:-bottom-8 animate-float delay-1000 opacity-90 -rotate-12 pointer-events-none">
+              <img src="/stickman_assets/group_hug.svg" alt="Support" className="w-24 h-18 md:w-32 md:h-24 drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]" />
             </div>
           </div>
 
           {/* Start Button */}
           <button
             onClick={() => { audioManager.init(); setGameState('NAMING'); }}
-            className="group relative px-12 py-6 bg-white text-slate-900 rounded-full font-black text-xl tracking-widest uppercase shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
+            className="group relative px-8 md:px-12 py-4 md:py-6 bg-white text-slate-900 rounded-full font-black text-lg md:text-xl tracking-widest uppercase shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
           >
             <span className="relative z-10 flex items-center gap-3">
               Start Simulation <span className="text-teal-600 transition-transform group-hover:translate-x-1">➔</span>
@@ -844,14 +943,14 @@ const App = () => {
 
           <button
             onClick={() => { audioManager.init(); setGameState('RESOURCES'); }}
-            className="mt-6 text-teal-400 hover:text-white text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
+            className="mt-6 md:mt-8 text-teal-400 hover:text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
           >
             <span>Mental Health Resources</span>
-            <span className="w-4 h-px bg-teal-500/50" />
-            <span className="text-sm">✚</span>
+            <span className="w-3 md:w-4 h-px bg-teal-500/50" />
+            <span className="text-xs md:text-sm">✚</span>
           </button>
 
-          <p className="mt-8 text-slate-400 text-xs font-medium uppercase tracking-widest max-w-sm opacity-60">
+          <p className="mt-6 md:mt-8 text-slate-400 text-[10px] md:text-xs font-medium uppercase tracking-widest max-w-sm opacity-60">
             A QPR Suicide Prevention Training Module
           </p>
 
@@ -874,20 +973,20 @@ const App = () => {
         </button>
 
         <Scenery trust={trust} />
-        <div className="relative z-20 max-w-md w-full p-12 naming-card bg-white/80 backdrop-blur-md rounded-[3rem] shadow-2xl border border-white/50 text-center animate-fade-in">
+        <div className="relative z-20 max-w-md w-[85%] md:w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border border-white/50 text-center animate-fade-in">
 
-          <div className="mb-8 w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto text-teal-600">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-6 md:mb-8 w-16 h-16 md:w-20 md:h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto text-teal-600">
+            <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h2 className="text-3xl font-black uppercase text-teal-800 mb-2">Identify Yourself</h2>
-          <p className="text-slate-500 text-sm mb-8 font-medium italic">What is your Name, Gatekeeper?</p>
+          <h2 className="text-2xl md:text-3xl font-black uppercase text-teal-800 mb-2">Identify Yourself</h2>
+          <p className="text-slate-500 text-xs md:text-sm mb-6 md:mb-8 font-medium italic">What is your Name, Gatekeeper?</p>
 
           <input
             type="text"
             placeholder="Enter your name..."
-            className="w-full px-6 py-4 bg-slate-100 border-2 border-slate-200 rounded-2xl mb-6 text-center text-lg font-bold text-slate-800 focus:border-teal-500 focus:outline-none transition-colors"
+            className="w-full px-4 md:px-6 py-3 md:py-4 bg-slate-100 border-2 border-slate-200 rounded-xl md:rounded-2xl mb-6 text-center text-base md:text-lg font-bold text-slate-800 focus:border-teal-500 focus:outline-none transition-colors"
             value={playerName === 'You' ? '' : playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && playerName.trim() && setGameState('GENDER_SELECT')}
@@ -896,7 +995,7 @@ const App = () => {
           <button
             disabled={!playerName.trim()}
             onClick={() => setGameState('GENDER_SELECT')}
-            className="w-full py-4 bg-teal-600 text-white rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+            className="w-full py-3 md:py-4 bg-teal-600 text-white rounded-xl md:rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
           >
             Choose Gender
           </button>
@@ -912,36 +1011,39 @@ const App = () => {
       <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-y-auto relative flex flex-col items-center justify-center p-4">
         {/* Back Button */}
         <button
-          onClick={() => setGameState('NAMING')}
+          onClick={() => { audioManager.stopSpeaking(); setGameState('NAMING'); }}
           className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/50 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-lg transition-all"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
         </button>
 
         <Scenery trust={trust} />
-        <div className="relative z-20 max-w-md w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
-          <h2 className="text-2xl md:text-3xl font-black uppercase text-teal-800 mb-8">Character Voice</h2>
+        <div className="relative z-20 max-w-md w-[85%] md:w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2.5rem] md:rounded-[2rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
+          <h2 className="text-xl md:text-3xl font-black uppercase text-teal-800 mb-6 md:mb-8">Character Voice</h2>
 
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
             <button
               onClick={() => { setPlayerGender('guy'); audioManager.speak("Testing, testing. This is the guy voice.", false, 'guy'); }}
-              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${playerGender === 'guy' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
+              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 md:gap-3 ${playerGender === 'guy' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
             >
-              <img src="/stickman_assets/guy_idle.svg" alt="Guy Character" className="w-16 h-16 md:w-20 md:h-20" />
-              <span className="font-bold uppercase text-[10px] tracking-widest text-slate-600">Guy</span>
+              <img src="/stickman_assets/guy_idle.svg" alt="Guy Character" className="w-12 h-12 md:w-20 md:h-20" />
+              <span className="font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-slate-600">Guy</span>
             </button>
             <button
               onClick={() => { setPlayerGender('girl'); audioManager.speak("Testing, testing. This is the girl voice.", false, 'girl'); }}
-              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${playerGender === 'girl' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
+              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 md:gap-3 ${playerGender === 'girl' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
             >
-              <img src="/stickman_assets/girl_idle.svg" alt="Girl Character" className="w-16 h-16 md:w-20 md:h-20" />
-              <span className="font-bold uppercase text-[10px] tracking-widest text-slate-600">Girl</span>
+              <img src="/stickman_assets/girl_idle.svg" alt="Girl Character" className="w-12 h-12 md:w-20 md:h-20" />
+              <span className="font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-slate-600">Girl</span>
             </button>
           </div>
 
           <button
-            onClick={() => setGameState('LEVEL_SELECT')}
-            className="w-full py-4 bg-teal-600 text-white rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all hover:scale-[1.02] active:scale-95"
+            onClick={() => {
+              audioManager.stopSpeaking();
+              setGameState('LEVEL_SELECT');
+            }}
+            className="w-full py-3 md:py-4 bg-teal-600 text-white rounded-xl md:rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all hover:scale-[1.02] active:scale-95"
           >
             Confirm & Continue
           </button>
@@ -982,9 +1084,9 @@ const App = () => {
             onScroll={handleSliderScroll}
             className="
               flex flex-row md:grid md:grid-cols-2 
-              gap-4 md:gap-8 
+              gap-6 md:gap-8 
               overflow-x-auto md:overflow-visible 
-              pb-12 md:pb-0 px-8 md:px-0
+              pb-12 md:pb-8 px-6 md:px-0
               snap-x snap-mandatory touch-pan-x
               scrollbar-hide
             ">
@@ -1000,15 +1102,15 @@ const App = () => {
                   onMouseEnter={() => !isLocked && setSelectedLevel(mission)}
                   onTouchStart={() => !isLocked && setSelectedLevel(mission)}
                   className={`
-                      flex-shrink-0 w-[85vw] md:w-auto snap-center
-                      group relative p-6 md:p-10 
-                      bg-white/80 backdrop-blur-xl rounded-[2.5rem] border-2 transition-all duration-300
-                      text-left flex flex-col justify-between h-[60vh] md:h-64
+                      flex-shrink-0 w-[75vw] md:w-auto snap-center
+                      group relative p-8 md:p-10 
+                      bg-white/80 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] border-2 transition-all duration-300
+                      text-left flex flex-col justify-between h-[50vh] md:h-64
                       overflow-hidden
                       ${isLocked
                       ? 'opacity-60 grayscale cursor-not-allowed border-slate-200'
                       : selectedLevel.id === mission.id
-                        ? 'border-teal-500 shadow-2xl scale-100 z-10'
+                        ? 'border-teal-500 shadow-2xl scale-100 z-10 bg-white'
                         : 'border-white/40 hover:border-teal-200 opacity-80 hover:opacity-100 scale-95 md:scale-100'
                     }
                     `}
@@ -1016,12 +1118,12 @@ const App = () => {
                   {/* Lock Overlay */}
                   {isLocked && (
                     <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-900/10 backdrop-blur-[1px]">
-                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg mb-2">
-                        <svg className="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-lg mb-2">
+                        <svg className="w-5 h-5 md:w-6 md:h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 bg-white/80 px-3 py-1 rounded-full">Locked</span>
+                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-600 bg-white/80 px-3 py-1 rounded-full">Locked</span>
                     </div>
                   )}
 
@@ -1032,34 +1134,35 @@ const App = () => {
 
                   <div className="relative z-10">
                     <div className="flex justify-between items-start mb-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest border ${mission.difficulty === 'Easy' ? 'bg-green-100 text-green-700 border-green-200' :
+                      <span className={`px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest border ${mission.difficulty === 'Easy' ? 'bg-green-100 text-green-700 border-green-200' :
                         mission.difficulty === 'Medium' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                          'bg-red-100 text-red-700 border-red-200'
+                          mission.difficulty === 'Hard' ? 'bg-red-100 text-red-700 border-red-200' :
+                            'bg-slate-900 text-white border-slate-900'
                         }`}>
                         {mission.difficulty}
                       </span>
 
                       {/* Selection Indicator */}
                       {!isLocked && (
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedLevel.id === mission.id ? 'border-teal-500 bg-teal-500 text-white' : 'border-slate-300'}`}>
-                          {selectedLevel.id === mission.id && <span className="text-xs font-bold">✓</span>}
+                        <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedLevel.id === mission.id ? 'border-teal-500 bg-teal-500 text-white' : 'border-slate-300'}`}>
+                          {selectedLevel.id === mission.id && <span className="text-[10px] md:text-xs font-bold">✓</span>}
                         </div>
                       )}
                     </div>
 
-                    <h3 className="text-2xl md:text-3xl font-black text-slate-800 mb-3 leading-none">
+                    <h3 className="text-xl md:text-3xl font-black text-slate-800 mb-2 md:mb-3 leading-none">
                       {mission.name}
                     </h3>
-                    <p className="text-sm md:text-base text-slate-600 leading-relaxed font-medium">
+                    <p className="text-xs md:text-base text-slate-600 leading-relaxed font-medium line-clamp-3 md:line-clamp-none">
                       {mission.desc}
                     </p>
                   </div>
 
-                  <div className={`relative z-10 pt-6 mt-auto border-t border-slate-200/50 flex items-center justify-between transition-colors ${isLocked ? 'text-slate-300' : 'text-slate-400 group-hover:text-teal-600'}`}>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                  <div className={`relative z-10 pt-4 md:pt-6 mt-auto border-t border-slate-200/50 flex items-center justify-between transition-colors ${isLocked ? 'text-slate-300' : 'text-slate-400 group-hover:text-teal-600'}`}>
+                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em]">
                       {isLocked ? 'Mission Locked' : isCompleted ? 'Replay Simulation' : 'Start Simulation'}
                     </span>
-                    <span className="text-xl">{isLocked ? '🔒' : '➔'}</span>
+                    <span className="text-lg md:text-xl">{isLocked ? '🔒' : '➔'}</span>
                   </div>
                 </button>
               );
@@ -1087,6 +1190,22 @@ const App = () => {
   if (gameState === 'RESOLUTION') {
     return (
       <div className="game-container min-h-screen w-full bg-slate-50 overflow-hidden relative animate-fade-in flex flex-col justify-end">
+        {/* Persistent Branding & Controls */}
+        <div className="absolute top-4 left-4 z-50 pointer-events-none opacity-100 flex flex-col gap-2 md:gap-4">
+          <img src="/ME.gif" alt="Mind Empowered" className="w-[50px] h-[50px] md:w-[80px] md:h-[80px] rounded-full border-2 md:border-4 border-white shadow-xl object-cover bg-slate-900" />
+
+          <button
+            onClick={() => {
+              if (confirm("Abandon current mission and return to menu?")) {
+                audioManager.stopMusic();
+                setGameState('LEVEL_SELECT');
+              }
+            }}
+            className="pointer-events-auto px-4 py-1.5 bg-slate-900 border-2 border-white text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl hover:bg-slate-800 transition-all opacity-100"
+          >
+            Exit
+          </button>
+        </div>
 
         {/* Camera/Zoom Container */}
         <div
@@ -1099,17 +1218,17 @@ const App = () => {
 
           {/* Helper Character (Medic/Pro) */}
           <div
-            className="absolute z-20 transition-all duration-[2000ms] ease-out bottom-[25%]"
+            className="absolute z-20 transition-all duration-[2000ms] ease-out bottom-[25%] md:bottom-[25%]"
             style={{
-              left: resolutionPhase >= 1 ? '70%' : '110%',
+              left: resolutionPhase >= 1 ? (window.innerWidth < 768 ? '60%' : '70%') : '110%',
             }}
           >
             <Stickman gender="girl" emotion="happy" theme={selectedLevel.theme} />
 
             {/* Speech Bubble */}
             {resolutionPhase >= 3 && (
-              <div className="absolute -top-40 right-0 bg-white/90 backdrop-blur border-2 border-teal-500 text-slate-800 p-6 rounded-2xl rounded-br-none shadow-2xl w-64 animate-pop-in z-50">
-                <p className="text-sm font-bold leading-relaxed">"Thank you for reaching out. We've got it from here."</p>
+              <div className="absolute -top-32 md:-top-40 right-0 bg-white/90 backdrop-blur border-2 border-teal-500 text-slate-800 p-4 md:p-6 rounded-2xl rounded-br-none shadow-2xl w-48 md:w-64 animate-pop-in z-50">
+                <p className="text-xs md:text-sm font-bold leading-relaxed">"Thank you for reaching out. We've got it from here."</p>
               </div>
             )}
           </div>
@@ -1119,12 +1238,12 @@ const App = () => {
             {resolutionPhase < 2 ? (
               <>
                 <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} />
-                <Stickman speaker="Sam" position={samPos} gender="guy" emotion="relief" theme={selectedLevel.theme} />
+                <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion="relief" theme={selectedLevel.theme} />
               </>
             ) : (
               <div className="absolute left-[45%] bottom-[25%] -translate-x-1/2 flex flex-col items-center animate-fade-in">
-                <img src="/stickman_assets/group_hug.svg" alt="Hug" className="w-[300px] h-[300px] drop-shadow-2xl filter brightness-110" />
-                <div className="absolute -top-10 text-6xl animate-bounce">❤️</div>
+                <img src="/stickman_assets/group_hug.svg" alt="Hug" className="w-[200px] h-[200px] md:w-[300px] md:h-[300px] drop-shadow-2xl filter brightness-110" />
+                <div className="absolute -top-6 md:-top-10 text-4xl md:text-6xl animate-bounce">❤️</div>
               </div>
             )}
           </div>
@@ -1136,18 +1255,35 @@ const App = () => {
   if (gameState === 'HANDOFF') {
     return (
       <div className="game-container min-h-screen w-full bg-slate-900 overflow-hidden relative flex flex-col items-center justify-center p-4">
+        {/* Persistent Branding & Controls */}
+        <div className="absolute top-4 left-4 z-50 pointer-events-none opacity-100 flex flex-col gap-2 md:gap-4">
+          <img src="/ME.gif" alt="Mind Empowered" className="w-[50px] h-[50px] md:w-[80px] md:h-[80px] rounded-full border-2 md:border-4 border-white shadow-xl object-cover bg-slate-900" />
+
+          <button
+            onClick={() => {
+              if (confirm("Abandon current mission and return to menu?")) {
+                audioManager.stopMusic();
+                setGameState('LEVEL_SELECT');
+              }
+            }}
+            className="pointer-events-auto px-4 py-1.5 bg-slate-900 border-2 border-white text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl hover:bg-slate-800 transition-all opacity-100"
+          >
+            Exit
+          </button>
+        </div>
+
         {/* Blurred Background to focus on the task */}
         <div className="absolute inset-0 z-0 opacity-20 blur-xl scale-110">
           <Scenery theme={selectedLevel.theme} trust={trust} />
         </div>
 
-        <div className="relative z-20 w-full max-w-sm bg-black rounded-[3rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden h-[80vh] flex flex-col animate-slide-up">
+        <div className="relative z-20 w-full max-w-[280px] md:max-w-sm bg-black rounded-[2.5rem] md:rounded-[3rem] border-[6px] md:border-[8px] border-slate-800 shadow-2xl overflow-hidden h-[75vh] md:h-[80vh] flex flex-col animate-slide-up">
           {/* Phone Top Bar */}
-          <div className="bg-slate-900 text-white p-4 flex justify-between items-center text-xs px-6 pt-5">
+          <div className="bg-slate-900 text-white p-3 md:p-4 flex justify-between items-center text-[10px] md:text-xs px-6 pt-5">
             <span>9:41</span>
             <div className="flex gap-1">
-              <div className="w-4 h-3 bg-white rounded-sm" />
-              <div className="w-3 h-3 bg-white rounded-full" />
+              <div className="w-3.5 h-2.5 bg-white rounded-sm" />
+              <div className="w-2.5 h-2.5 bg-white rounded-full" />
             </div>
           </div>
 
@@ -1273,7 +1409,7 @@ const App = () => {
         {/* Persistent Exit Button (End Screen) */}
         <div className="absolute top-4 left-4 z-50 flex flex-col gap-4">
           <button
-            onClick={() => { if (confirm("Exit the simulation?")) resetGame(); }}
+            onClick={() => { if (confirm("Abandon current mission and return to menu?")) resetGame(); }}
             className="px-4 py-2 bg-slate-900/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg hover:bg-slate-700 transition-all border border-white/20"
           >
             Exit Game
@@ -1283,48 +1419,48 @@ const App = () => {
         <Scenery theme={selectedLevel.theme} trust={isSuccess ? 100 : 0} />
 
         {/* Result Card - Compact View */}
-        <div className="relative z-20 w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="relative z-20 w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-[2rem] md:rounded-3xl shadow-2xl border border-white/60 flex flex-col max-h-[85vh] md:max-h-[90vh] overflow-hidden">
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 md:p-8 custom-scrollbar">
             {/* Visual Header */}
             <div className="mb-4 flex justify-center shrink-0">
               {isSuccess ? (
                 <div className="relative">
                   <div className="absolute inset-0 bg-teal-400/20 blur-3xl rounded-full animate-pulse" />
-                  <img src="/stickman_assets/group_hug.svg" alt="Supportive Hug" className="relative z-10 w-32 h-24 md:w-40 md:h-32 drop-shadow-lg" />
+                  <img src="/stickman_assets/group_hug.svg" alt="Supportive Hug" className="relative z-10 w-28 h-20 md:w-40 md:h-32 drop-shadow-lg" />
                 </div>
               ) : (
-                <div className="relative grayscale opacity-80">
-                  <Stickman emotion="distressed" gender="guy" isNPC={true} position={{ x: 50, y: 50 }} />
+                <div className="relative grayscale opacity-80 scale-75 md:scale-100">
+                  <Stickman emotion="distressed" gender={selectedLevel.npc.gender} isNPC={true} position={{ x: 50, y: 50 }} />
                 </div>
               )}
             </div>
 
             <div className="text-center mb-6">
-              <h2 className={`text-2xl md:text-3xl font-black uppercase mb-1 tracking-tight ${isSuccess ? 'text-teal-600' : 'text-orange-600'}`}>
+              <h2 className={`text-xl md:text-3xl font-black uppercase mb-1 tracking-tight ${isSuccess ? 'text-teal-600' : 'text-orange-600'}`}>
                 {isSuccess ? 'Connection Made' : 'Session Ended'}
               </h2>
-              <p className={`text-sm font-black ${isSuccess ? 'text-purple-600' : 'text-slate-400'}`}>
+              <p className={`text-[10px] md:text-sm font-black ${isSuccess ? 'text-purple-600' : 'text-slate-400'}`}>
                 {isSuccess ? rankMessage : "Don't give up."}
               </p>
             </div>
 
-            <div className="border-t border-slate-100 pt-6 mb-6">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+            <div className="border-t border-slate-100 pt-4 md:pt-6 mb-6">
+              <h3 className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500" /> DEBRIEFING
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {history.map((h, i) => (
-                  <div key={i} className="flex gap-3 items-start bg-slate-50/80 rounded-lg p-3">
-                    <span className="text-[10px] font-mono text-slate-400 mt-0.5">0{i + 1}</span>
+                  <div key={i} className="flex gap-2 md:gap-3 items-start bg-slate-50/80 rounded-lg p-3">
+                    <span className="text-[8px] md:text-[10px] font-mono text-slate-400 mt-0.5">0{i + 1}</span>
                     <div className="flex-1">
-                      <p className="text-xs text-slate-700 font-semibold mb-1 leading-tight">"{h.choiceText}"</p>
+                      <p className="text-[10px] md:text-xs text-slate-700 font-semibold mb-1 leading-tight">"{h.choiceText}"</p>
                       <div className="flex gap-2">
                         {h.wasOptimal ? (
-                          <span className="text-[8px] uppercase font-bold text-teal-600 bg-teal-100 px-2 py-0.5 rounded-full">Proactive</span>
+                          <span className="text-[7px] md:text-[8px] uppercase font-bold text-teal-600 bg-teal-100 px-2 py-0.5 rounded-full">Proactive</span>
                         ) : (
-                          <span className="text-[8px] uppercase font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">Reactive</span>
+                          <span className="text-[7px] md:text-[8px] uppercase font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">Reactive</span>
                         )}
                       </div>
                     </div>
@@ -1334,20 +1470,20 @@ const App = () => {
             </div>
 
             {/* Feedback Form */}
-            <div className="bg-slate-50 p-4 rounded-xl text-left border border-slate-200/50 mb-2">
-              <h4 className="text-[10px] font-bold uppercase text-slate-400 mb-2 tracking-widest">Feedback</h4>
+            <div className="bg-slate-50 p-3 md:p-4 rounded-xl text-left border border-slate-200/50 mb-2">
+              <h4 className="text-[8px] md:text-[10px] font-bold uppercase text-slate-400 mb-2 tracking-widest">Feedback</h4>
               <textarea
-                className="w-full text-xs p-3 rounded-lg border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-500 outline-none mb-3 bg-white/50 focus:bg-white transition-all resize-none"
+                className="w-full text-[10px] md:text-xs p-3 rounded-lg border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-teal-500 outline-none mb-3 bg-white/50 focus:bg-white transition-all resize-none"
                 placeholder="Reflect on your choices..."
                 rows="2"
               ></textarea>
               <button
                 onClick={(e) => {
                   e.target.innerHTML = "<span>Sent &hearts;</span>";
-                  e.target.className = "text-[10px] font-bold text-white bg-green-500 px-4 py-1.5 rounded-lg shadow transition-all w-full";
+                  e.target.className = "text-[9px] md:text-[10px] font-bold text-white bg-green-500 px-4 py-1.5 rounded-lg shadow transition-all w-full";
                   e.target.disabled = true;
                 }}
-                className="text-[10px] font-bold text-teal-700 bg-white border border-teal-200 px-4 py-1.5 rounded-lg hover:bg-teal-50 transition-all shadow-sm w-full"
+                className="text-[9px] md:text-[10px] font-bold text-teal-700 bg-white border border-teal-200 px-4 py-1.5 rounded-lg hover:bg-teal-50 transition-all shadow-sm w-full"
               >
                 Send Feedback
               </button>
@@ -1386,10 +1522,9 @@ const App = () => {
       className="game-container min-h-screen w-full bg-slate-50 overflow-hidden relative"
       onClick={() => { if (!audioManager.initialized) audioManager.init(); }}
     >
-      {/* Persistent Branding */}
       {/* Persistent Branding & Controls */}
-      <div className="absolute top-4 left-4 z-50 pointer-events-none mix-blend-multiply opacity-90 flex flex-col gap-4">
-        <img src="/ME.gif" alt="Mind Empowered" className="w-[80px] h-[80px] rounded-full border-4 border-white shadow-xl object-cover" />
+      <div className="absolute top-4 left-4 z-50 pointer-events-none opacity-100 flex flex-col gap-2 md:gap-4">
+        <img src="/ME.gif" alt="Mind Empowered" className="w-[50px] h-[50px] md:w-[80px] md:h-[80px] rounded-full border-2 md:border-4 border-white shadow-xl object-cover bg-slate-900" />
 
         <button
           onClick={() => {
@@ -1398,44 +1533,168 @@ const App = () => {
               setGameState('LEVEL_SELECT');
             }
           }}
-          className="pointer-events-auto w-[80px] py-1 bg-slate-900 border-2 border-white/50 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg hover:bg-slate-700 transition-all opacity-0 hover:opacity-100 focus:opacity-100 group-hover:opacity-100 md:opacity-50"
+          className="pointer-events-auto px-4 py-1.5 bg-slate-900 border-2 border-white text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl hover:bg-slate-800 transition-all opacity-100"
         >
-          Exit Mission
+          Exit
         </button>
       </div>
 
-      <Scenery theme={selectedLevel.theme} trust={trust} />
+      <div
+        className="camera-viewport"
+        style={{ transform: `scale(${camera.scale}) translate(${camera.x}px, ${camera.y}px)` }}
+      >
+        <Scenery theme={selectedLevel.theme} trust={trust} />
+        <div className="flex-1 relative z-10 w-full h-full">
+          {/* Background NPCs for life */}
+          {BACKGROUND_NPCS.map(npc => (
+            <div key={npc.id} style={{ opacity: npc.opacity, transform: `scale(${npc.scale})` }}>
+              <Stickman
+                speaker=""
+                emotion={npc.emotion}
+                position={npc.pos}
+                gender="guy"
+                theme={selectedLevel.theme}
+              />
+            </div>
+          ))}
+
+          <Stickman
+            speaker={playerName}
+            emotion="listening"
+            position={playerPos}
+            isWalking={isWalking}
+            isJumping={isJumping}
+            isCrouching={isCrouching}
+            currentMessage={playerLastSaid}
+            gender={playerGender}
+            moveDir={moveDir}
+            theme={selectedLevel.theme}
+            textSpeed={settings.textSpeed}
+          />
+
+          <Stickman
+            speaker={selectedLevel.npc.name}
+            position={samPos}
+            emotion={currentNode?.npc_emotion || 'neutral'}
+            currentMessage={(gameState === 'DIALOGUE' && !playerLastSaid) ? currentNode.npc_text : null}
+            textEffect={currentNode?.text_effect}
+            isPhoneChecking={npcAction === 'phone'}
+            isSitting={npcAction === 'sitting'}
+            gender={selectedLevel.npc.gender}
+            theme={selectedLevel.theme}
+            textSpeed={settings.textSpeed}
+          />
+
+          {/* Ambient NPC walking in distant background */}
+          <div className="animate-[slide_20s_linear_infinite]" style={{ position: 'absolute', width: '100%', top: '65%', opacity: 0.1 }}>
+            <Stickman speaker="" emotion="neutral" position={{ x: -10, y: 0 }} isWalking={true} gender="guy" theme={selectedLevel.theme} />
+          </div>
+
+          {/* Dog Walker (Park Exclusive) */}
+          {selectedLevel.theme === 'park' && (
+            <div className="animate-[slide_45s_linear_infinite]" style={{ position: 'absolute', width: '100%', top: '68%', opacity: 0.2, animationDelay: '5s' }}>
+              <img
+                src="/stickman_assets/dog_walker.svg"
+                alt="Dog Walker"
+                className="w-16 h-10 md:w-24 md:h-16"
+                style={{ transform: 'scaleX(-1)' }}
+              />
+            </div>
+          )}
+
+          {/* Environmental Clue (Artifact) */}
+          {CLUE_POSITIONS[selectedLevel.theme] && !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) && (
+            <div
+              onClick={handleInvestigate}
+              className="absolute bottom-[30%] animate-bounce cursor-pointer z-50 hover:scale-110 transition-transform"
+              style={{ left: `${CLUE_POSITIONS[selectedLevel.theme].x}%`, transform: 'translateX(-50%) translateY(-100%)' }}
+            >
+              <div className="w-6 h-8 md:w-8 md:h-10 bg-white border-2 border-orange-200 rounded-sm shadow-lg rotate-12 flex items-center justify-center p-1">
+                <div className="w-full h-px bg-slate-100 mb-0.5" />
+                <div className="w-full h-px bg-slate-100 mb-0.5" />
+                <div className="w-2/3 h-0.5 bg-slate-100" />
+              </div>
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[6px] md:text-[8px] font-black uppercase text-orange-600 bg-white/90 px-3 py-1 rounded-full border border-orange-100 shadow-sm">
+                Tap to Investigate
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Input HUD */}
+          {isTouchDevice && gameState === 'APPROACH' && (
+            <>
+              <div className="mobile-controls !bottom-8 !left-8">
+                <button
+                  onMouseDown={() => { setMoveDir(-1); setIsWalking(true); }}
+                  onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
+                  onTouchStart={() => { setMoveDir(-1); setIsWalking(true); }}
+                  onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
+                  className="control-btn !w-16 !h-16 !rounded-2xl"
+                >
+                  <span className="text-2xl">←</span>
+                </button>
+                <button
+                  onMouseDown={() => { setMoveDir(1); setIsWalking(true); }}
+                  onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
+                  onTouchStart={() => { setMoveDir(1); setIsWalking(true); }}
+                  onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
+                  className="control-btn !w-16 !h-16 !rounded-2xl"
+                >
+                  <span className="text-2xl">→</span>
+                </button>
+              </div>
+
+              <div className="action-buttons !bottom-8 !right-8 flex flex-col gap-4">
+                <div className="flex gap-4">
+                  <button
+                    onTouchStart={() => { setIsJumping(true); setTimeout(() => setIsJumping(false), 500); }}
+                    className="control-btn !w-16 !h-16 !rounded-2xl bg-teal-50"
+                  >
+                    <span className="text-[10px] font-black">JUMP</span>
+                  </button>
+                  <button
+                    onTouchStart={() => setIsCrouching(true)}
+                    onTouchEnd={() => setIsCrouching(false)}
+                    className="control-btn !w-16 !h-16 !rounded-2xl bg-orange-50"
+                  >
+                    <span className="text-[10px] font-black">HIDE</span>
+                  </button>
+                </div>
+                {CLUE_POSITIONS[selectedLevel.theme] &&
+                  !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) &&
+                  Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 12 && (
+                    <button
+                      onClick={handleInvestigate}
+                      className="w-full py-4 bg-orange-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg animate-pulse"
+                    >
+                      🔎 INVESTIGATE
+                    </button>
+                  )}
+              </div>
+            </>
+          )}
+
+          {gameState === 'APPROACH' && (
+            <div className="absolute bottom-40 md:bottom-32 left-1/2 -translate-x-1/2 text-center animate-bounce px-4 w-full">
+              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-teal-800 bg-white/80 px-4 py-2 rounded-full border border-teal-100 shadow-sm backdrop-blur-sm block mx-auto max-w-xs md:max-w-md">
+                {isTouchDevice ? 'Use buttons to approach NPC' : 'Search the area or approach NPC'}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="tunnel-vision" style={{ opacity: vignetteOpacity }} />
 
-      {/* Clue Inspection Modal */}
-      {viewedClue && CLUE_DETAILS[viewedClue.id] && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in p-4">
-          <div className="bg-white p-6 md:p-8 rounded-2xl max-w-md w-full shadow-2xl transform scale-100 border-2 border-slate-100 relative">
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full font-bold shadow-lg animate-bounce">
-              CLUE FOUND
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">{CLUE_DETAILS[viewedClue.id].title}</h3>
-            <div className="w-full h-px bg-slate-200 mb-4" />
-            <p className="text-slate-600 italic leading-relaxed mb-6">"{CLUE_DETAILS[viewedClue.id].description}"</p>
-            <button
-              onClick={closeClueModal}
-              className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg active:scale-95"
-            >
-              Note & Continue
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Connection HUD */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 z-20">
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-[10px] uppercase tracking-widest font-black text-slate-400">Empathy Score</span>
-          <span className={`text-[10px] font-mono font-bold ${trust < 30 ? 'text-orange-600' : 'text-teal-600'}`}>{trust}%</span>
+      <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 w-[70%] md:w-80 z-20">
+        <div className="flex justify-between items-center mb-1 md:mb-3">
+          <span className="text-[7px] md:text-[10px] uppercase tracking-widest font-black text-slate-400">Empathy Score</span>
+          <span className={`text-[8px] md:text-[10px] font-mono font-bold ${trust < 30 ? 'text-orange-600' : 'text-teal-600'}`}>{trust}%</span>
         </div>
-        <div className="h-2 w-full bg-slate-200/50 rounded-full overflow-hidden backdrop-blur-sm">
+        <div className="h-1.5 md:h-2 w-full bg-slate-200/50 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
           <div
-            className={`h-full transition-all duration-1000 ease-out rounded-full ${trust < 30 ? 'bg-orange-500' : 'bg-teal-500'}`}
+            className={`h-full transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(20,184,166,0.3)] ${trust < 30 ? 'bg-orange-500' : 'bg-teal-500'}`}
             style={{ width: `${trust}%` }}
           />
         </div>
@@ -1462,147 +1721,6 @@ const App = () => {
         onSelectResource={setSelectedResource}
       />
 
-      {/* Gameplay Area */}
-      <div className="flex-1 relative z-10 w-full h-full">
-        {/* Background NPCs for life */}
-        {BACKGROUND_NPCS.map(npc => (
-          <div key={npc.id} style={{ opacity: npc.opacity, transform: `scale(${npc.scale})` }}>
-            <Stickman
-              speaker=""
-              emotion={npc.emotion}
-              position={npc.pos}
-              gender="guy"
-              theme={selectedLevel.theme}
-            />
-          </div>
-        ))}
-
-        <Stickman
-          speaker={playerName}
-          emotion="listening"
-          position={playerPos}
-          isWalking={isWalking}
-          isJumping={isJumping}
-          isCrouching={isCrouching}
-          currentMessage={playerLastSaid}
-          gender={playerGender}
-          moveDir={moveDir}
-          theme={selectedLevel.theme}
-          textSpeed={settings.textSpeed}
-        />
-
-        <Stickman
-          speaker={selectedLevel.id === 'tutorial' ? 'Guide' : 'Sam'}
-          emotion={currentNode.npc_emotion}
-          position={samPos}
-          isWalking={npcAction === 'pacing'}
-          isSitting={npcAction === 'sitting'}
-          isPhoneChecking={npcAction === 'phone'}
-          currentMessage={(gameState === 'DIALOGUE' && !playerLastSaid) ? currentNode.npc_text : null}
-          textEffect={currentNode.text_effect}
-          gender="guy"
-          theme={selectedLevel.theme}
-          textSpeed={settings.textSpeed}
-        />
-
-        {/* Ambient NPC walking in distant background */}
-        <div className="animate-[slide_20s_linear_infinite]" style={{ position: 'absolute', width: '100%', top: '65%', opacity: 0.1 }}>
-          <Stickman speaker="" emotion="neutral" position={{ x: -10, y: 0 }} isWalking={true} gender="guy" theme={selectedLevel.theme} />
-        </div>
-
-        {/* Dog Walker (Park Exclusive) */}
-        {selectedLevel.theme === 'park' && (
-          <div className="animate-[slide_45s_linear_infinite]" style={{ position: 'absolute', width: '100%', top: '68%', opacity: 0.2, animationDelay: '5s' }}>
-            <img
-              src="/stickman_assets/dog_walker.svg"
-              alt="Dog Walker"
-              className="w-24 h-16"
-              style={{ transform: 'scaleX(-1)' }} // Face right if sliding left-to-right? Wait, slide anim usually goes left to right.
-            />
-          </div>
-        )}
-
-        {/* Environmental Clue (Artifact) */}
-        {CLUE_POSITIONS[selectedLevel.theme] && !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) && (
-          <div
-            onClick={handleInvestigate}
-            className="absolute bottom-[30%] animate-bounce cursor-pointer z-50 hover:scale-110 transition-transform"
-            style={{ left: `${CLUE_POSITIONS[selectedLevel.theme].x}%`, transform: 'translateX(-50%) translateY(-100%)' }}
-          >
-            <div className="w-8 h-10 bg-white border-2 border-orange-200 rounded-sm shadow-lg rotate-12 flex items-center justify-center p-1">
-              <div className="w-full h-0.5 bg-slate-100 mb-0.5" />
-              <div className="w-full h-0.5 bg-slate-100 mb-0.5" />
-              <div className="w-2/3 h-0.5 bg-slate-100" />
-            </div>
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black uppercase text-orange-600 bg-white/90 px-3 py-1 rounded-full border border-orange-100 shadow-sm">
-              Tap to Investigate
-            </div>
-          </div>
-        )}
-
-        {/* Mobile Input HUD */}
-        {isTouchDevice && gameState === 'APPROACH' && (
-          <>
-            <div className="mobile-controls">
-              <button
-                onMouseDown={() => { setMoveDir(-1); setIsWalking(true); }}
-                onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
-                onTouchStart={() => { setMoveDir(-1); setIsWalking(true); }}
-                onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
-                className="control-btn"
-              >
-                ←
-              </button>
-              <button
-                onMouseDown={() => { setMoveDir(1); setIsWalking(true); }}
-                onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
-                onTouchStart={() => { setMoveDir(1); setIsWalking(true); }}
-                onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
-                className="control-btn"
-              >
-                →
-              </button>
-            </div>
-
-            <div className="action-buttons flex flex-col gap-2">
-              <div className="flex gap-2">
-                <button
-                  onTouchStart={() => { setIsJumping(true); setTimeout(() => setIsJumping(false), 500); }}
-                  className="control-btn bg-teal-50"
-                >
-                  JUMP
-                </button>
-                <button
-                  onTouchStart={() => setIsCrouching(true)}
-                  onTouchEnd={() => setIsCrouching(false)}
-                  className="control-btn bg-orange-50"
-                >
-                  HIDE
-                </button>
-              </div>
-              {CLUE_POSITIONS[selectedLevel.theme] &&
-                !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) &&
-                Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 12 && (
-                  <button
-                    onClick={handleInvestigate}
-                    className="w-full py-3 bg-orange-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg animate-pulse"
-                  >
-                    🔎 INVESTIGATE
-                  </button>
-                )}
-            </div>
-          </>
-        )}
-
-        {gameState === 'APPROACH' && (
-          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 text-center animate-bounce px-4 w-full">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-800 bg-white/80 px-4 py-2 rounded-full border border-teal-100 shadow-sm backdrop-blur-sm block mx-auto max-w-xs">
-              {isTouchDevice ? 'Use buttons to approach Sam' : 'Search the area or approach Sam'}
-            </span>
-          </div>
-        )}
-      </div>
-
       {/* Discovery Notification */}
       {foundClues.length > 0 && (
         <div className="fixed top-24 right-8 flex flex-col gap-2 z-[100] animate-slide-up">
@@ -1622,12 +1740,12 @@ const App = () => {
       {coachFeedback && (
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 max-w-sm w-11/12 z-[150] animate-fade-in-up">
           <div className={`p-4 rounded-xl border-l-4 shadow-xl backdrop-blur-md flex items-start gap-4 
-                ${coachFeedback.type === 'positive' ? 'bg-teal-900/90 border-teal-400 text-teal-100' :
+              ${coachFeedback.type === 'positive' ? 'bg-teal-900/90 border-teal-400 text-teal-100' :
               coachFeedback.type === 'negative' ? 'bg-red-900/90 border-red-500 text-red-100' :
                 'bg-slate-800/90 border-slate-400 text-slate-100'}`}
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-inner
-                    ${coachFeedback.type === 'positive' ? 'bg-teal-800 text-teal-200' :
+                  ${coachFeedback.type === 'positive' ? 'bg-teal-800 text-teal-200' :
                 coachFeedback.type === 'negative' ? 'bg-red-800 text-red-200' :
                   'bg-slate-700 text-slate-300'}`}
             >
@@ -1641,8 +1759,6 @@ const App = () => {
         </div>
       )}
 
-      {/* ... (Chapter Label) ... */}
-
       {gameState === 'DIALOGUE' && !playerLastSaid && (
         <DialogueBox
           options={currentNode.options}
@@ -1652,7 +1768,7 @@ const App = () => {
       )}
 
       {renderSettingsUI()}
-    </div>
+    </div >
   );
 };
 

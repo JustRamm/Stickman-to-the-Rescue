@@ -31,7 +31,13 @@ class SoundEngine {
 
     toggleTTS(enabled) {
         this.ttsEnabled = enabled;
-        if (!enabled && window.speechSynthesis) {
+        if (!enabled) {
+            this.stopSpeaking();
+        }
+    }
+
+    stopSpeaking() {
+        if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
     }
@@ -199,8 +205,6 @@ class SoundEngine {
     async playMenuMusic() {
         if (!this.initialized || this.currentTrack === 'menu') return;
 
-        this.stopMusic();
-
         try {
             const buffer = await this.getBuffer('/ThemeAudio/bc.mp3');
             if (buffer) {
@@ -209,12 +213,22 @@ class SoundEngine {
                 source.loop = true;
 
                 const gain = this.ctx.createGain();
-                gain.gain.value = 0.3;
+                gain.gain.setValueAtTime(0.001, this.ctx.currentTime); // Start silent
 
                 source.connect(gain);
                 gain.connect(this.masterGain);
-
                 source.start();
+
+                // Cross-fade logic
+                if (this.musicNodes) {
+                    this.musicNodes.forEach(n => {
+                        if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 2);
+                        if (n.source) n.source.stop(this.ctx.currentTime + 2.1);
+                        if (n.osc) n.osc.stop(this.ctx.currentTime + 2.1);
+                    });
+                }
+
+                gain.gain.exponentialRampToValueAtTime(0.3, this.ctx.currentTime + 2);
                 this.musicNodes = [{ source, gain }];
                 this.currentTrack = 'menu';
             }
@@ -226,7 +240,15 @@ class SoundEngine {
     // Adaptive Ambient Pad
     async startAmbient(arg1, arg2 = 50) {
         if (!this.initialized) return;
-        if (this.musicNodes) this.stopMusic();
+
+        // Cross-fade: Start fading out existing music immediately
+        if (this.musicNodes) {
+            this.musicNodes.forEach(n => {
+                if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 2);
+                if (n.source) n.source.stop(this.ctx.currentTime + 2.1);
+                if (n.osc) n.osc.stop(this.ctx.currentTime + 2.1);
+            });
+        }
 
         // Handle flexible arguments: startAmbient(theme) or startAmbient(trust, theme)
         let theme = 'park';
@@ -251,8 +273,9 @@ class SoundEngine {
                 source.loop = true;
                 const gain = this.ctx.createGain();
 
-                // Softer volume for background
-                gain.gain.value = 0.3;
+                // Softer volume for background with fade-in
+                gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.3, this.ctx.currentTime + 2);
 
                 source.connect(gain);
                 gain.connect(this.masterGain);
@@ -272,8 +295,9 @@ class SoundEngine {
                 source.loop = true;
                 const gain = this.ctx.createGain();
 
-                // Reduced volume as requested
-                gain.gain.value = 0.1;
+                // Reduced volume as requested with fade-in
+                gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.1, this.ctx.currentTime + 2);
 
                 source.connect(gain);
                 gain.connect(this.masterGain);
@@ -328,7 +352,7 @@ class SoundEngine {
             osc.type = type;
             osc.frequency.setValueAtTime(f, this.ctx.currentTime);
             gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(volume, this.ctx.currentTime + 2);
+            gain.gain.exponentialRampToValueAtTime(volume, this.ctx.currentTime + 2); // Smooth fade-in
 
             osc.connect(gain);
             gain.connect(this.masterGain);
@@ -389,7 +413,7 @@ class SoundEngine {
     }
 
     // Voice Synthesis (TTS)
-    speak(text, isSam = true, gender = 'guy') {
+    speak(text, isSam = true, gender = 'guy', voiceParams = null) {
         if (!this.ttsEnabled || !window.speechSynthesis) return;
 
         // Prevent error logging for intentional interruptions
@@ -409,8 +433,6 @@ class SoundEngine {
         this.utterance = new SpeechSynthesisUtterance(text);
 
         // --- CRITICAL FIX FOR LONG SENTENCES ---
-        // Chrome/Edge bug: long sentences pause after 15 seconds. 
-        // We pause and resume every few words to keep the engine awake.
         this.utterance.onend = () => {
             this.utterance = null;
         };
@@ -428,20 +450,21 @@ class SoundEngine {
             }
         };
 
-        // Standardized vocal profiles
-        if (isSam) {
+        // Use Voice Parameters if provided, otherwise fallback to defaults
+        if (voiceParams) {
+            this.utterance.pitch = voiceParams.pitch || 1.0;
+            this.utterance.rate = voiceParams.rate || 0.9;
+        } else if (isSam) {
             this.utterance.pitch = 0.7; // Deep, somber
             this.utterance.rate = 0.75; // Slower, weighted
-            this.utterance.volume = 1.0;
         } else if (gender === 'girl') {
-            this.utterance.pitch = 1.4; // High but not 'chipmunk'
+            this.utterance.pitch = 1.4;
             this.utterance.rate = 1.0;
-            this.utterance.volume = 1.0;
         } else {
-            this.utterance.pitch = 1.0; // Standard male
+            this.utterance.pitch = 1.0;
             this.utterance.rate = 0.95;
-            this.utterance.volume = 1.0;
         }
+        this.utterance.volume = 1.0;
 
         const voices = this.voices.length > 0 ? this.voices : window.speechSynthesis.getVoices();
 
