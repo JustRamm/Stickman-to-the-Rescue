@@ -7,6 +7,8 @@ class SoundEngine {
         this.cache = {}; // Cache for decoded audio assets
         this.voices = []; // Cache for TTS voices
         this.owlInterval = null; // Interval for owl hooting
+        this.ttsEnabled = true; // User preference
+        this.currentTrack = null; // To avoid restarting same track
     }
 
     init() {
@@ -20,6 +22,18 @@ class SoundEngine {
         this.loadVoices();
 
         this.initialized = true;
+    }
+
+    setVolume(value) {
+        if (!this.initialized) return;
+        this.masterGain.gain.setTargetAtTime(value, this.ctx.currentTime, 0.1);
+    }
+
+    toggleTTS(enabled) {
+        this.ttsEnabled = enabled;
+        if (!enabled && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
     }
 
     loadVoices() {
@@ -78,8 +92,8 @@ class SoundEngine {
         osc.frequency.setValueAtTime(800, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.05);
 
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
 
         osc.connect(gain);
         gain.connect(this.masterGain);
@@ -155,7 +169,6 @@ class SoundEngine {
         gain.connect(this.masterGain);
 
         osc.start();
-        osc.start();
         osc.stop(this.ctx.currentTime + 0.3);
     }
 
@@ -180,6 +193,33 @@ class SoundEngine {
             }
         } catch (e) {
             console.error("Failed to play victory sound:", e);
+        }
+    }
+
+    async playMenuMusic() {
+        if (!this.initialized || this.currentTrack === 'menu') return;
+
+        this.stopMusic();
+
+        try {
+            const buffer = await this.getBuffer('/ThemeAudio/bc.mp3');
+            if (buffer) {
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+
+                const gain = this.ctx.createGain();
+                gain.gain.value = 0.3;
+
+                source.connect(gain);
+                gain.connect(this.masterGain);
+
+                source.start();
+                this.musicNodes = [{ source, gain }];
+                this.currentTrack = 'menu';
+            }
+        } catch (e) {
+            console.error("Failed to play menu music:", e);
         }
     }
 
@@ -250,7 +290,7 @@ class SoundEngine {
 
         // Special handling for Office Theme with Owl sfx
         if (theme === 'office') {
-            type = 'square';
+            type = 'sine';
             freqs = freqs.map(f => f * 0.5); // Lower, starker
             volume = 0.01;
 
@@ -318,6 +358,9 @@ class SoundEngine {
     updateMusic(trust) {
         if (!this.musicNodes) return;
         const isHigh = trust > 50;
+        if (this.isHighTrust === isHigh) return; // Prevent thrashing
+        this.isHighTrust = isHigh;
+
         const freqs = isHigh ? [220, 277, 329, 440] : [110, 138, 164, 220];
 
         this.musicNodes.forEach((node, i) => {
@@ -336,6 +379,7 @@ class SoundEngine {
                 if (n.source) n.source.stop(this.ctx.currentTime + 1.1);
             });
             this.musicNodes = null;
+            this.currentTrack = null;
         }
 
         if (this.owlInterval) {
@@ -346,7 +390,7 @@ class SoundEngine {
 
     // Voice Synthesis (TTS)
     speak(text, isSam = true, gender = 'guy') {
-        if (!window.speechSynthesis) return;
+        if (!this.ttsEnabled || !window.speechSynthesis) return;
 
         // Prevent error logging for intentional interruptions
         if (this.utterance) {

@@ -12,6 +12,26 @@ const RESOURCES = [
   { id: 3, name: 'A Trusted Friend', description: 'Immediate emotional support and social connection.' }
 ];
 
+const REAL_RESOURCES = {
+  helplines: [
+    { name: "Maithri Kochi", phone: "0484 2540530", hours: "10 AM - 7 PM", desc: "Confidential emotional support for those in distress." },
+    { name: "Sanjeevani", phone: "0471 2533900", hours: "24/7", desc: "Suicide prevention and unconditional emotional support." },
+    { name: "Disha Helpline", phone: "1056", hours: "24/7", desc: "Kerala Govt health awareness and intervention." },
+    { name: "Tele-MANAS", phone: "14416", hours: "24/7", desc: "National tele-mental health assistance." }
+  ],
+  hospitals: [
+    { name: "Amrita Hospital", location: "Edappally, Kochi", dept: "Psychiatry & Behavior Medicine", contact: "0484 2851234" },
+    { name: "Cochin Brain & Behavioral Health", location: "Kochi", type: "Specialized Psychiatric Care", contact: "0484 2301030" },
+    { name: "Nair's Hospital", location: "Vytila, Kochi", type: "Holistic Psychiatric Care", contact: "0484 2302666" }
+  ],
+  selfcare: [
+    { title: "Breathe First", tip: "Practice deep breathing (4-7-8) after a stressful intervention." },
+    { title: "Set Your Limits", tip: "Understand you are a gatekeeper, not a doctor. Connect them to pros." },
+    { title: "Talk it Out", tip: "Debrief with a trusted peer or mentor after helping someone." },
+    { title: "Physical Health", tip: "Ensure you sleep and hydrate. Compassion fatigue is real." }
+  ]
+};
+
 const BACKGROUND_NPCS = [
   { id: 'bg1', pos: { x: 85, y: 70 }, emotion: 'neutral', scale: 0.8, opacity: 0.2 },
   { id: 'bg2', pos: { x: 25, y: 70 }, emotion: 'listening', scale: 0.7, opacity: 0.15 },
@@ -19,52 +39,32 @@ const BACKGROUND_NPCS = [
 ];
 
 const MISSIONS = [
+  { id: 'tutorial', name: 'Interactive Intro', desc: 'New to life-saving? Start here to learn the basics.', difficulty: 'Training', theme: 'park' },
   { id: 'park', name: 'The Sunset Park', desc: 'A regular evening in the park. Sam is alone.', difficulty: 'Easy', theme: 'park' },
   { id: 'office', name: 'Midnight Office', desc: 'Sam is working late. The vibe is stark and cold.', difficulty: 'Medium', theme: 'office' },
   { id: 'campus', name: 'Alumni Square', desc: 'A high-pressure university campus environment.', difficulty: 'Hard', theme: 'campus' },
   { id: 'rainy', name: 'Rainy Sidewalk', desc: 'A moody street scene. Weather adds to the tension.', difficulty: 'Expert', theme: 'rainy_street' }
 ];
 
-const OBSERVATION_DATA = {
-  park: [
-    { id: 'posture', x: 0, y: -5, w: 10, h: 25, label: 'Slumped Posture', type: 'Behavioral', desc: 'Shoulders hunched, head down. Indicates hopelessness.' },
-    { id: 'isolation', x: 20, y: 0, w: 15, h: 10, label: 'Secluded Spot', type: 'Situational', desc: 'Chose a hidden bench away from the main path.' },
-    { id: 'hands', x: 0, y: 10, w: 8, h: 8, label: 'Clenched Fists', type: 'Behavioral', desc: 'Sign of repressed anger or anxiety.' }
-  ],
-  office: [
-    { id: 'fatigue', x: 0, y: -8, w: 10, h: 10, label: 'Dark Circles', type: 'Physical', desc: 'Signs of sleep deprivation and exhaustion.' },
-    { id: 'desk', x: 15, y: 5, w: 12, h: 12, label: 'Messy Desk', type: 'Situational', desc: 'Loss of organizational control or apathy.' },
-    { id: 'pacing', x: 0, y: 15, w: 10, h: 20, label: 'Restlessness', type: 'Behavioral', desc: 'Inability to sit still, high agitation.' }
-  ],
-  // Fallbacks for other themes
-  campus: [
-    { id: 'posture', x: 0, y: -5, w: 10, h: 25, label: 'Defeated Stance', type: 'Behavioral', desc: 'Looking at ground, avoiding eye contact.' },
-    { id: 'bag', x: 10, y: 10, w: 10, h: 10, label: 'Heavy Bag', type: 'Situational', desc: 'Carrying a physical or metaphorical burden.' }
-  ],
-  rainy_street: [
-    { id: 'shiver', x: 0, y: 0, w: 10, h: 30, label: 'Shivering', type: 'Physical', desc: 'Ignoring the cold/rain. Self-neglect.' },
-    { id: 'shadow', x: -10, y: 20, w: 30, h: 5, label: 'Standing in Shadow', type: 'Situational', desc: 'Seeking invisibility or hiding.' }
-  ]
-};
-
 const App = () => {
   const [gameState, setGameState] = useState('START');
   const [playerName, setPlayerName] = useState('You');
   const [playerGender, setPlayerGender] = useState('guy'); // guy or girl
-  const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
+  const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]); // Default to Tutorial
   const [foundClues, setFoundClues] = useState([]);
 
   const CLUE_POSITIONS = {
+    tutorial: { x: 30, label: 'Tutorial Note', id: 'tutorial_note' },
     park: { x: 40, label: 'Dropped Photo', id: 'family_photo' },
     office: { x: 30, label: 'Termination Letter', id: 'termination_letter' },
     campus: { x: 50, label: 'Failing Grade Paper', id: 'failing_grade' },
     rainy_street: { x: 45, label: 'Discarded Envelope', id: 'wet_envelope' }
   };
 
-  // Dynamic Dialogue Loading
-  const currentScenario = dialogueData[selectedLevel.theme] || dialogueData['park']; // Fallback
+  // Dynamic Dialogue Loading - Prioritize Mission ID, then Theme
+  const currentScenario = dialogueData[selectedLevel.id] || dialogueData[selectedLevel.theme] || dialogueData['park'];
 
-  const [currentNodeId, setCurrentNodeId] = useState(currentScenario.startNode);
+  const [currentNodeId, setCurrentNodeId] = useState(currentScenario.startNode || 'beginning');
   const [trust, setTrust] = useState(25);
   const [selectedResource, setSelectedResource] = useState(null);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
@@ -85,9 +85,73 @@ const App = () => {
 
   /* New State for Clue Inspection */
   const [viewedClue, setViewedClue] = useState(null);
-  const [scannedItems, setScannedItems] = useState([]);
-  const [scanTimer, setScanTimer] = useState(15);
+  const [dialedNumber, setDialedNumber] = useState([]);
   const [resolutionPhase, setResolutionPhase] = useState(0); // 0: Call, 1: Arrive, 2: Hug, 3: Speech
+  const [npcAction, setNpcAction] = useState('idle'); // idle, phone, sitting, pacing
+
+  // Progression & Save System
+  const [completedLevels, setCompletedLevels] = useState(() => {
+    try {
+      const saved = localStorage.getItem('qpr_completed_missions');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('qpr_completed_missions', JSON.stringify(completedLevels));
+  }, [completedLevels]);
+
+  const isMissionLocked = (missionId) => {
+    // Tutorial is always unlocked
+    if (missionId === 'tutorial') return false;
+
+    // Park and Office require Tutorial completion
+    if (missionId === 'park' || missionId === 'office') {
+      return !completedLevels.includes('tutorial');
+    }
+
+    // Campus requires Park & Office
+    if (missionId === 'campus') {
+      return !(completedLevels.includes('park') && completedLevels.includes('office'));
+    }
+
+    // Rainy (Expert) requires Campus
+    if (missionId === 'rainy') {
+      return !completedLevels.includes('campus');
+    }
+
+    return false;
+  };
+
+  // Settings & Accessibility System
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('qpr_settings');
+      return saved ? JSON.parse(saved) : { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50 };
+    } catch (e) {
+      return { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50 };
+    }
+  });
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const prevGameState = useRef('START');
+
+  useEffect(() => {
+    // Update prevGameState whenever it's not RESOURCES
+    if (gameState !== 'RESOURCES') {
+      prevGameState.current = gameState;
+    }
+  }, [gameState]);
+  useEffect(() => {
+    localStorage.setItem('qpr_settings', JSON.stringify(settings));
+    // Apply audio settings
+    if (audioManager.initialized) {
+      audioManager.setVolume(settings.audioVolume);
+      audioManager.toggleTTS(settings.ttsEnabled);
+    }
+  }, [settings]);
 
   const sliderRef = useRef(null);
 
@@ -148,7 +212,7 @@ const App = () => {
   const launchMission = (mission) => {
     setSelectedLevel(mission);
     // Reset Level Specific State
-    setCurrentNodeId(dialogueData[mission.theme]?.startNode || 'beginning');
+    setCurrentNodeId(dialogueData[mission.id]?.startNode || 'beginning');
     setFoundClues([]);
     setTrust(25);
     setPlayerPos({ x: 10, y: 70 });
@@ -242,31 +306,66 @@ const App = () => {
   }, [isWalking, gameState]);
 
   useEffect(() => {
-    if (gameState === 'APPROACH' || gameState === 'DIALOGUE' || gameState === 'SCAN') {
-      audioManager.init();
+    const isMenu = ['START', 'NAMING', 'GENDER_SELECT', 'LEVEL_SELECT'].includes(gameState);
+
+    if (isMenu) {
+      audioManager.playMenuMusic();
+    } else if (gameState === 'APPROACH' || gameState === 'DIALOGUE' || gameState === 'SCAN') {
+      audioManager.init(); // Ensure context is ready
       audioManager.startAmbient(trust, selectedLevel.theme);
-    } else {
+    } else if (gameState === 'RESOLUTION') {
+      // Handled by Victory or Phone logic
+    } else if (gameState !== 'HANDOFF') {
+      // Don't stop music during handoff or other transitional states unless needed
       audioManager.stopMusic();
     }
-  }, [gameState, selectedLevel.theme, trust]);
+  }, [gameState, selectedLevel]);
 
   // Correct useEffect for Distance Check Triggering Scan
   useEffect(() => {
     if (gameState !== 'APPROACH') return;
+    const dist = Math.abs(playerPos.x - samPos.x);
+
+    if (dist < 10) {
+      setGameState('DIALOGUE');
+      audioManager.playDing();
+    }
+  }, [playerPos.x, samPos.x, gameState]);
+
+  // NPC Dynamic Behavior Controller
+  useEffect(() => {
+    if (gameState !== 'APPROACH') {
+      setNpcAction('idle');
+      return;
+    }
 
     const interval = setInterval(() => {
+      // Don't change action if very close to player to avoid "glitching" during transition to SCAN
       const dist = Math.abs(playerPos.x - samPos.x);
-      if (dist < 15) {
-        setGameState('DIALOGUE');
-        // setScanTimer(15); // Not needed
-        // setScannedItems([]); // Not needed
-        // audioManager.playPop(); // Maybe keep sound?
-        setIsWalking(false);
-        setMoveDir(0);
-      }
+      if (dist < 20) return;
+
+      const actions = ['idle', 'phone', 'pacing', 'sitting'];
+      setNpcAction(actions[Math.floor(Math.random() * actions.length)]);
+    }, 5000 + Math.random() * 5000);
+
+    return () => clearInterval(interval);
+  }, [gameState, playerPos.x, samPos.x]);
+
+  // NPC Pacing Logic
+  useEffect(() => {
+    if (gameState !== 'APPROACH' || npcAction !== 'pacing') return;
+
+    let dir = Math.random() > 0.5 ? 1 : -1;
+    const interval = setInterval(() => {
+      setSamPos(prev => {
+        const nextX = prev.x + (dir * 0.05);
+        if (nextX > 82) dir = -1;
+        if (nextX < 68) dir = 1;
+        return { ...prev, x: nextX };
+      });
     }, 50);
     return () => clearInterval(interval);
-  }, [gameState, playerPos, isWalking, moveDir, isTouchDevice, selectedLevel]);
+  }, [gameState, npcAction]);
 
   // Resolution Cutscene Logic
   useEffect(() => {
@@ -453,19 +552,9 @@ const App = () => {
     }
   };
 
-  const handleScanClick = (clue) => {
-    if (scannedItems.find(i => i.id === clue.id)) return;
-    audioManager.playInvestigate();
-    setScannedItems(prev => [...prev, clue]);
-    setTrust(t => t + 5);
-  };
-
-  const completeScan = () => {
-    setGameState('DIALOGUE');
-    audioManager.playDing();
-  };
 
   const CLUE_DETAILS = {
+    tutorial_note: { title: "Training Manual", description: "A guide on how to help others. Focus on Listen, Ask, and Refer." },
     family_photo: { title: "A Crumpled Photograph", description: "A slightly water-damaged photo of Sam smiling with two children at a birthday party. 'Happy 40th Dad!' is written on the back." },
     termination_letter: { title: "Official Letterhead", description: "TERMINATION OF EMPLOYMENT. 'Effective Immediately due to restructuring.' The paper has been folded and unfolded many times." },
     failing_grade: { title: "Academic Notice", description: "Academic Probation Warning. 'Grade: F'. Red ink circles the phrase 'Loss of Scholarship Eligibility'." },
@@ -475,7 +564,7 @@ const App = () => {
   const resetGame = () => {
     audioManager.stopMusic(); // Force stop all audio immediately
     setGameState('START');
-    setCurrentNodeId(dialogueData.startNode);
+    setCurrentNodeId(currentScenario.startNode || 'beginning');
     setTrust(25);
     setPlayerName('You');
     setPlayerPos({ x: 10, y: 70 });
@@ -485,13 +574,19 @@ const App = () => {
     setIsJumping(false);
     setIsCrouching(false);
     setViewedClue(null);
-    setScannedItems([]);
-    setScanTimer(15);
+    setDialedNumber([]);
     setResolutionPhase(0);
+    setFoundClues([]);
+    setNpcAction('idle');
   };
 
   const handleEndGameContinue = () => {
     audioManager.stopMusic();
+
+    // Mark as completed if successful
+    if (currentNode.result === 'success' && !completedLevels.includes(selectedLevel.id)) {
+      setCompletedLevels(prev => [...prev, selectedLevel.id]);
+    }
 
     // Reset Session State (Keep Name/Gender unless Hard mode finished)
     setTrust(25);
@@ -502,8 +597,7 @@ const App = () => {
     setIsJumping(false);
     setIsCrouching(false);
     setViewedClue(null);
-    setScannedItems([]);
-    setScanTimer(15);
+    setDialedNumber([]);
     setResolutionPhase(0);
 
     if (selectedLevel.difficulty === 'Hard') {
@@ -516,63 +610,254 @@ const App = () => {
 
   const vignetteOpacity = Math.max(0, ((100 - trust) / 100) * 0.4);
 
-  if (gameState === 'START') {
-    return (
-      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center p-6">
-        {/* Dynamic Background with stronger blur for start screen */}
-        <div className="absolute inset-0 z-0 opacity-60 contrast-125 blur-sm scale-110">
-          <Scenery trust={trust} />
+  const renderSettingsUI = () => (
+    <>
+      {/* Settings Button (Top Right) */}
+      <div className="fixed top-6 right-6 z-[400] pointer-events-auto">
+        <button
+          onClick={() => { audioManager.init(); setIsSettingsOpen(true); }}
+          className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-lg transition-all border border-white/50 shadow-sm"
+        >
+          <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsSettingsOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
+            <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-black uppercase text-slate-800 tracking-tight">Settings</h3>
+              <button onClick={() => setIsSettingsOpen(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all">✕</button>
+            </div>
+
+            <div className="p-8 space-y-8">
+              {/* Volume */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Master Volume</label>
+                  <span className="text-sm font-bold text-teal-600">{Math.round(settings.audioVolume * 100)}%</span>
+                </div>
+                <input
+                  type="range" min="0" max="1" step="0.01"
+                  value={settings.audioVolume}
+                  onChange={(e) => setSettings(s => ({ ...s, audioVolume: parseFloat(e.target.value) }))}
+                  className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                />
+              </div>
+
+              {/* TTS Toggle */}
+              <div className="flex justify-between items-center group">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block group-hover:text-teal-600 transition-colors">Narrator (TTS)</label>
+                  <p className="text-[10px] text-slate-500 font-medium">Read dialogue out loud</p>
+                </div>
+                <button
+                  onClick={() => setSettings(s => ({ ...s, ttsEnabled: !s.ttsEnabled }))}
+                  className={`w-12 h-6 rounded-full transition-all relative ${settings.ttsEnabled ? 'bg-teal-500 shadow-lg shadow-teal-500/30' : 'bg-slate-200'}`}
+                >
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${settings.ttsEnabled ? 'translate-x-6' : ''}`} />
+                </button>
+              </div>
+
+              {/* Text Speed */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Text Flow Speed</label>
+                  <span className="text-sm font-bold text-teal-600">
+                    {settings.textSpeed === 0 ? 'Instant' : settings.textSpeed > 75 ? 'Relaxed' : settings.textSpeed > 30 ? 'Normal' : 'Rapid'}
+                  </span>
+                </div>
+                <div className="relative py-2">
+                  <input
+                    type="range" min="0" max="100" step="5"
+                    value={100 - settings.textSpeed}
+                    onChange={(e) => setSettings(s => ({ ...s, textSpeed: 100 - parseInt(e.target.value) }))}
+                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                  />
+                  <div className="flex justify-between mt-2 px-1">
+                    <span className="text-[8px] font-bold text-slate-300 uppercase">Slow</span>
+                    <span className="text-[8px] font-bold text-slate-300 uppercase">Fast</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsSettingsOpen(false)}
+              className="w-full py-5 bg-teal-600 text-white font-black uppercase text-xs tracking-widest hover:bg-teal-700 transition-colors shadow-inner"
+            >
+              Apply Changes
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  const renderResourcesUI = () => (
+    <div className="fixed inset-0 z-[600] bg-slate-900 overflow-y-auto custom-scrollbar animate-fade-in">
+      <div className="min-h-screen w-full flex flex-col items-center p-6 md:p-12 relative">
+        {/* Background Accents */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full" />
+
+        {/* Header */}
+        <div className="w-full max-w-4xl flex justify-between items-center mb-12 relative z-10">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-2">Mental Health Resources</h2>
+            <p className="text-teal-400 font-bold uppercase tracking-widest text-xs">Kochi, Kerala & Beyond</p>
+          </div>
+          <button
+            onClick={() => setGameState(prevGameState.current)}
+            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-all border border-white/20"
+          >
+            ← Back
+          </button>
         </div>
 
-        {/* Main Hero Card - Glassmorphism */}
-        <div className="relative z-20 w-full max-w-2xl bg-white/80 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/60 p-8 md:p-12 text-center animate-fade-in flex flex-col items-center overflow-hidden">
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 pb-20">
+          {/* Helplines Column */}
+          <div className="space-y-6">
+            <h3 className="text-xl font-black text-white/50 uppercase tracking-widest px-2">Immediate Support</h3>
+            {REAL_RESOURCES.helplines.map((item, i) => (
+              <div key={i} className="group p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:border-teal-500/50 transition-all duration-300">
+                <div className="flex justify-between items-start mb-4">
+                  <h4 className="text-xl font-bold text-white group-hover:text-teal-400 transition-colors">{item.name}</h4>
+                  <span className="text-[10px] font-black bg-teal-500/20 text-teal-400 px-2 py-0.5 rounded-full uppercase">{item.hours}</span>
+                </div>
+                <p className="text-slate-400 text-sm mb-4 leading-relaxed">{item.desc}</p>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-teal-500 rounded-lg">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
+                  </div>
+                  <span className="text-lg font-black text-teal-500 group-hover:scale-110 transition-transform origin-left">{item.phone}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Hospitals and Self Care Column */}
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <h3 className="text-xl font-black text-white/50 uppercase tracking-widest px-2">Professional Care (Kochi)</h3>
+              <div className="space-y-4">
+                {REAL_RESOURCES.hospitals.map((hosp, i) => (
+                  <div key={i} className="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl">
+                    <h5 className="font-bold text-white text-lg">{hosp.name}</h5>
+                    <p className="text-xs text-slate-500 font-medium mb-2">{hosp.location} • {hosp.dept || hosp.type}</p>
+                    <p className="text-sm font-black text-teal-500">{hosp.contact}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="text-xl font-black text-white/50 uppercase tracking-widest px-2">Self-Care for You</h3>
+              <div className="p-8 bg-gradient-to-br from-teal-500/20 to-blue-500/20 rounded-[2.5rem] border border-teal-500/30">
+                <div className="grid grid-cols-1 gap-6">
+                  {REAL_RESOURCES.selfcare.map((sc, i) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="w-2 h-2 mt-2 bg-teal-400 rounded-full flex-shrink-0" />
+                      <div>
+                        <h6 className="font-bold text-teal-400 text-sm mb-1">{sc.title}</h6>
+                        <p className="text-slate-300 text-xs leading-relaxed">{sc.tip}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="w-full max-w-4xl border-t border-white/10 pt-8 text-center relative z-10">
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.5em]">
+            Saving a life starts with the first step. You are never alone.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (gameState === 'RESOURCES') return renderResourcesUI();
+
+  if (gameState === 'START') {
+    return (
+      <div className="game-container min-h-screen w-full bg-slate-900 text-white overflow-hidden relative flex flex-col items-center justify-center p-6">
+
+        {/* Immersive Background */}
+        <div className="absolute inset-0 z-0">
+          <Scenery trust={trust} />
+          {/* Cinematic Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-slate-900/60 backdrop-blur-[2px]" />
+        </div>
+
+        {/* Floating Content */}
+        <div className="relative z-20 flex flex-col items-center text-center max-w-4xl animate-slide-up">
 
           {/* Top Badge: Mind Empowered Logo */}
-          <div className="mb-6 flex flex-col items-center gap-3">
-            <div className="relative group w-20 h-20 rounded-2xl overflow-hidden shadow-lg border-2 border-white ring-2 ring-teal-100 transition-transform duration-300 hover:scale-110">
-              <img src="/ME.jpeg" alt="Mind Empowered" className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0" />
-              <img src="/ME.gif" alt="Mind Empowered Animated" className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="mb-8 flex flex-col items-center gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+            <div className="relative group w-24 h-24 rounded-full overflow-hidden shadow-2xl border-4 border-slate-800 ring-4 ring-teal-500/50 transition-transform duration-500 hover:scale-110 hover:rotate-3">
+              <img src="/ME.jpeg" alt="Mind Empowered" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+              <div className="absolute inset-0 bg-teal-500/0 group-hover:bg-teal-500/10 transition-colors" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Presented By <span className="text-teal-700">Mind Empowered</span></span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-teal-400/80 text-shadow-sm">Presented By Mind Empowered</span>
           </div>
 
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-8" />
+          {/* Main Title Group */}
+          <div className="mb-12 relative">
+            <div className="absolute -inset-10 bg-teal-500/20 blur-3xl rounded-full animate-pulse-slow pointer-events-none" />
 
-          {/* Hero Section */}
-          <div className="mb-8 relative hover:rotate-2 transition-transform duration-500 cursor-pointer" onClick={() => audioManager.playPop()}>
-            <div className="absolute inset-0 bg-teal-300/30 blur-2xl rounded-full animate-pulse z-0" />
-            <img src="/logo.svg" alt="Game Logo" className="relative z-10 w-32 h-32 md:w-36 md:h-36 drop-shadow-xl" />
-
-            {/* Floating Elements */}
-            <div className="absolute -right-4 top-0 animate-bounce delay-700 bg-white p-2 rounded-lg shadow-sm border border-slate-100 text-xl rotate-12">❓</div>
-            <div className="absolute -left-4 bottom-0 animate-bounce delay-1000 bg-white p-2 rounded-lg shadow-sm border border-slate-100 text-xl -rotate-12">❤️</div>
-          </div>
-
-          {/* Title - Ultra Bold */}
-          <div className="mb-8 space-y-1">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-800 leading-none">
-              STICKMAN <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-emerald-500">TO THE RESCUE</span>
+            <h1 className="relative text-6xl md:text-8xl font-black tracking-tighter text-white drop-shadow-2xl mb-2 leading-none">
+              STICKMAN
             </h1>
+            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-white to-teal-300 animate-shimmer">
+              TO THE RESCUE
+            </h2>
+
+            {/* Decorative Elements */}
+            <div className="absolute -right-16 -top-12 animate-float delay-700 opacity-90 rotate-12">
+              <img src="/stickman_assets/guy_idle.svg" alt="Stickman" className="w-24 h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+            </div>
+            <div className="absolute -left-16 -bottom-8 animate-float delay-1000 opacity-90 -rotate-12">
+              <img src="/stickman_assets/group_hug.svg" alt="Support" className="w-32 h-24 drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]" />
+            </div>
           </div>
 
-          {/* Start Button - High Contrast */}
+          {/* Start Button */}
           <button
             onClick={() => { audioManager.init(); setGameState('NAMING'); }}
-            className="group relative w-full max-w-xs py-5 bg-slate-900 text-white rounded-2xl font-black text-lg tracking-widest uppercase shadow-2xl hover:bg-teal-600 transition-all duration-300 hover:scale-105 active:scale-95"
+            className="group relative px-12 py-6 bg-white text-slate-900 rounded-full font-black text-xl tracking-widest uppercase shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
           >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              Start Journey
+            <span className="relative z-10 flex items-center gap-3">
+              Start Simulation <span className="text-teal-600 transition-transform group-hover:translate-x-1">➔</span>
             </span>
-            {/* Hover shine effect */}
-            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine" />
+            {/* Button Glint */}
+            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-teal-200/50 opacity-0 group-hover:opacity-100 group-hover:animate-shine" />
           </button>
 
-          <p className="mt-6 text-slate-400 text-xs font-semibold max-w-sm leading-relaxed">
-            A serious game simulation for QPR Suicide Prevention Training.
+          <button
+            onClick={() => { audioManager.init(); setGameState('RESOURCES'); }}
+            className="mt-6 text-teal-400 hover:text-white text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
+          >
+            <span>Mental Health Resources</span>
+            <span className="w-4 h-px bg-teal-500/50" />
+            <span className="text-sm">✚</span>
+          </button>
+
+          <p className="mt-8 text-slate-400 text-xs font-medium uppercase tracking-widest max-w-sm opacity-60">
+            A QPR Suicide Prevention Training Module
           </p>
 
         </div>
+
+        {renderSettingsUI()}
       </div>
     );
   }
@@ -580,6 +865,14 @@ const App = () => {
   if (gameState === 'NAMING') {
     return (
       <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center">
+        {/* Back Button */}
+        <button
+          onClick={() => setGameState('START')}
+          className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/50 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-lg transition-all"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </button>
+
         <Scenery trust={trust} />
         <div className="relative z-20 max-w-md w-full p-12 naming-card bg-white/80 backdrop-blur-md rounded-[3rem] shadow-2xl border border-white/50 text-center animate-fade-in">
 
@@ -608,6 +901,8 @@ const App = () => {
             Choose Gender
           </button>
         </div>
+
+        {renderSettingsUI()}
       </div>
     );
   }
@@ -615,6 +910,14 @@ const App = () => {
   if (gameState === 'GENDER_SELECT') {
     return (
       <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-y-auto relative flex flex-col items-center justify-center p-4">
+        {/* Back Button */}
+        <button
+          onClick={() => setGameState('NAMING')}
+          className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/50 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-lg transition-all"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </button>
+
         <Scenery trust={trust} />
         <div className="relative z-20 max-w-md w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
           <h2 className="text-2xl md:text-3xl font-black uppercase text-teal-800 mb-8">Character Voice</h2>
@@ -643,6 +946,8 @@ const App = () => {
             Confirm & Continue
           </button>
         </div>
+
+        {renderSettingsUI()}
       </div>
     );
   }
@@ -650,6 +955,14 @@ const App = () => {
   if (gameState === 'LEVEL_SELECT') {
     return (
       <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col justify-center">
+        {/* Back to Title */}
+        <button
+          onClick={() => setGameState('START')}
+          className="absolute top-6 left-6 z-50 px-4 py-2 bg-white/50 backdrop-blur rounded-full flex items-center justify-center text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:shadow-lg transition-all"
+        >
+          ← Exit to Title
+        </button>
+
         <Scenery theme={selectedLevel.theme} trust={trust} />
 
         {/* Header - Fixed at top for context */}
@@ -675,166 +988,101 @@ const App = () => {
               snap-x snap-mandatory touch-pan-x
               scrollbar-hide
             ">
-            {MISSIONS.map((mission) => (
-              <button
-                key={mission.id}
-                onClick={() => launchMission(mission)}
-                onMouseEnter={() => setSelectedLevel(mission)}
-                // Update background immediately on touch interaction for mobile feel
-                onTouchStart={() => setSelectedLevel(mission)}
-                className={`
-                    flex-shrink-0 w-[85vw] md:w-auto snap-center
-                    group relative p-6 md:p-10 
-                    bg-white/80 backdrop-blur-xl rounded-[2.5rem] border-2 transition-all duration-300
-                    text-left flex flex-col justify-between h-[60vh] md:h-64
-                    overflow-hidden
-                    ${selectedLevel.id === mission.id
-                    ? 'border-teal-500 shadow-2xl scale-100 z-10'
-                    : 'border-white/40 hover:border-teal-200 opacity-80 hover:opacity-100 scale-95 md:scale-100'
-                  }
-                  `}
-              >
-                {/* Dynamic Background Tint for active card */}
-                <div className={`absolute inset-0 opacity-0 transition-opacity duration-500 ${selectedLevel.id === mission.id ? 'opacity-10 bg-gradient-to-br from-teal-400 to-transparent' : ''}`} />
+            {MISSIONS.map((mission) => {
+              const isLocked = isMissionLocked(mission.id);
+              const isCompleted = completedLevels.includes(mission.id);
 
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest border ${mission.difficulty === 'Easy' ? 'bg-green-100 text-green-700 border-green-200' :
-                      mission.difficulty === 'Medium' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                        'bg-red-100 text-red-700 border-red-200'
-                      }`}>
-                      {mission.difficulty}
-                    </span>
-
-                    {/* Selection Indicator */}
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedLevel.id === mission.id ? 'border-teal-500 bg-teal-500 text-white' : 'border-slate-300'}`}>
-                      {selectedLevel.id === mission.id && <span className="text-xs font-bold">✓</span>}
+              return (
+                <button
+                  key={mission.id}
+                  disabled={isLocked}
+                  onClick={() => !isLocked && launchMission(mission)}
+                  onMouseEnter={() => !isLocked && setSelectedLevel(mission)}
+                  onTouchStart={() => !isLocked && setSelectedLevel(mission)}
+                  className={`
+                      flex-shrink-0 w-[85vw] md:w-auto snap-center
+                      group relative p-6 md:p-10 
+                      bg-white/80 backdrop-blur-xl rounded-[2.5rem] border-2 transition-all duration-300
+                      text-left flex flex-col justify-between h-[60vh] md:h-64
+                      overflow-hidden
+                      ${isLocked
+                      ? 'opacity-60 grayscale cursor-not-allowed border-slate-200'
+                      : selectedLevel.id === mission.id
+                        ? 'border-teal-500 shadow-2xl scale-100 z-10'
+                        : 'border-white/40 hover:border-teal-200 opacity-80 hover:opacity-100 scale-95 md:scale-100'
+                    }
+                    `}
+                >
+                  {/* Lock Overlay */}
+                  {isLocked && (
+                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-900/10 backdrop-blur-[1px]">
+                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg mb-2">
+                        <svg className="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 bg-white/80 px-3 py-1 rounded-full">Locked</span>
                     </div>
+                  )}
+
+                  {/* Dynamic Background Tint for active card */}
+                  {!isLocked && (
+                    <div className={`absolute inset-0 opacity-0 transition-opacity duration-500 ${selectedLevel.id === mission.id ? 'opacity-10 bg-gradient-to-br from-teal-400 to-transparent' : ''}`} />
+                  )}
+
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className={`px-3 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest border ${mission.difficulty === 'Easy' ? 'bg-green-100 text-green-700 border-green-200' :
+                        mission.difficulty === 'Medium' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                          'bg-red-100 text-red-700 border-red-200'
+                        }`}>
+                        {mission.difficulty}
+                      </span>
+
+                      {/* Selection Indicator */}
+                      {!isLocked && (
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedLevel.id === mission.id ? 'border-teal-500 bg-teal-500 text-white' : 'border-slate-300'}`}>
+                          {selectedLevel.id === mission.id && <span className="text-xs font-bold">✓</span>}
+                        </div>
+                      )}
+                    </div>
+
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-800 mb-3 leading-none">
+                      {mission.name}
+                    </h3>
+                    <p className="text-sm md:text-base text-slate-600 leading-relaxed font-medium">
+                      {mission.desc}
+                    </p>
                   </div>
 
-                  <h3 className="text-2xl md:text-3xl font-black text-slate-800 mb-3 leading-none">
-                    {mission.name}
-                  </h3>
-                  <p className="text-sm md:text-base text-slate-600 leading-relaxed font-medium">
-                    {mission.desc}
-                  </p>
-                </div>
-
-                <div className="relative z-10 pt-6 mt-auto border-t border-slate-200/50 flex items-center justify-between text-slate-400 group-hover:text-teal-600 transition-colors">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Start Simulation</span>
-                  <span className="text-xl">➔</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (gameState === 'SCAN') {
-    const activeClues = OBSERVATION_DATA[selectedLevel.theme] || OBSERVATION_DATA['park'];
-    return (
-      <div className="game-container min-h-screen w-full bg-slate-900 text-slate-100 relative overflow-hidden flex flex-col items-center justify-center">
-        {/* Background Frozen/Dimmed */}
-        <div className="absolute inset-0 opacity-40 grayscale">
-          <Scenery theme={selectedLevel.theme} trust={trust} />
-        </div>
-
-        {/* HUD Overlay - Behind Actions but in front of scene */}
-        <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-40">
-          {/* Top HUD */}
-          <div className="flex justify-between items-start">
-            <div className="animate-fade-in md:ml-12 pointer-events-auto">
-              <h3 className="text-2xl font-black uppercase text-teal-400 tracking-widest drop-shadow-md">Observation Mode</h3>
-              <p className="text-slate-300 text-sm md:text-base max-w-md">
-                Identify warning signs. <span className="text-teal-200 font-bold">Tap the red markers.</span>
-              </p>
-            </div>
-
-            <div className="flex flex-col items-end gap-4 pointer-events-auto">
-              <button
-                onClick={resetGame}
-                className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-500/50 transition-all"
-              >
-                Exit Mission
-              </button>
-              <div className="flex flex-col items-end">
-                <div className="text-4xl font-mono font-bold text-teal-400">{scanTimer < 10 ? `0${scanTimer}` : scanTimer}s</div>
-                <div className="text-[10px] uppercase h-1 w-32 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                  <div className="h-full bg-teal-400 transition-all duration-1000 ease-linear" style={{ width: `${(scanTimer / 15) * 100}%` }} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Center Reticle Effect */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[60vh] md:w-[600px] md:h-[600px] border-2 border-dashed border-teal-500/30 rounded-3xl pointer-events-none">
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-teal-500 -mt-2 -ml-2" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-teal-500 -mt-2 -mr-2" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-teal-500 -mb-2 -ml-2" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-teal-500 -mb-2 -mr-2" />
-            <div className="absolute inset-0 bg-teal-500/5 animate-pulse" />
-          </div>
-
-          {/* Bottom Action */}
-          <div className="flex justify-center pointer-events-auto pb-8">
-            <button
-              onClick={completeScan}
-              className="bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg transition-transform active:scale-95 flex items-center gap-2"
-            >
-              {scannedItems.length > 0 ? 'Analysis Complete' : 'Skip & Approach'} <span className="text-xl">➔</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Stickman Container - Centered for Analysis */}
-        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-          <div className="relative animate-slide-up" style={{ transform: 'scale(2.5) translateY(10%)' }}>
-            <Stickman gender="guy" isNPC={true} emotion="distressed" position={{ x: 50, y: 50 }} theme={selectedLevel.theme} />
-
-            {/* HITBOXES RENDERED HERE, RELATIVE TO STICKMAN */}
-            {activeClues.map(clue => {
-              const isFound = scannedItems.find(i => i.id === clue.id);
-              return (
-                <div
-                  key={clue.id}
-                  onClick={(e) => { e.stopPropagation(); handleScanClick(clue); }}
-                  className={`absolute cursor-pointer transition-all duration-300 z-50
-                  ${isFound
-                      ? 'border-2 border-teal-400 bg-teal-400/20'
-                      : 'border-2 border-dotted border-red-400/50 hover:border-red-400 hover:bg-red-400/10 animate-pulse'
-                    }
-                `}
-                  style={{
-                    /* Positioning relative to the 0,0 center of the stickman container */
-                    left: `${clue.x}px`,
-                    top: `${clue.y - 100}px`, /* Offset to account for stickman height anchor */
-                    width: `${clue.w * 3}px`,
-                    height: `${clue.h * 3}px`,
-                    transform: 'translate(-50%, -50%)',
-                    borderRadius: '50%'
-                  }}
-                >
-                  {!isFound && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[8px] font-bold px-1 rounded opacity-0 hover:opacity-100 transition-opacity whitespace-nowrap">
-                      SCAN
-                    </div>
-                  )}
-                  {isFound && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-slate-900/95 border border-teal-500 p-2 rounded-lg w-32 shadow-xl animate-bounce">
-                      <div className="text-[8px] uppercase font-bold text-teal-400 mb-0.5">{clue.type}</div>
-                      <div className="text-[10px] font-bold text-white leading-tight">{clue.label}</div>
-                    </div>
-                  )}
-                </div>
-              )
+                  <div className={`relative z-10 pt-6 mt-auto border-t border-slate-200/50 flex items-center justify-between transition-colors ${isLocked ? 'text-slate-300' : 'text-slate-400 group-hover:text-teal-600'}`}>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                      {isLocked ? 'Mission Locked' : isCompleted ? 'Replay Simulation' : 'Start Simulation'}
+                    </span>
+                    <span className="text-xl">{isLocked ? '🔒' : '➔'}</span>
+                  </div>
+                </button>
+              );
             })}
           </div>
         </div>
+
+        {/* Resources Footer */}
+        <div className="relative z-20 flex justify-center mt-4 mb-8">
+          <button
+            onClick={() => setGameState('RESOURCES')}
+            className="px-8 py-3 bg-slate-900/10 hover:bg-slate-900/20 text-slate-900/60 hover:text-slate-900 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center gap-3 backdrop-blur-sm border border-slate-900/5 shadow-inner"
+          >
+            <span>Kochi Help & Self-Care Resources</span>
+            <span className="text-teal-600 font-bold">✚</span>
+          </button>
+        </div>
+
+        {renderSettingsUI()}
       </div>
     );
   }
+
 
   if (gameState === 'RESOLUTION') {
     return (
@@ -925,7 +1173,7 @@ const App = () => {
               {/* Input Display */}
               <div className="mt-4 mb-4 h-12 flex items-center justify-center border-b-2 border-slate-100 w-full">
                 <span className="text-3xl font-light tracking-widest text-slate-900">
-                  {scannedItems.length > 0 ? scannedItems.join('') : <span className="text-slate-200">...</span>}
+                  {dialedNumber.length > 0 ? dialedNumber.join('') : <span className="text-slate-200">...</span>}
                 </span>
               </div>
 
@@ -940,8 +1188,8 @@ const App = () => {
                 <button
                   key={num}
                   onClick={() => {
-                    if (scannedItems.length < 10) {
-                      setScannedItems([...scannedItems, num]);
+                    if (dialedNumber.length < 10) {
+                      setDialedNumber([...dialedNumber, num]);
                       audioManager.playDing();
                     }
                   }}
@@ -953,8 +1201,8 @@ const App = () => {
               <div /> {/* Spacer */}
               <button
                 onClick={() => {
-                  if (scannedItems.length < 10) {
-                    setScannedItems([...scannedItems, 0]);
+                  if (dialedNumber.length < 10) {
+                    setDialedNumber([...dialedNumber, 0]);
                     audioManager.playDing();
                   }
                 }}
@@ -962,7 +1210,7 @@ const App = () => {
               >
                 0
               </button>
-              <button onClick={() => setScannedItems(prev => prev.slice(0, -1))} className="w-14 h-14 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={() => setDialedNumber(prev => prev.slice(0, -1))} className="w-14 h-14 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg>
               </button>
             </div>
@@ -970,7 +1218,7 @@ const App = () => {
             {/* Call Button */}
             <button
               onClick={() => {
-                const number = scannedItems.join('');
+                const number = dialedNumber.join('');
                 if (number === '14416' || number === '112' || number === '988') {
                   audioManager.playPop();
                   setGameState('RESOLUTION');
@@ -978,7 +1226,7 @@ const App = () => {
                 } else {
                   audioManager.playSad();
                   alert("Incorrect Number. Try the Mental Health Helpline: 14416");
-                  setScannedItems([]);
+                  setDialedNumber([]);
                 }
               }}
               className="w-16 h-16 mx-auto rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-green-500/30 shadow-lg transition-transform active:scale-90 animate-pulse border-4 border-green-100"
@@ -989,7 +1237,7 @@ const App = () => {
             {/* Emergency Override */}
             <button
               onClick={() => {
-                setScannedItems([1, 4, 4, 1, 6]);
+                setDialedNumber([1, 4, 4, 1, 6]);
                 setTimeout(() => {
                   setGameState('RESOLUTION');
                   setResolutionPhase(0);
@@ -1005,6 +1253,8 @@ const App = () => {
           {/* Phone Home Bar */}
           <div className="h-1 w-32 bg-slate-200 rounded-full mx-auto my-4" />
         </div>
+
+        {renderSettingsUI()}
       </div>
     );
   }
@@ -1112,6 +1362,12 @@ const App = () => {
               </p>
             )}
             <button
+              onClick={() => setGameState('RESOURCES')}
+              className="w-full mb-3 py-3 bg-white border-2 border-slate-100 text-slate-800 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+            >
+              <span>✚ Kochi Resources & Self-Care</span>
+            </button>
+            <button
               onClick={handleEndGameContinue}
               className="w-full py-4 bg-teal-600 text-white rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-teal-700 transition-all shadow-lg hover:shadow-teal-500/30 active:scale-95"
             >
@@ -1119,22 +1375,32 @@ const App = () => {
             </button>
           </div>
         </div>
+
+        {renderSettingsUI()}
       </div>
     );
   }
 
   return (
-    <div className="game-container min-h-screen w-full bg-slate-50 overflow-hidden relative">
+    <div
+      className="game-container min-h-screen w-full bg-slate-50 overflow-hidden relative"
+      onClick={() => { if (!audioManager.initialized) audioManager.init(); }}
+    >
       {/* Persistent Branding */}
       {/* Persistent Branding & Controls */}
       <div className="absolute top-4 left-4 z-50 pointer-events-none mix-blend-multiply opacity-90 flex flex-col gap-4">
         <img src="/ME.gif" alt="Mind Empowered" className="w-[80px] h-[80px] rounded-full border-4 border-white shadow-xl object-cover" />
 
         <button
-          onClick={() => { if (confirm("Exit the simulation?")) resetGame(); }}
+          onClick={() => {
+            if (confirm("Abandon current mission and return to menu?")) {
+              audioManager.stopMusic();
+              setGameState('LEVEL_SELECT');
+            }
+          }}
           className="pointer-events-auto w-[80px] py-1 bg-slate-900 border-2 border-white/50 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg hover:bg-slate-700 transition-all opacity-0 hover:opacity-100 focus:opacity-100 group-hover:opacity-100 md:opacity-50"
         >
-          Exit Game
+          Exit Mission
         </button>
       </div>
 
@@ -1175,6 +1441,20 @@ const App = () => {
         </div>
       </div>
 
+      {/* Tutorial Instructions */}
+      {selectedLevel.id === 'tutorial' && (
+        <div className="fixed top-28 left-1/2 -translate-x-1/2 z-[40] w-full max-w-sm px-4 pointer-events-none">
+          <div className="bg-teal-900/90 text-white p-4 rounded-xl border-l-4 border-teal-400 shadow-2xl backdrop-blur-md animate-fade-in-down">
+            <h5 className="text-[10px] font-black uppercase tracking-widest text-teal-400 mb-1">Training Tip</h5>
+            <p className="text-xs font-medium leading-relaxed">
+              {gameState === 'APPROACH' && (isTouchDevice ? 'Tap the arrows to walk towards the training NPC.' : 'Use Arrow Keys to move. Reach the NPC to start talking.')}
+              {gameState === 'DIALOGUE' && !playerLastSaid && 'Choose a response. Good choices build trust (empathy score).'}
+              {gameState === 'DIALOGUE' && playerLastSaid && 'Wait for the NPC to respond, or select your next action.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <ResourceWallet
         isOpen={isWalletOpen}
         resources={RESOURCES}
@@ -1208,16 +1488,21 @@ const App = () => {
           gender={playerGender}
           moveDir={moveDir}
           theme={selectedLevel.theme}
+          textSpeed={settings.textSpeed}
         />
 
         <Stickman
-          speaker="Sam"
+          speaker={selectedLevel.id === 'tutorial' ? 'Guide' : 'Sam'}
           emotion={currentNode.npc_emotion}
           position={samPos}
+          isWalking={npcAction === 'pacing'}
+          isSitting={npcAction === 'sitting'}
+          isPhoneChecking={npcAction === 'phone'}
           currentMessage={(gameState === 'DIALOGUE' && !playerLastSaid) ? currentNode.npc_text : null}
           textEffect={currentNode.text_effect}
           gender="guy"
           theme={selectedLevel.theme}
+          textSpeed={settings.textSpeed}
         />
 
         {/* Ambient NPC walking in distant background */}
@@ -1365,6 +1650,8 @@ const App = () => {
           foundClues={foundClues}
         />
       )}
+
+      {renderSettingsUI()}
     </div>
   );
 };

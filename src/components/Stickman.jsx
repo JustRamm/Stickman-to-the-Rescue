@@ -7,13 +7,40 @@ const Stickman = ({
     isWalking = false,
     isJumping = false,
     isCrouching = false,
+    isSitting = false,
+    isPhoneChecking = false,
     currentMessage = null,
     textEffect = null,
     gender = 'guy',
     moveDir = 0,
-    theme = 'park' // New prop to handle contrast
+    theme = 'park',
+    textSpeed = 50
 }) => {
-    const isIdle = !isWalking && !isJumping && !isCrouching;
+    const isIdle = !isWalking && !isJumping && !isCrouching && !isSitting && !isPhoneChecking;
+    const [displayedText, setDisplayedText] = React.useState('');
+
+    // Typewriter effect
+    React.useEffect(() => {
+        if (!currentMessage) {
+            setDisplayedText('');
+            return;
+        }
+
+        if (textSpeed === 0) {
+            setDisplayedText(currentMessage);
+            return;
+        }
+
+        let i = 0;
+        setDisplayedText('');
+        const timer = setInterval(() => {
+            setDisplayedText(currentMessage.substring(0, i + 1));
+            i++;
+            if (i >= currentMessage.length) clearInterval(timer);
+        }, textSpeed);
+
+        return () => clearInterval(timer);
+    }, [currentMessage, textSpeed]);
 
     // Determine which SVG to use
     const getAssetUrl = () => {
@@ -21,6 +48,8 @@ const Stickman = ({
 
         if (isJumping) return `${base}_jump.svg`;
         if (isCrouching) return `${base}_crouch.svg`;
+        if (isSitting) return `${base}_crouch.svg`; // Fallback to crouch for sitting pose
+        if (isPhoneChecking) return `${base}_idle.svg`; // Fallback to idle
         if (isWalking) {
             if (moveDir === -1) return `${base}_walk_left.svg`;
             return `${base}_walk_right.svg`;
@@ -51,11 +80,16 @@ const Stickman = ({
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-orange-400/10 rounded-full animate-ping z-0 pointer-events-none" />
             )}
 
+            {/* Phone Glow Effect */}
+            {isPhoneChecking && (
+                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-8 h-8 bg-blue-400/30 blur-md rounded-full animate-pulse z-0 pointer-events-none" />
+            )}
+
             {/* Dialogue Bubble */}
             {currentMessage && (
                 <div className="absolute bottom-[140px] md:bottom-[160px] left-1/2 -translate-x-1/2 w-[85vw] md:w-auto md:min-w-[200px] md:max-w-[300px] bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 animate-fade-in z-50">
                     <p className={`text-xs md:text-sm font-bold text-slate-800 leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
-                        {currentMessage}
+                        {displayedText}
                     </p>
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-r border-b border-slate-100 rotate-45" />
                 </div>

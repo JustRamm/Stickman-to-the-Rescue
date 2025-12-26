@@ -1,4 +1,59 @@
 {
+    "tutorial": {
+        "startNode": "intro",
+        "nodes": {
+            "intro": {
+                "npc_text": "Welcome to the Gatekeeper Training. I'm your Tutorial Guide. Ready to learn?",
+                "npc_emotion": "neutral",
+                "options": [
+                    {
+                        "text": "Yes, show me how this works.",
+                        "next": "trust_lesson",
+                        "trust_impact": 10
+                    }
+                ]
+            },
+            "trust_lesson": {
+                "npc_text": "The bar at the top represents Trust. Helpful responses increase it, while dismissive ones decrease it.",
+                "npc_emotion": "neutral",
+                "options": [
+                    {
+                        "text": "I see. What about the icons?",
+                        "next": "clue_lesson",
+                        "trust_impact": 5
+                    }
+                ]
+            },
+            "clue_lesson": {
+                "npc_text": "Observations help you unlock deeper dialogue. You can see the 'Magnifying Glass' on some options.",
+                "npc_emotion": "neutral",
+                "options": [
+                    {
+                        "text": "Got it. How do I help someone in crisis?",
+                        "next": "refer_lesson",
+                        "trust_impact": 5
+                    }
+                ]
+            },
+            "refer_lesson": {
+                "npc_text": "At the end, you'll use the 'Refer' action to connect them to professional help.",
+                "npc_emotion": "neutral",
+                "options": [
+                    {
+                        "text": "I'm ready to try a real scenario!",
+                        "next": "success_tutorial",
+                        "trust_impact": 20
+                    }
+                ]
+            },
+            "success_tutorial": {
+                "isEnd": true,
+                "result": "success",
+                "message": "Tutorial Complete! You've learned the basics of Approach, Listen, and Refer. Now, let's head to the park.",
+                "npc_emotion": "relief"
+            }
+        }
+    },
     "park": {
         "startNode": "beginning",
         "nodes": {
