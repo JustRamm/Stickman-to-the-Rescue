@@ -1,0 +1,428 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  /* Soft slate white */
+  --foreground: #1e293b;
+  /* Deep slate for text */
+  --primary: #0d9488;
+  /* Teal for growth/life */
+  --accent: #f97316;
+  /* Orange for energy/awareness */
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Updated Full-Screen Aesthetic */
+.game-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.stickman {
+  transition: all 0.3s ease-out;
+  color: var(--foreground);
+  stroke: var(--foreground);
+}
+
+.stickman-wrapper {
+  position: absolute;
+  pointer-events: none;
+  z-index: 20;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.shake {
+  animation: shake 0.2s ease-in-out infinite;
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* Tunnel Vision Vignette - Now using a semi-transparent blue/grey for stress instead of pure black */
+.tunnel-vision {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 1s ease-in-out;
+  background: radial-gradient(circle at center, transparent 0%, rgba(30, 41, 59, 0.2) 40%, rgba(15, 23, 42, 0.9) 100%);
+}
+
+/* Tooltip for Inner Thought */
+.inner-thought-tooltip {
+  display: flex;
+  align-items: center;
+}
+
+/* Response Menu - Transparent & Non-Obstructive */
+.dialogue-box-container {
+  pointer-events: none;
+}
+
+.dialogue-box-container button {
+  pointer-events: auto;
+}
+
+/* Mobile Controls HUD */
+.mobile-controls {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.action-buttons {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.control-btn {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.control-btn:active {
+  transform: scale(0.9);
+  background: var(--primary);
+  color: white;
+}
+
+/* Responsiveness & Mobile HUD */
+@media (max-width: 768px) {
+  .resource-wallet {
+    width: 100%;
+    right: -100%;
+    z-index: 200;
+  }
+
+  .resource-wallet.open {
+    right: 0;
+  }
+
+  h1 {
+    font-size: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .naming-card {
+    padding: 1.5rem !important;
+    width: 90% !important;
+  }
+
+  .mobile-controls {
+    left: 1rem;
+    bottom: 1.5rem;
+  }
+
+  .action-buttons {
+    right: 1rem;
+    bottom: 1.5rem;
+  }
+
+  .stickman-wrapper {
+    transform-origin: bottom center;
+    scale: 0.8;
+  }
+}
+
+@media (max-height: 500px) {
+
+  /* Landscape Mode Adjustments */
+  .mobile-controls,
+  .action-buttons {
+    bottom: 0.5rem;
+  }
+
+  .control-btn {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.8rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .naming-card {
+    scale: 0.8;
+  }
+}
+
+/* Base ergonomics for touch */
+button,
+input {
+  min-height: 44px;
+  /* Standard Apple touch target */
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(-10vw);
+  }
+
+  100% {
+    transform: translateX(110vw);
+  }
+}
+
+@keyframes bird-fly-1 {
+  0% {
+    transform: translate(-10vw, 0);
+  }
+
+  50% {
+    transform: translate(50vw, -20px);
+  }
+
+  100% {
+    transform: translate(110vw, 0);
+  }
+}
+
+@keyframes bird-fly-2 {
+  0% {
+    transform: translate(-20vw, 10px);
+  }
+
+  50% {
+    transform: translate(40vw, 30px);
+  }
+
+  100% {
+    transform: translate(120vw, 10px);
+  }
+}
+
+@keyframes bird-fly-3 {
+  0% {
+    transform: translate(-15vw, -10px);
+  }
+
+  50% {
+    transform: translate(60vw, 15px);
+  }
+
+  100% {
+    transform: translate(115vw, -10px);
+  }
+}
+
+@keyframes float-particle {
+
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: translate(100px, -100px) rotate(180deg);
+  }
+
+  75% {
+    opacity: 1;
+  }
+}
+
+.animate-bird-fly-1 {
+  animation: bird-fly-1 15s linear infinite;
+}
+
+.animate-bird-fly-2 {
+  animation: bird-fly-2 18s linear infinite;
+}
+
+.animate-bird-fly-3 {
+  animation: bird-fly-3 12s linear infinite;
+}
+
+@keyframes idle-sway {
+
+  0%,
+  100% {
+    transform: translate(-50%, -100%) rotate(-1deg);
+  }
+
+  50% {
+    transform: translate(-50%, -100%) rotate(1deg);
+  }
+}
+
+.animate-idle-sway {
+  animation: idle-sway 3s ease-in-out infinite;
+}
+
+@keyframes rain-drop {
+  0% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.animate-rain-drop {
+  animation: rain-drop 0.8s linear infinite;
+}
+
+
+/* Wallet Styles - Brighter theme */
+.resource-wallet {
+  position: absolute;
+  right: -240px;
+  top: 0;
+  bottom: 0;
+  width: 240px;
+  background: #ffffff;
+  border-left: 1px solid var(--border);
+  transition: right 0.5s ease;
+  z-index: 40;
+  padding: 24px;
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.resource-wallet.open {
+  right: 0;
+}
+
+.resource-card {
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 8px;
+}
+
+.resource-card:hover {
+  border-color: var(--primary);
+  background: #f0fdfa;
+}
+
+.resource-card.selected {
+  border-color: var(--primary);
+  background: #ccfbf1;
+  box-shadow: 0 0 0 2px var(--primary);
+}

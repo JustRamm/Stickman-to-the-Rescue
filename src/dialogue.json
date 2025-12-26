@@ -1,0 +1,152 @@
+{
+    "startNode": "beginning",
+    "nodes": {
+        "beginning": {
+            "npc_text": "Hey. I didn't think anyone else would be out here this late.",
+            "npc_emotion": "sad",
+            "options": [
+                {
+                    "text": "It's a quiet spot. You come here often?",
+                    "next": "opening_up",
+                    "trust_impact": 10,
+                    "inner_thought": "Engagement: Starting with a neutral, non-threatening observation."
+                },
+                {
+                    "text": "Are you okay? You look pretty down.",
+                    "next": "defensive",
+                    "trust_impact": -5,
+                    "inner_thought": "Assumption: Jumping to conclusions too quickly can cause a person to retreat."
+                },
+                {
+                    "text": "I saw this photo of a family back there... is it yours?",
+                    "next": "opening_up_clue",
+                    "trust_impact": 35,
+                    "required_clue": "family_photo",
+                    "inner_thought": "Connection: Using an environmental clue to show deep attentiveness."
+                },
+                {
+                    "text": "I saw that termination letter on the desk... I'm so sorry.",
+                    "next": "deep_pain",
+                    "trust_impact": 40,
+                    "required_clue": "termination_letter",
+                    "inner_thought": "Empathy: Acknowledging a specific pain point found in the environment."
+                }
+            ]
+        },
+        "opening_up_clue": {
+            "npc_text": "Yeah... my kids. I don't know how I'm going to look them in the eye after what happened.",
+            "npc_emotion": "vulnerable",
+            "options": [
+                {
+                    "text": "They love you, Sam. The situation doesn't define your value to them.",
+                    "next": "deep_pain",
+                    "trust_impact": 15,
+                    "inner_thought": "Validation: Refocusing on relationships and worth."
+                }
+            ]
+        },
+        "opening_up": {
+            "npc_text": "Used to. Now it's the only place where I don't feel like I'm failing everyone.",
+            "npc_emotion": "vulnerable",
+            "options": [
+                {
+                    "text": "Failing everyone? That sounds like a heavy burden to carry.",
+                    "next": "deep_pain",
+                    "trust_impact": 15,
+                    "inner_thought": "Validation: Acknowledging the weight of his feelings without judging."
+                },
+                {
+                    "text": "I noticed your university grade sheet... it looked tough. Is that what's weight on you?",
+                    "next": "deep_pain",
+                    "trust_impact": 25,
+                    "required_clue": "failing_grade",
+                    "inner_thought": "Specificity: Showing you've noticed the specific stressor."
+                },
+                {
+                    "text": "Don't say that. I'm sure people care about you.",
+                    "next": "toxic_positivity",
+                    "trust_impact": -10,
+                    "inner_thought": "Toxic Positivity: Dismissing pain with platitudes shuts down the conversation."
+                }
+            ]
+        },
+        "deep_pain": {
+            "npc_text": "I've lost the job, the house... I think everyone would just be better off if I wasn't around.",
+            "npc_emotion": "vulnerable",
+            "text_effect": "fade-in",
+            "options": [
+                {
+                    "text": "When you say 'better off', are you saying you're thinking about suicide?",
+                    "next": "direct_question",
+                    "trust_impact": 20,
+                    "inner_thought": "The Question: QPR mandates asking directly and clearly. It shows you are listening."
+                },
+                {
+                    "text": "You shouldn't think that. It'll get better eventually.",
+                    "next": "defensive",
+                    "trust_impact": -15,
+                    "inner_thought": "Avoidance: Skipping the hard question leaves the person in danger."
+                }
+            ]
+        },
+        "direct_question": {
+            "npc_text": "I... I have the bottle in my bag. I was just sitting here waiting for the courage to do it.",
+            "npc_emotion": "vulnerable",
+            "text_effect": "shake",
+            "options": [
+                {
+                    "text": "I'm so glad you told me. I want to help you stay safe. Will you go with me to get some help?",
+                    "next": "persuade",
+                    "trust_impact": 20,
+                    "inner_thought": "Persuade: Listening is the first step to persuasion. Offer hope."
+                }
+            ]
+        },
+        "persuade": {
+            "npc_text": "I don't know who to even call. I'm so lost.",
+            "npc_emotion": "vulnerable",
+            "required_resource": "Crisis Hotline",
+            "options": [
+                {
+                    "text": "[REFER: SELECT CRISIS RESOURCE FROM TOOLKIT]",
+                    "next": "success_end",
+                    "trust_impact": 25,
+                    "inner_thought": "Refer: Connecting the person to professional, immediate life-saving support."
+                }
+            ]
+        },
+        "toxic_positivity": {
+            "npc_text": "That's what they always say. But they don't see the mess I've made.",
+            "npc_emotion": "closed_off",
+            "options": [
+                {
+                    "text": "I'm sorry, I was minimizing. Tell me more about what's going on.",
+                    "next": "deep_pain",
+                    "trust_impact": 10,
+                    "inner_thought": "Repair: Admitting you misspoke can rebuild trust."
+                }
+            ]
+        },
+        "defensive": {
+            "npc_text": "Look, I'm just here to look at the trees. Just leave me alone.",
+            "npc_emotion": "closed_off",
+            "options": [
+                {
+                    "text": "I'll give you some space, but I'm here if you change your mind.",
+                    "next": "leave_failure",
+                    "trust_impact": -50
+                }
+            ]
+        },
+        "success_end": {
+            "isEnd": true,
+            "result": "success",
+            "message": "Connection Established. Sam agreed to call the hotline. By listening and asking the direct question, you provided the bridge he needed back to safety."
+        },
+        "leave_failure": {
+            "isEnd": true,
+            "result": "failure",
+            "message": "Session Terminated. You left Sam alone while he was in a vulnerable state. In QPR training, never leaving a person in crisis alone is a critical rule."
+        }
+    }
+}
