@@ -111,21 +111,31 @@ class SoundEngine {
     playHeartbeat() {
         if (!this.initialized) return;
         const t = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
 
-        // Low drum-like sound
-        osc.frequency.setValueAtTime(50, t);
-        osc.frequency.exponentialRampToValueAtTime(30, t + 0.1);
+        // Helper to create a thump (lub/dub)
+        const playThump = (startTime, freqStart, dur, vol) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
 
-        gain.gain.setValueAtTime(0.4, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freqStart, startTime);
+            osc.frequency.exponentialRampToValueAtTime(freqStart * 0.6, startTime + dur);
 
-        osc.connect(gain);
-        gain.connect(this.masterGain);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(vol, startTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
 
-        osc.start(t);
-        osc.stop(t + 0.15);
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+
+            osc.start(startTime);
+            osc.stop(startTime + dur);
+        };
+
+        // "Lub" - Deep, resonant
+        playThump(t, 65, 0.15, 0.6);
+        // "Dub" - Slightly higher, tighter
+        playThump(t + 0.18, 55, 0.12, 0.4);
     }
 
     // Low "thud" for trust decrease or frown

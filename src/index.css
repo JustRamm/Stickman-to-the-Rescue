@@ -46,6 +46,20 @@ body {
   background: var(--background);
 }
 
+/* FORCE LANDSCAPE on Mobile Portrait - Rotates content 90deg so it fits the screen sideways */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  #root {
+    transform: rotate(90deg);
+    transform-origin: bottom left;
+    position: absolute;
+    top: -100vw;
+    left: 0;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+  }
+}
+
 .stickman {
   transition: all 0.3s ease-out;
   color: var(--foreground);

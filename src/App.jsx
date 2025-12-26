@@ -980,20 +980,6 @@ const App = () => {
     </div>
   );
 
-  // Force Landscape on Mobile
-  if (isPortrait) {
-    return (
-      <div className="fixed inset-0 z-[9999] bg-slate-900 text-white flex flex-col items-center justify-center p-8 text-center">
-        <div className="text-6xl mb-8 animate-bounce">📱</div>
-        <div className="text-4xl mb-6 animate-spin-slow">🔄</div>
-        <h2 className="text-2xl font-black uppercase tracking-widest mb-4">Rotate Device</h2>
-        <p className="text-slate-400 font-medium max-w-xs leading-relaxed">
-          For the best immersive experience, please rotate your device to landscape mode.
-        </p>
-      </div>
-    );
-  }
-
   if (gameState === 'SPLASH') return renderSplashScreen();
 
   if (gameState === 'START') {
@@ -1034,17 +1020,17 @@ const App = () => {
             <div className="absolute -right-8 md:-right-16 -top-8 md:-top-12 animate-float delay-700 opacity-90 rotate-12 pointer-events-none">
               <img src="/stickman_assets/guy_idle.svg" alt="Stickman" className="w-16 h-16 md:w-24 md:h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
             </div>
-            <div className="absolute -left-12 md:-left-16 -bottom-6 md:-bottom-8 animate-float delay-1000 opacity-90 -rotate-12 pointer-events-none">
-              <img src="/stickman_assets/group_hug.svg" alt="Support" className="w-24 h-18 md:w-32 md:h-24 drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]" />
+            <div className="absolute -left-8 md:-left-16 -bottom-6 md:-bottom-8 animate-float delay-1000 opacity-90 -rotate-12 pointer-events-none">
+              <img src="/stickman_assets/group_hug.svg" alt="Support" className="w-20 h-16 md:w-32 md:h-24 drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]" />
             </div>
           </div>
 
           {/* Start Button */}
           <button
             onClick={() => { audioManager.init(); setGameState('NAMING'); }}
-            className="group relative px-8 md:px-12 py-4 md:py-6 bg-white text-slate-900 rounded-full font-black text-lg md:text-xl tracking-widest uppercase shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
+            className="group relative px-6 md:px-10 py-3 md:py-5 bg-white text-slate-900 rounded-full font-black text-sm md:text-xl tracking-widest uppercase shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
           >
-            <span className="relative z-10 flex items-center gap-3">
+            <span className="relative z-10 flex items-center gap-2 md:gap-3">
               Start Simulation <span className="text-teal-600 transition-transform group-hover:translate-x-1">➔</span>
             </span>
             {/* Button Glint */}
@@ -1053,7 +1039,7 @@ const App = () => {
 
           <button
             onClick={() => { audioManager.init(); setGameState('RESOURCES'); }}
-            className="mt-6 md:mt-8 text-teal-400 hover:text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
+            className="mt-4 md:mt-8 text-teal-400 hover:text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
           >
             <span>Mental Health Resources</span>
             <span className="w-3 md:w-4 h-px bg-teal-500/50" />
@@ -1083,20 +1069,20 @@ const App = () => {
         </button>
 
         <Scenery trust={trust} />
-        <div className="relative z-20 max-w-md w-[85%] md:w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border border-white/50 text-center animate-fade-in">
+        <div className="relative z-20 max-w-md w-[85%] md:w-full p-6 md:p-10 naming-card bg-white/80 backdrop-blur-md rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
 
-          <div className="mb-6 md:mb-8 w-16 h-16 md:w-20 md:h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto text-teal-600">
-            <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-4 md:mb-6 w-12 h-12 md:w-16 md:h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto text-teal-600">
+            <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black uppercase text-teal-800 mb-2">Identify Yourself</h2>
-          <p className="text-slate-500 text-xs md:text-sm mb-6 md:mb-8 font-medium italic">What is your Name, Gatekeeper?</p>
+          <h2 className="text-xl md:text-2xl font-black uppercase text-teal-800 mb-1">Identify Yourself</h2>
+          <p className="text-slate-500 text-[10px] md:text-sm mb-4 md:mb-6 font-medium italic">What is your Name, Gatekeeper?</p>
 
           <input
             type="text"
             placeholder="Enter your name..."
-            className="w-full px-4 md:px-6 py-3 md:py-4 bg-slate-100 border-2 border-slate-200 rounded-xl md:rounded-2xl mb-6 text-center text-base md:text-lg font-bold text-slate-800 focus:border-teal-500 focus:outline-none transition-colors"
+            className="w-full px-4 py-2 md:py-3 bg-slate-100 border-2 border-slate-200 rounded-lg md:rounded-xl mb-4 text-center text-sm md:text-lg font-bold text-slate-800 focus:border-teal-500 focus:outline-none transition-colors"
             value={playerName === 'You' ? '' : playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && playerName.trim() && setGameState('GENDER_SELECT')}
@@ -1105,7 +1091,7 @@ const App = () => {
           <button
             disabled={!playerName.trim()}
             onClick={() => setGameState('GENDER_SELECT')}
-            className="w-full py-3 md:py-4 bg-teal-600 text-white rounded-xl md:rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+            className="w-full py-2 md:py-3 bg-teal-600 text-white rounded-lg md:rounded-xl font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
           >
             Choose Gender
           </button>
@@ -1128,22 +1114,23 @@ const App = () => {
         </button>
 
         <Scenery trust={trust} />
-        <div className="relative z-20 max-w-md w-[85%] md:w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2.5rem] md:rounded-[2rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
-          <h2 className="text-xl md:text-3xl font-black uppercase text-teal-800 mb-6 md:mb-8">Character Voice</h2>
+        <Scenery trust={trust} />
+        <div className="relative z-20 max-w-md w-[85%] md:w-full p-6 md:p-10 naming-card bg-white/80 backdrop-blur-md rounded-[1.5rem] md:rounded-[2rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
+          <h2 className="text-lg md:text-2xl font-black uppercase text-teal-800 mb-4 md:mb-6">Character Voice</h2>
 
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
             <button
               onClick={() => { setPlayerGender('guy'); audioManager.speak("Testing, testing. This is the guy voice.", false, 'guy'); }}
-              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 md:gap-3 ${playerGender === 'guy' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
+              className={`p-3 md:p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-2 md:gap-3 ${playerGender === 'guy' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
             >
-              <img src="/stickman_assets/guy_idle.svg" alt="Guy Character" className="w-12 h-12 md:w-20 md:h-20" />
+              <img src="/stickman_assets/guy_idle.svg" alt="Guy Character" className="w-10 h-10 md:w-16 md:h-16" />
               <span className="font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-slate-600">Guy</span>
             </button>
             <button
               onClick={() => { setPlayerGender('girl'); audioManager.speak("Testing, testing. This is the girl voice.", false, 'girl'); }}
-              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 md:gap-3 ${playerGender === 'girl' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
+              className={`p-3 md:p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-2 md:gap-3 ${playerGender === 'girl' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
             >
-              <img src="/stickman_assets/girl_idle.svg" alt="Girl Character" className="w-12 h-12 md:w-20 md:h-20" />
+              <img src="/stickman_assets/girl_idle.svg" alt="Girl Character" className="w-10 h-10 md:w-16 md:h-16" />
               <span className="font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-slate-600">Girl</span>
             </button>
           </div>
@@ -1153,7 +1140,7 @@ const App = () => {
               audioManager.stopSpeaking();
               setGameState('LEVEL_SELECT');
             }}
-            className="w-full py-3 md:py-4 bg-teal-600 text-white rounded-xl md:rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all hover:scale-[1.02] active:scale-95"
+            className="w-full py-2 md:py-3 bg-teal-600 text-white rounded-lg md:rounded-xl font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all hover:scale-[1.02] active:scale-95"
           >
             Confirm & Continue
           </button>
@@ -1276,9 +1263,9 @@ const App = () => {
                   onTouchStart={() => !isLocked && setSelectedLevel(mission)}
                   className={`
                       flex-shrink-0 w-[75vw] md:w-auto snap-center
-                      group relative p-8 md:p-10 
-                      bg-white/80 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] border-2 transition-all duration-300
-                      text-left flex flex-col justify-between h-[50vh] md:h-64
+                      group relative p-6 md:p-8 
+                      bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2.5rem] border-2 transition-all duration-300
+                      text-left flex flex-col justify-between h-[70vh] md:h-64
                       overflow-hidden
                       ${isLocked
                       ? 'opacity-60 grayscale cursor-not-allowed border-slate-200'
@@ -1323,7 +1310,7 @@ const App = () => {
                       )}
                     </div>
 
-                    <h3 className="text-xl md:text-3xl font-black text-slate-800 mb-2 md:mb-3 leading-none">
+                    <h3 className="text-lg md:text-3xl font-black text-slate-800 mb-1 md:mb-3 leading-none">
                       {mission.name}
                     </h3>
                     <p className="text-xs md:text-base text-slate-600 leading-relaxed font-medium line-clamp-3 md:line-clamp-none">
