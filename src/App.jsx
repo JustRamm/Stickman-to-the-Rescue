@@ -9,7 +9,8 @@ import { audioManager } from './utils/audio';
 const RESOURCES = [
   { id: 1, name: 'Crisis Hotline', description: 'Immediate clinical support via phone or text.' },
   { id: 2, name: 'Professional Therapist', description: 'Long-term psychological treatment and support.' },
-  { id: 3, name: 'A Trusted Friend', description: 'Immediate emotional support and social connection.' }
+  { id: 3, name: 'A Trusted Friend', description: 'Immediate emotional support and social connection.' },
+  { id: 4, name: 'Confidential Counselor', description: 'Private, professional guidance for sensitive personal issues.' }
 ];
 
 const REAL_RESOURCES = {
@@ -134,25 +135,29 @@ const App = () => {
   }, [completedLevels]);
 
   const isMissionLocked = (missionId) => {
-    // Tutorial is always unlocked
-    if (missionId === 'tutorial') return false;
-
-    // Park and Office require Tutorial completion
-    if (missionId === 'park' || missionId === 'office') {
-      return !completedLevels.includes('tutorial');
-    }
-
-    // Campus requires Park & Office
-    if (missionId === 'campus') {
-      return !(completedLevels.includes('park') && completedLevels.includes('office'));
-    }
-
-    // Rainy (Expert) requires Campus
-    if (missionId === 'rainy') {
-      return !completedLevels.includes('campus');
-    }
-
+    // DEV MODE: All levels unlocked for testing
     return false;
+
+    // ORIGINAL PROGRESSION LOGIC (Commented out for dev):
+    // // Tutorial is always unlocked
+    // if (missionId === 'tutorial') return false;
+    //
+    // // Park and Office require Tutorial completion
+    // if (missionId === 'park' || missionId === 'office') {
+    //   return !completedLevels.includes('tutorial');
+    // }
+    //
+    // // Campus requires Park & Office
+    // if (missionId === 'campus') {
+    //   return !(completedLevels.includes('park') && completedLevels.includes('office'));
+    // }
+    //
+    // // Rainy (Expert) requires Campus
+    // if (missionId === 'rainy') {
+    //   return !completedLevels.includes('campus');
+    // }
+    //
+    // return false;
   };
 
   // Settings & Accessibility System
