@@ -86,6 +86,7 @@ const App = () => {
 
   /* New State for Clue Inspection */
   const [viewedClue, setViewedClue] = useState(null);
+  const [showDiscoveryPopup, setShowDiscoveryPopup] = useState(false);
   const [dialedNumber, setDialedNumber] = useState([]);
   const [resolutionPhase, setResolutionPhase] = useState(0); // 0: Call, 1: Arrive, 2: Hug, 3: Speech
   const [npcAction, setNpcAction] = useState('idle'); // idle, phone, sitting, pacing
@@ -406,19 +407,26 @@ const App = () => {
         const nextX = prev.x + (dir * 0.05);
         if (nextX > 82) dir = -1;
         if (nextX < 68) dir = 1;
-
-        // Check proximity even while NPC is moving
-        const dist = Math.abs(playerPos.x - nextX);
-        if (dist < 10 && gameState === 'APPROACH') {
-          setGameState('DIALOGUE');
-          audioManager.playDing();
-        }
-
         return { ...prev, x: nextX };
       });
     }, 50);
     return () => clearInterval(interval);
   }, [gameState, npcAction]);
+
+  // Continuous Proximity Check (runs more frequently for mobile responsiveness)
+  useEffect(() => {
+    if (gameState !== 'APPROACH') return;
+
+    const checkProximity = setInterval(() => {
+      const dist = Math.abs(playerPos.x - samPos.x);
+      if (dist < 10) {
+        setGameState('DIALOGUE');
+        audioManager.playDing();
+      }
+    }, 100); // Check every 100ms for responsive detection
+
+    return () => clearInterval(checkProximity);
+  }, [gameState, playerPos.x, samPos.x]);
 
   // Resolution Cutscene Logic
   useEffect(() => {
@@ -469,6 +477,8 @@ const App = () => {
   useEffect(() => {
     if (gameState === 'DIALOGUE') {
       audioManager.playPop();
+      // Stop any previous speech to ensure only current chapter's voice plays
+      audioManager.stopSpeaking();
       // Add a natural 500ms pause before NPC responds
       setTimeout(() => {
         audioManager.speak(currentNode.npc_text, false, selectedLevel.npc.gender, selectedLevel.npc.voice);
@@ -605,6 +615,14 @@ const App = () => {
     if (viewedClue) {
       setFoundClues(prev => [...prev, viewedClue.id]);
       setViewedClue(null);
+
+      // Show discovery popup
+      setShowDiscoveryPopup(true);
+
+      // Auto-dismiss the discovery popup after 2 seconds
+      setTimeout(() => {
+        setShowDiscoveryPopup(false);
+      }, 2000);
     }
   };
 
@@ -1158,6 +1176,17 @@ const App = () => {
                     </p>
                   </div>
 
+                  {/* NPC Character Preview - Mobile Only */}
+                  {!isLocked && (
+                    <div className="absolute bottom-4 right-4 md:hidden z-20 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <img
+                        src={`/npc/${mission.npc.name.toLowerCase()}.svg`}
+                        alt={mission.npc.name}
+                        className="w-16 h-20 drop-shadow-lg"
+                      />
+                    </div>
+                  )}
+
                   <div className={`relative z-10 pt-4 md:pt-6 mt-auto border-t border-slate-200/50 flex items-center justify-between transition-colors ${isLocked ? 'text-slate-300' : 'text-slate-400 group-hover:text-teal-600'}`}>
                     <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em]">
                       {isLocked ? 'Mission Locked' : isCompleted ? 'Replay Simulation' : 'Start Simulation'}
@@ -1533,10 +1562,24 @@ const App = () => {
               setGameState('LEVEL_SELECT');
             }
           }}
-          className="pointer-events-auto px-4 py-1.5 bg-slate-900 border-2 border-white text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl hover:bg-slate-800 transition-all opacity-100"
+          className="pointer-events-auto px-2 py-1 md:px-4 md:py-1.5 bg-slate-900 border-2 border-white text-white text-[7px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl hover:bg-slate-800 transition-all opacity-100"
         >
           Exit
         </button>
+
+        {/* Trust Bar - Mobile Only (Below Exit) */}
+        <div className="md:hidden pointer-events-none w-[200px]">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-[7px] uppercase tracking-widest font-black text-slate-400">Empathy</span>
+            <span className={`text-[8px] font-mono font-bold ${trust < 30 ? 'text-orange-600' : 'text-teal-600'}`}>{trust}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-slate-200/50 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
+            <div
+              className={`h-full transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(20,184,166,0.3)] ${trust < 30 ? 'bg-orange-500' : 'bg-teal-500'}`}
+              style={{ width: `${trust}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       <div
@@ -1620,28 +1663,37 @@ const App = () => {
             </div>
           )}
 
-          {/* Mobile Input HUD */}
+          {/* Mobile Input HUD - Circular Joystick */}
           {isTouchDevice && gameState === 'APPROACH' && (
             <>
-              <div className="mobile-controls !bottom-8 !left-8">
-                <button
-                  onMouseDown={() => { setMoveDir(-1); setIsWalking(true); }}
-                  onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
-                  onTouchStart={() => { setMoveDir(-1); setIsWalking(true); }}
-                  onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
-                  className="control-btn !w-16 !h-16 !rounded-2xl"
-                >
-                  <span className="text-2xl">←</span>
-                </button>
-                <button
-                  onMouseDown={() => { setMoveDir(1); setIsWalking(true); }}
-                  onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
-                  onTouchStart={() => { setMoveDir(1); setIsWalking(true); }}
-                  onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
-                  className="control-btn !w-16 !h-16 !rounded-2xl"
-                >
-                  <span className="text-2xl">→</span>
-                </button>
+              {/* Circular Joystick */}
+              <div className="absolute bottom-8 left-8 z-50">
+                <div className="relative w-24 h-24 bg-slate-900/20 backdrop-blur-sm rounded-full border-2 border-white/30 shadow-2xl flex items-center justify-center">
+                  {/* Center dot */}
+                  <div className="absolute w-6 h-6 bg-white/40 rounded-full" />
+
+                  {/* Left button */}
+                  <button
+                    onTouchStart={() => { setMoveDir(-1); setIsWalking(true); }}
+                    onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
+                    onMouseDown={() => { setMoveDir(-1); setIsWalking(true); }}
+                    onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
+                    className="absolute left-0 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-slate-900 font-black text-xl active:bg-teal-500 active:text-white transition-all shadow-lg"
+                  >
+                    ←
+                  </button>
+
+                  {/* Right button */}
+                  <button
+                    onTouchStart={() => { setMoveDir(1); setIsWalking(true); }}
+                    onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
+                    onMouseDown={() => { setMoveDir(1); setIsWalking(true); }}
+                    onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
+                    className="absolute right-0 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-slate-900 font-black text-xl active:bg-teal-500 active:text-white transition-all shadow-lg"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
 
               <div className="action-buttons !bottom-8 !right-8 flex flex-col gap-4">
@@ -1686,13 +1738,13 @@ const App = () => {
 
       <div className="tunnel-vision" style={{ opacity: vignetteOpacity }} />
 
-      {/* Connection HUD */}
-      <div className="absolute top-6 md:top-12 left-1/2 -translate-x-1/2 w-[70%] md:w-80 z-20">
-        <div className="flex justify-between items-center mb-1 md:mb-3">
-          <span className="text-[7px] md:text-[10px] uppercase tracking-widest font-black text-slate-400">Empathy Score</span>
-          <span className={`text-[8px] md:text-[10px] font-mono font-bold ${trust < 30 ? 'text-orange-600' : 'text-teal-600'}`}>{trust}%</span>
+      {/* Connection HUD - Desktop Only (Top Center) */}
+      <div className="hidden md:block absolute top-12 left-1/2 -translate-x-1/2 w-80 z-20">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-[10px] uppercase tracking-widest font-black text-slate-400">Empathy Score</span>
+          <span className={`text-[10px] font-mono font-bold ${trust < 30 ? 'text-orange-600' : 'text-teal-600'}`}>{trust}%</span>
         </div>
-        <div className="h-1.5 md:h-2 w-full bg-slate-200/50 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
+        <div className="h-2 w-full bg-slate-200/50 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
           <div
             className={`h-full transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(20,184,166,0.3)] ${trust < 30 ? 'bg-orange-500' : 'bg-teal-500'}`}
             style={{ width: `${trust}%` }}
@@ -1721,18 +1773,17 @@ const App = () => {
         onSelectResource={setSelectedResource}
       />
 
-      {/* Discovery Notification */}
-      {foundClues.length > 0 && (
-        <div className="fixed top-24 right-8 flex flex-col gap-2 z-[100] animate-slide-up">
-          {foundClues.map(clueId => (
-            <div key={clueId} className="bg-orange-500 text-white px-6 py-3 rounded-2xl shadow-2xl border-2 border-orange-400 flex items-center gap-4">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-lg">🔍</div>
-              <div>
-                <p className="text-[9px] font-black uppercase tracking-widest opacity-80">Discovery Unlocked</p>
-                <p className="text-xs font-bold font-mono">NEW DIALOGUE OPTION</p>
-              </div>
+      {/* Discovery Notification - Subtle Top Banner */}
+      {showDiscoveryPopup && foundClues.length > 0 && (
+        <div className="fixed top-20 md:top-24 left-1/2 -translate-x-1/2 z-[100] animate-slide-down">
+          <div className="bg-orange-500/95 backdrop-blur-sm text-white px-6 py-2 rounded-full shadow-lg border-2 border-orange-400 flex items-center gap-3">
+            <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">
+              🔍
             </div>
-          ))}
+            <div>
+              <p className="text-xs font-bold">New dialogue option unlocked</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1765,6 +1816,32 @@ const App = () => {
           onSelect={handleSelectOption}
           foundClues={foundClues}
         />
+      )}
+
+      {/* Clue Discovery Modal */}
+      {viewedClue && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-fade-in" onClick={closeClueModal}>
+          <div className="relative max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-2xl">
+                🔍
+              </div>
+              <div>
+                <h3 className="text-lg font-black uppercase text-orange-600">Clue Discovered!</h3>
+                <p className="text-xs text-slate-500 font-medium">{CLUE_DETAILS[viewedClue.id]?.title || viewedClue.label}</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed mb-6">
+              {CLUE_DETAILS[viewedClue.id]?.description || "You found something important."}
+            </p>
+            <button
+              onClick={closeClueModal}
+              className="w-full py-3 bg-orange-500 text-white rounded-xl font-bold uppercase text-sm hover:bg-orange-600 transition-all shadow-lg"
+            >
+              Continue Investigation
+            </button>
+          </div>
+        </div>
       )}
 
       {renderSettingsUI()}

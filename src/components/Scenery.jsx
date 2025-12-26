@@ -85,7 +85,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 </div>
 
                 {/* Background Cubicles & Equipment */}
-                <div className="absolute bottom-[30%] inset-x-0 flex justify-around items-end opacity-60">
+                <div className="absolute bottom-[25%] inset-x-0 flex justify-around items-end opacity-60">
                     {[...Array(5)].map((_, i) => (
                         <div key={i} className="flex flex-col items-center">
                             <div className="w-48 h-24 bg-slate-800 border-t border-slate-700 rounded-t-lg relative shadow-2xl">
@@ -121,7 +121,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 </div>
 
                 {/* Water Cooler with Glow */}
-                <div className="absolute bottom-[30%] right-[10%] flex flex-col items-center opacity-70">
+                <div className="absolute bottom-[25%] right-[10%] flex flex-col items-center opacity-70">
                     <div className="w-7 h-9 bg-blue-300/30 rounded-t-xl backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.2)]" />
                     <div className="w-9 h-20 bg-slate-800 rounded-b-lg border-l-2 border-slate-700" />
                 </div>
@@ -144,10 +144,10 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 style={{ filter: worldFilter, background: `linear-gradient(to b, ${isHighTrust ? '#bae6fd' : '#cbd5e1'}, ${isHighTrust ? '#e0f2fe' : '#f1f5f9'})` }}
             >
                 {/* Distant Trees reflecting season */}
-                <div className="absolute bottom-[30%] inset-x-0 h-1 bg-amber-900/20" /> {/* Ground line */}
+                <div className="absolute bottom-[25%] inset-x-0 h-1 bg-amber-900/20" /> {/* Ground line */}
 
                 {/* University Buildings (Brick Style) */}
-                <div className="absolute bottom-[30%] left-0 right-0 flex justify-center items-end gap-0 opacity-80">
+                <div className="absolute bottom-[25%] left-0 right-0 flex justify-center items-end gap-0 opacity-80">
                     {/* Left Wing */}
                     <div className="w-64 h-48 bg-red-900/80 relative border-r border-red-950 flex flex-wrap content-start p-4 gap-2">
                         {[...Array(12)].map((_, i) => (
@@ -209,7 +209,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 style={{ filter: worldFilter, background: `linear-gradient(to b, ${skyColorTop}, ${skyColorBottom})` }}
             >
                 {/* City Skyline Silhouette */}
-                <div className="absolute bottom-[30%] left-0 right-0 flex items-end opacity-60">
+                <div className="absolute bottom-[25%] left-0 right-0 flex items-end opacity-60">
                     {[...Array(10)].map((_, i) => (
                         <div
                             key={i}
@@ -229,7 +229,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 </div>
 
                 {/* Street Lamp */}
-                <div className="absolute bottom-[30%] right-[10%] w-2 h-64 bg-slate-900 flex flex-col items-center">
+                <div className="absolute bottom-[25%] right-[10%] w-2 h-64 bg-slate-900 flex flex-col items-center">
                     <div className="w-16 h-4 bg-slate-900 absolute top-0 rounded-t-xl" />
                     <div className="w-12 h-8 bg-yellow-100/20 absolute top-4 blur-md animate-pulse shadow-[0_0_40px_rgba(253,224,71,0.2)]" />
                     <div className="w-1.5 h-full bg-slate-800" />
@@ -241,7 +241,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 </div>
 
                 {/* Horizon Line */}
-                <div className="absolute bottom-[30%] left-0 right-0 h-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+                <div className="absolute bottom-[25%] left-0 right-0 h-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
 
                 {/* Rain Particles */}
                 {!isHighTrust && (
@@ -314,7 +314,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
             )}
 
             {/* City Skyline Far Away */}
-            <div className="absolute bottom-[30%] left-0 right-0 flex justify-around items-end px-12 opacity-10 blur-sm">
+            <div className="absolute bottom-[25%] left-0 right-0 flex justify-around items-end px-12 opacity-10 blur-sm">
                 {[...Array(6)].map((_, i) => (
                     <div key={i} className="flex gap-2 items-end">
                         <div className="w-10 h-32 bg-slate-900 rounded-t-sm" />
@@ -322,7 +322,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                     </div>
                 ))}
             </div>
-            <div className="absolute bottom-[30%] left-0 right-0 h-1 bg-emerald-200" />
+            <div className="absolute bottom-[25%] left-0 right-0 h-1 bg-emerald-200" />
 
             {/* Animated Birds */}
             {!isLowTrust && (
@@ -339,7 +339,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
             )}
 
             {/* Trees with realistic colors */}
-            <div className="absolute inset-x-0 bottom-[30%] flex justify-between px-20">
+            <div className="absolute inset-x-0 bottom-[25%] flex justify-between px-20">
                 {[1, 2, 3, 4, 5, 6].map(i => (
                     <div key={i} className={`relative flex flex-col items-center transition-all duration-1000 ${i % 2 === 0 ? 'scale-90 opacity-80' : 'translate-y-2 opacity-90'}`}>
                         {/* Trunk */}

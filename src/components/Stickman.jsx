@@ -97,11 +97,11 @@ const Stickman = ({
 
             {/* Dialogue Bubble */}
             {currentMessage && (
-                <div className="absolute bottom-[140px] md:bottom-[160px] left-1/2 -translate-x-1/2 w-[85vw] md:w-auto md:min-w-[200px] md:max-w-[300px] bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 animate-fade-in z-50">
-                    <p className={`text-xs md:text-sm font-bold text-slate-800 leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
+                <div className="absolute bottom-[120px] md:bottom-[160px] left-1/2 -translate-x-1/2 w-[75vw] md:w-auto md:min-w-[200px] md:max-w-[300px] bg-white p-2 md:p-4 rounded-lg md:rounded-2xl shadow-xl border border-slate-100 animate-fade-in z-50">
+                    <p className={`text-[10px] md:text-sm font-bold text-slate-800 leading-snug md:leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
                         {displayedText}
                     </p>
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-r border-b border-slate-100 rotate-45" />
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 md:w-4 md:h-4 bg-white border-r border-b border-slate-100 rotate-45" />
                 </div>
             )}
 
