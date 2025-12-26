@@ -94,6 +94,26 @@ const App = () => {
   const [camera, setCamera] = useState({ scale: 1, x: 0, y: 0 });
   const [isNpcSpeaking, setIsNpcSpeaking] = useState(false);
 
+  // Landscape Enforcement State
+  const [isPortrait, setIsPortrait] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      // Check if portrait AND effective width is mobile-like (<768px typically)
+      // We check window.innerHeight > window.innerWidth for orientation
+      const isMobilePortrait = window.innerHeight > window.innerWidth && window.innerWidth < 1024;
+      setIsPortrait(isMobilePortrait);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
   // Progression & Save System
   const [completedLevels, setCompletedLevels] = useState(() => {
     try {
@@ -929,6 +949,20 @@ const App = () => {
       </div>
     </div>
   );
+
+  // Force Landscape on Mobile
+  if (isPortrait) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-slate-900 text-white flex flex-col items-center justify-center p-8 text-center">
+        <div className="text-6xl mb-8 animate-bounce">📱</div>
+        <div className="text-4xl mb-6 animate-spin-slow">🔄</div>
+        <h2 className="text-2xl font-black uppercase tracking-widest mb-4">Rotate Device</h2>
+        <p className="text-slate-400 font-medium max-w-xs leading-relaxed">
+          For the best immersive experience, please rotate your device to landscape mode.
+        </p>
+      </div>
+    );
+  }
 
   if (gameState === 'SPLASH') return renderSplashScreen();
 
