@@ -4,6 +4,8 @@ class SoundEngine {
         this.ctx = null;
         this.masterGain = null;
         this.initialized = false;
+        this.cache = {}; // Cache for decoded audio assets
+        this.voices = []; // Cache for TTS voices
     }
 
     init() {
@@ -12,7 +14,37 @@ class SoundEngine {
         this.masterGain = this.ctx.createGain();
         this.masterGain.connect(this.ctx.destination);
         this.masterGain.gain.value = 0.5;
+
+        // Pre-load voices to avoid "first try" default voice bug
+        this.loadVoices();
+
         this.initialized = true;
+    }
+
+    loadVoices() {
+        const populate = () => {
+            this.voices = window.speechSynthesis.getVoices();
+        };
+
+        populate();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = populate;
+        }
+    }
+
+    // Load external assets (like rain.mp3)
+    async getBuffer(url) {
+        if (this.cache[url]) return this.cache[url];
+        try {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+            this.cache[url] = audioBuffer;
+            return audioBuffer;
+        } catch (e) {
+            console.error("Failed to load audio asset:", url, e);
+            return null;
+        }
     }
 
     // Satisfying "pop" for speech bubbles
@@ -105,44 +137,104 @@ class SoundEngine {
         noise.stop(this.ctx.currentTime + 0.1);
     }
 
+    // Sound when finding a clue
+    playInvestigate() {
+        if (!this.initialized) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.2);
+
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.3);
+    }
+
     // Adaptive Ambient Pad
-    startMusic(trust) {
+    async startAmbient(trust, theme = 'park') {
         if (!this.initialized) return;
         if (this.musicNodes) this.stopMusic();
 
         const nodes = [];
-        const freqs = trust > 50 ? [220, 277, 329, 440] : [110, 138, 164, 220]; // Major vs Minor/Low
+        let freqs = trust > 50 ? [220, 277, 329, 440] : [110, 138, 164, 220];
+        let type = 'sine';
+        let volume = 0.02;
+
+        if (theme === 'office') {
+            type = 'square';
+            freqs = freqs.map(f => f * 0.5); // Lower, starker
+            volume = 0.01;
+        } else if (theme === 'campus') {
+            type = 'triangle';
+            freqs = freqs.map(f => f * 1.5); // Higher tension
+            volume = 0.015;
+        } else if (theme === 'rainy_street') {
+            type = 'sine';
+            freqs = freqs.map(f => f * 0.8);
+            volume = 0.03;
+        }
 
         freqs.forEach(f => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
 
-            osc.type = 'sine';
+            osc.type = type;
             osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(volume, this.ctx.currentTime + 2);
 
             osc.connect(gain);
             gain.connect(this.masterGain);
             osc.start();
-            nodes.push({ osc, gain });
+            nodes.push({ osc, gain, baseFreq: f });
         });
+
+        // Add real rain audio asset for rainy theme
+        if (theme === 'rainy_street') {
+            const buffer = await this.getBuffer('/ThemeAudio/rain.mp3');
+            if (buffer) {
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+                const rainGain = this.ctx.createGain();
+                rainGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+                rainGain.gain.exponentialRampToValueAtTime(0.15, this.ctx.currentTime + 2); // Louder for atmosphere
+                source.connect(rainGain);
+                rainGain.connect(this.masterGain);
+                source.start();
+                nodes.push({ source, gain: rainGain });
+            }
+        }
 
         this.musicNodes = nodes;
     }
 
     updateMusic(trust) {
         if (!this.musicNodes) return;
-        const freqs = trust > 50 ? [220, 277, 329, 440] : [110, 138, 164, 220];
+        const isHigh = trust > 50;
+        const freqs = isHigh ? [220, 277, 329, 440] : [110, 138, 164, 220];
+
         this.musicNodes.forEach((node, i) => {
-            node.osc.frequency.exponentialRampToValueAtTime(freqs[i], this.ctx.currentTime + 2);
+            if (node.osc) {
+                const targetFreq = freqs[i] || node.baseFreq;
+                node.osc.frequency.exponentialRampToValueAtTime(targetFreq, this.ctx.currentTime + 2);
+            }
         });
     }
 
     stopMusic() {
         if (this.musicNodes) {
             this.musicNodes.forEach(n => {
-                n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1);
-                n.osc.stop(this.ctx.currentTime + 1.1);
+                if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1);
+                if (n.osc) n.osc.stop(this.ctx.currentTime + 1.1);
+                if (n.source) n.source.stop(this.ctx.currentTime + 1.1);
             });
             this.musicNodes = null;
         }
@@ -152,43 +244,90 @@ class SoundEngine {
     speak(text, isSam = true, gender = 'guy') {
         if (!window.speechSynthesis) return;
 
-        // Cancel any ongoing speech
+        // Prevent error logging for intentional interruptions
+        if (this.utterance) {
+            this.utterance.onerror = null;
+        }
+
+        // Force-cancel previous speech thoroughly before starting new
         window.speechSynthesis.cancel();
 
-        const utterance = new SpeechSynthesisUtterance(text);
-
-        if (isSam) {
-            // Sam remains somber and slightly lower
-            utterance.pitch = 0.8;
-            utterance.rate = 0.85;
-            utterance.volume = 1.0;
-        } else {
-            // Player voice based on selected gender
-            if (gender === 'girl') {
-                utterance.pitch = 1.4; // Higher pitch for female voice
-                utterance.rate = 1.1; // Slightly faster
-            } else {
-                utterance.pitch = 1.0; // Standard male-ish pitch
-                utterance.rate = 1.0;
-            }
-            utterance.volume = 0.8;
+        // Ensure voices are loaded if empty
+        if (!this.voices || this.voices.length === 0) {
+            this.voices = window.speechSynthesis.getVoices();
         }
 
-        // Try to find a nice natural voice if available
-        const voices = window.speechSynthesis.getVoices();
+        // Use a consistent internal reference to prevent garbage collection
+        this.utterance = new SpeechSynthesisUtterance(text);
+
+        // --- CRITICAL FIX FOR LONG SENTENCES ---
+        // Chrome/Edge bug: long sentences pause after 15 seconds. 
+        // We pause and resume every few words to keep the engine awake.
+        this.utterance.onend = () => {
+            this.utterance = null;
+        };
+
+        this.utterance.onerror = (event) => {
+            if (event.error === 'interrupted' || event.error === 'canceled') return;
+            console.warn("TTS Error/Interrupt:", event);
+            this.utterance = null;
+        };
+
+        this.utterance.onboundary = () => {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.pause();
+                window.speechSynthesis.resume();
+            }
+        };
+
+        // Standardized vocal profiles
+        if (isSam) {
+            this.utterance.pitch = 0.7; // Deep, somber
+            this.utterance.rate = 0.75; // Slower, weighted
+            this.utterance.volume = 1.0;
+        } else if (gender === 'girl') {
+            this.utterance.pitch = 1.4; // High but not 'chipmunk'
+            this.utterance.rate = 1.0;
+            this.utterance.volume = 1.0;
+        } else {
+            this.utterance.pitch = 1.0; // Standard male
+            this.utterance.rate = 0.95;
+            this.utterance.volume = 1.0;
+        }
+
+        const voices = this.voices.length > 0 ? this.voices : window.speechSynthesis.getVoices();
+
         if (voices.length > 0) {
-            // Find appropriate gender voice if possible
             const preferredVoice = voices.find(v => {
                 const name = v.name.toLowerCase();
-                if (isSam) return name.includes('male') || name.includes('david');
-                if (gender === 'girl') return name.includes('female') || name.includes('zira') || name.includes('samantha');
-                return name.includes('male') || name.includes('google');
+                const lang = v.lang.toLowerCase();
+                if (!lang.includes('en')) return false;
+
+                if (isSam) {
+                    return name.includes('david') || name.includes('mark') || (name.includes('male') && !name.includes('female'));
+                }
+                if (gender === 'girl') {
+                    return name.includes('zira') || name.includes('samantha') || name.includes('female') || name.includes('hazel') || name.includes('susan');
+                }
+                return name.includes('david') || name.includes('google us english') || (name.includes('male') && !name.includes('female'));
             });
-            utterance.voice = preferredVoice || voices[0];
+
+            if (preferredVoice) {
+                this.utterance.voice = preferredVoice;
+                if (gender === 'girl' && (preferredVoice.name.toLowerCase().includes('zira') || preferredVoice.name.toLowerCase().includes('samantha'))) {
+                    this.utterance.pitch = 1.1;
+                }
+            } else {
+                this.utterance.voice = voices.find(v => {
+                    const n = v.name.toLowerCase();
+                    return gender === 'girl' ? n.includes('female') : (n.includes('male') && !n.includes('female'));
+                }) || voices[0];
+            }
         }
 
-        window.speechSynthesis.speak(utterance);
+        window.speechSynthesis.speak(this.utterance);
     }
 }
 
 export const audioManager = new SoundEngine();
+```

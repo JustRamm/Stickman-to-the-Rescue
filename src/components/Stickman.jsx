@@ -1,80 +1,56 @@
 import React from 'react';
 
-const Stickman = ({ emotion, speaker, position = { x: 50, y: 70 }, isWalking = false, isJumping = false, isCrouching = false, currentMessage = null, textEffect = null }) => {
+const Stickman = ({
+    emotion,
+    speaker,
+    position = { x: 50, y: 70 },
+    isWalking = false,
+    isJumping = false,
+    isCrouching = false,
+    currentMessage = null,
+    textEffect = null,
+    gender = 'guy',
+    moveDir = 0
+}) => {
     const isIdle = !isWalking && !isJumping && !isCrouching;
 
-    // Define postures for different emotions and movement
-    const getPostures = (emo, walk, jump, crouch) => {
-        const walkOffset = walk ? Math.sin(Date.now() / 100) * 10 : 0;
-        const legOffset = walk ? Math.sin(Date.now() / 100) * 20 : 0;
-        const idleOffset = isIdle ? Math.sin(Date.now() / 500) * 3 : 0;
+    // Determine which SVG to use
+    const getAssetUrl = () => {
+        const base = `/stickman_assets/${gender}`;
 
-        // Base geometry
-        let headY = 60 + idleOffset;
-        let bodyPath = `M50,${60 + idleOffset} L50,${110}`;
-        let armsPath = `M30,${90 + idleOffset} L50,${80 + idleOffset} L70,${90 + idleOffset}`;
-        let legsPath = "M30,140 L50,110 L70,140";
-
-        if (crouch) {
-            headY = 90;
-            bodyPath = "M50,90 L50,120";
-            armsPath = "M30,105 L50,100 L70,105";
-            legsPath = "M20,140 L50,120 L80,140";
-        } else if (jump) {
-            headY = 50;
-            bodyPath = "M50,50 L50,100";
-            armsPath = "M20,60 L50,70 L80,60";
-            legsPath = "M35,120 L50,100 L65,120";
-        } else if (walk) {
-            headY = 60 + walkOffset / 4;
-            bodyPath = `M50,${60 + walkOffset / 4} L50,${110 + walkOffset / 4}`;
-            armsPath = `M${30 + legOffset / 2},90 L50,${80 + walkOffset / 4} L${70 - legOffset / 2},90`;
-            legsPath = `M${30 + legOffset},140 L50,110 L${70 - legOffset},140`;
-        } else {
-            // Emotion overrides
-            switch (emo) {
-                case 'sad':
-                    headY = 65 + idleOffset;
-                    bodyPath = `M50,${65 + idleOffset} L50,110`;
-                    armsPath = `M35,${100 + idleOffset} L50,${80 + idleOffset} L65,${100 + idleOffset}`;
-                    legsPath = "M40,140 L50,110 L60,140";
-                    break;
-                case 'vulnerable':
-                    headY = 75 + idleOffset;
-                    bodyPath = `M50,${75 + idleOffset} L50,110`;
-                    armsPath = `M35,${100 + idleOffset} L50,${85 + idleOffset} L65,${100 + idleOffset}`;
-                    legsPath = "M40,140 L50,110 L60,140";
-                    break;
-                case 'frustrated':
-                    headY = 60 + idleOffset;
-                    bodyPath = `M50,${60 + idleOffset} L50,110`;
-                    armsPath = `M20,${70 + idleOffset} L50,${80 + idleOffset} L80,${70 + idleOffset}`;
-                    legsPath = "M30,140 L50,110 L70,140";
-                    break;
-            }
+        if (isJumping) return `${base}_jump.svg`;
+        if (isCrouching) return `${base}_crouch.svg`;
+        if (isWalking) {
+            if (moveDir === -1) return `${base}_walk_left.svg`;
+            return `${base}_walk_right.svg`;
         }
+        if (emotion === 'distressed' || emotion === 'sad') return `${base}_distressed.svg`;
 
-        return { headY, bodyPath, armsPath, legsPath };
+        return `${base}_idle.svg`;
     };
 
-    const [, setTick] = React.useState(0);
-    React.useEffect(() => {
-        const interval = setInterval(() => setTick(t => t + 1), 50);
-        return () => clearInterval(interval);
-    }, []);
+    const assetUrl = getAssetUrl();
 
-    const posture = getPostures(emotion, isWalking, isJumping, isCrouching);
+    // Visual classes for different states
+    const animationClass = isWalking ? 'animate-stickman-walk' :
+        (isJumping ? 'animate-stickman-jump' :
+            ((emotion === 'distressed' || emotion === 'sad' || emotion === 'vulnerable') ? 'animate-stickman-shiver' : ''));
 
     return (
         <div
-            className={`absolute stickman-wrapper transition-all ${isJumping ? 'duration-500 ease-out' : 'duration-300'} ${isIdle ? 'animate-idle-sway' : ''}`}
+            className={`absolute stickman-wrapper transition-all duration-300 ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
             style={{
                 left: `${position.x}%`,
                 top: `${position.y}%`,
-                transform: `translate(-50%, ${isJumping ? '-150%' : '-100%'}) scale(${isCrouching ? '0.8, 0.6' : '1'})`,
-                zIndex: isJumping ? 100 : 20
+                transform: `translate(-50%, -100%)`,
+                zIndex: isJumping ? 100 : 20,
             }}
         >
+            {/* Distress Visual Cues (Pulse) */}
+            {(emotion === 'sad' || emotion === 'distressed' || emotion === 'vulnerable') && isIdle && !isJumping && speaker === "Sam" && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-orange-400/10 rounded-full animate-ping z-0 pointer-events-none" />
+            )}
+
             {/* Dialogue Bubble */}
             {currentMessage && (
                 <div className="absolute bottom-[140px] md:bottom-[160px] left-1/2 -translate-x-1/2 w-[85vw] md:w-auto md:min-w-[200px] md:max-w-[300px] bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 animate-fade-in z-50">
@@ -85,12 +61,15 @@ const Stickman = ({ emotion, speaker, position = { x: 50, y: 70 }, isWalking = f
                 </div>
             )}
 
-            <svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy={posture.headY - 20} r="15" stroke="currentColor" strokeWidth="3" fill="none" />
-                <path d={posture.bodyPath} stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                <path d={posture.armsPath} stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                <path d={posture.legsPath} stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-            </svg>
+            {/* The Character Rendered as SVG Image */}
+            <div className={`stickman-asset-container ${animationClass}`}>
+                <img
+                    src={assetUrl}
+                    alt={`${gender} stickman`}
+                    className="w-[100px] h-[125px] select-none pointer-events-none drop-shadow-sm transition-opacity duration-200"
+                    draggable="false"
+                />
+            </div>
 
             {!isJumping && !isCrouching && (
                 <div className="text-center mt-2">

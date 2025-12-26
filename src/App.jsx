@@ -39,7 +39,10 @@ const App = () => {
     rainy_street: { x: 45, label: 'Discarded Envelope', id: 'wet_envelope' }
   };
 
-  const [currentNodeId, setCurrentNodeId] = useState(dialogueData.startNode);
+  // Dynamic Dialogue Loading
+  const currentScenario = dialogueData[selectedLevel.theme] || dialogueData['park']; // Fallback
+
+  const [currentNodeId, setCurrentNodeId] = useState(currentScenario.startNode);
   const [trust, setTrust] = useState(25);
   const [selectedResource, setSelectedResource] = useState(null);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
@@ -54,8 +57,55 @@ const App = () => {
   const [isJumping, setIsJumping] = useState(false);
   const [isCrouching, setIsCrouching] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  // Optional: Walking direction for sprite flipping (-1 left, 1 right, 0 idle)
+  const [moveDir, setMoveDir] = useState(0);
 
-  const currentNode = dialogueData.nodes[currentNodeId];
+  const sliderRef = useRef(null);
+
+  const handleSliderScroll = () => {
+    if (!sliderRef.current) return;
+    const container = sliderRef.current;
+
+    // Only apply logic on mobile (if grid layout is active on desktop, offsets might differ, but our dual-design uses flex-row for mobile slider)
+    // We can check if overflow-x is actually active or check window width, but simpler is to just run math.
+
+    const center = container.scrollLeft + (container.offsetWidth / 2);
+
+    // We assume direct children are the buttons
+    const cards = Array.from(container.children);
+    let closestMission = null;
+    let minDiff = Infinity;
+
+    cards.forEach((card, index) => {
+      const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+      const diff = Math.abs(center - cardCenter);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestMission = MISSIONS[index];
+      }
+    });
+
+    if (closestMission && closestMission.id !== selectedLevel.id) {
+      setSelectedLevel(closestMission);
+    }
+  };
+
+  const currentNode = currentScenario.nodes[currentNodeId];
+
+  // Removed the aggressive useEffect that reset game state on level change
+  // Instead, we handle resets explicitly when launching a mission.
+
+  const launchMission = (mission) => {
+    setSelectedLevel(mission);
+    // Reset Level Specific State
+    setCurrentNodeId(dialogueData[mission.theme]?.startNode || 'beginning');
+    setFoundClues([]);
+    setTrust(25);
+    setPlayerPos({ x: 10, y: 70 });
+    // Start Game
+    setGameState('APPROACH');
+    audioManager.startAmbient(mission.theme);
+  };
 
   useEffect(() => {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
@@ -69,14 +119,18 @@ const App = () => {
       if (e.key === 'ArrowRight' && playerPos.x < 65) {
         setPlayerPos(prev => ({ ...prev, x: prev.x + 1.5 }));
         setIsWalking(true);
+        audioManager.init();
       } else if (e.key === 'ArrowLeft' && playerPos.x > 5) {
         setPlayerPos(prev => ({ ...prev, x: prev.x - 1.5 }));
         setIsWalking(true);
+        audioManager.init();
       } else if (e.key === 'ArrowUp' && !isJumping) {
         setIsJumping(true);
         setTimeout(() => setIsJumping(false), 500);
       } else if (e.key === 'ArrowDown') {
         setIsCrouching(true);
+      } else if (e.key.toLowerCase() === 'z') {
+        handleInvestigate();
       }
     };
 
@@ -111,7 +165,6 @@ const App = () => {
     }
   }, [isWalking, gameState]);
 
-  const [moveDir, setMoveDir] = useState(0); // -1, 0, 1
 
   useEffect(() => {
     if (moveDir === 0 || gameState !== 'APPROACH') return;
@@ -120,14 +173,32 @@ const App = () => {
         const nextX = prev.x + (moveDir * 1.5);
         if (nextX < 5 || nextX > 65) return prev;
 
-        // Footstep rhythm (roughly every 5 ticks)
-        if (Math.round(nextX * 10) % 5 === 0) audioManager.playStep();
-
         return { ...prev, x: nextX };
       });
     }, 30);
     return () => clearInterval(interval);
   }, [moveDir, gameState]);
+
+  useEffect(() => {
+    if (!isWalking || gameState !== 'APPROACH') return;
+
+    // Play a step immediately and then every 400ms
+    audioManager.playStep();
+    const interval = setInterval(() => {
+      audioManager.playStep();
+    }, 400);
+
+    return () => clearInterval(interval);
+  }, [isWalking, gameState]);
+
+  useEffect(() => {
+    if (gameState === 'APPROACH' || gameState === 'DIALOGUE') {
+      audioManager.init();
+      audioManager.startAmbient(trust, selectedLevel.theme);
+    } else {
+      audioManager.stopMusic();
+    }
+  }, [gameState, selectedLevel.theme, trust]);
 
   useEffect(() => {
     if (gameState === 'APPROACH' && Math.abs(playerPos.x - samPos.x) < 18) {
@@ -138,24 +209,18 @@ const App = () => {
   }, [playerPos, samPos, gameState]);
 
   useEffect(() => {
-    if (gameState === 'APPROACH' || gameState === 'DIALOGUE') {
-      audioManager.init();
-      audioManager.startMusic(trust);
-    } else {
-      audioManager.stopMusic();
-    }
-  }, [gameState === 'APPROACH']);
-
-  useEffect(() => {
     audioManager.updateMusic(trust);
   }, [trust]);
 
   useEffect(() => {
     if (gameState === 'DIALOGUE') {
       audioManager.playPop();
-      audioManager.speak(currentNode.npc_text, true, 'guy'); // Sam is always guy
+      // Add a natural 500ms pause before Sam responds
+      setTimeout(() => {
+        audioManager.speak(currentNode.npc_text, true, 'guy');
+      }, 500);
     }
-  }, [currentNodeId]);
+  }, [currentNodeId, gameState]);
 
   useEffect(() => {
     if (trust <= 0 && currentNodeId !== 'leave_failure') {
@@ -208,100 +273,107 @@ const App = () => {
 
       setTrust(prev => Math.min(100, Math.max(0, prev + (trustImpact || 0))));
       setCurrentNodeId(nextNodeId);
-    }, 1800);
+    }, 3500); // Increased from 1800ms to allow full reading
+  };
+
+  /* New State for Clue Inspection */
+  const [viewedClue, setViewedClue] = useState(null);
+
+  const handleInvestigate = () => {
+    const clue = CLUE_POSITIONS[selectedLevel.theme];
+    if (clue && !foundClues.includes(clue.id)) {
+      // Direct click interaction - no distance check needed for mouse/touch
+      setViewedClue(clue);
+      audioManager.playInvestigate();
+    }
+  };
+
+  const closeClueModal = () => {
+    if (viewedClue) {
+      setFoundClues(prev => [...prev, viewedClue.id]);
+      setViewedClue(null);
+    }
+  };
+
+  const CLUE_DETAILS = {
+    family_photo: { title: "A Crumpled Photograph", description: "A slightly water-damaged photo of Sam smiling with two children at a birthday party. 'Happy 40th Dad!' is written on the back." },
+    termination_letter: { title: "Official Letterhead", description: "TERMINATION OF EMPLOYMENT. 'Effective Immediately due to restructuring.' The paper has been folded and unfolded many times." },
+    failing_grade: { title: "Academic Notice", description: "Academic Probation Warning. 'Grade: F'. Red ink circles the phrase 'Loss of Scholarship Eligibility'." },
+    wet_envelope: { title: "Eviction Notice", description: "FINAL NOTICE TO VACATE. 'Failure to pay rent will result in immediate legal action.' It's stained with mud." }
   };
 
   const resetGame = () => {
     setGameState('START');
     setCurrentNodeId(dialogueData.startNode);
     setTrust(25);
-    setPlayerName('You'); // Reset player name
+    setPlayerName('You');
     setPlayerPos({ x: 10, y: 70 });
     setSelectedResource(null);
     setHistory([]);
     setPlayerLastSaid(null);
     setIsJumping(false);
     setIsCrouching(false);
+    setViewedClue(null);
   };
 
   const vignetteOpacity = Math.max(0, ((100 - trust) / 100) * 0.4);
 
   if (gameState === 'START') {
     return (
-      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center">
-        <Scenery trust={trust} />
-
-        {/* Animated Introductory Scene */}
-        <div className="relative z-10 w-full max-w-4xl h-[400px] mb-12">
-          <div className="absolute left-[20%] top-[70%] animate-pulse">
-            <Stickman speaker="Guide" emotion="listening" position={{ x: 50, y: 0 }} />
-          </div>
-          <div className="absolute right-[20%] top-[70%] animate-[bounce_3s_infinite]">
-            <Stickman speaker="Sam" emotion="sad" position={{ x: 50, y: 0 }} />
-          </div>
-
-          {/* Connection Line Decor */}
-          <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-teal-300 to-transparent opacity-50" />
+      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center p-6">
+        {/* Dynamic Background with stronger blur for start screen */}
+        <div className="absolute inset-0 z-0 opacity-60 contrast-125 blur-sm scale-110">
+          <Scenery trust={trust} />
         </div>
 
-        <div className="relative z-20 text-center px-8">
-          <div className="flex flex-col items-center mb-8 gap-4">
-            <div className="relative group">
-              <img
-                src="/ME.jpeg"
-                alt="Organization Logo"
-                className="w-16 h-16 rounded-2xl shadow-xl transition-opacity group-hover:opacity-0"
-              />
-              <img
-                src="/ME.gif"
-                alt="Organization Logo Animated"
-                className="w-16 h-16 rounded-2xl shadow-xl absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              />
-              <div className="absolute -bottom-2 -right-2 bg-teal-500 w-6 h-6 rounded-full border-4 border-slate-50 flex items-center justify-center">
-                <div className="w-1 h-1 bg-white rounded-full animate-ping" />
-              </div>
+        {/* Main Hero Card - Glassmorphism */}
+        <div className="relative z-20 w-full max-w-2xl bg-white/80 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/60 p-8 md:p-12 text-center animate-fade-in flex flex-col items-center overflow-hidden">
+
+          {/* Top Badge: Mind Empowered Logo */}
+          <div className="mb-6 flex flex-col items-center gap-3">
+            <div className="relative group w-20 h-20 rounded-2xl overflow-hidden shadow-lg border-2 border-white ring-2 ring-teal-100 transition-transform duration-300 hover:scale-110">
+              <img src="/ME.jpeg" alt="Mind Empowered" className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0" />
+              <img src="/ME.gif" alt="Mind Empowered Animated" className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Presented By</span>
-              <span className="text-[12px] font-black uppercase tracking-[0.3em] text-teal-600">Mind Empowered</span>
-            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Presented By <span className="text-teal-700">Mind Empowered</span></span>
           </div>
 
-          <div className="flex flex-col items-center mb-12">
-            <img
-              src="/logo.svg"
-              alt="Stickman to the Rescue Logo"
-              className="w-32 h-32 md:w-48 md:h-48 drop-shadow-2xl animate-float"
-            />
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-8" />
+
+          {/* Hero Section */}
+          <div className="mb-8 relative hover:rotate-2 transition-transform duration-500 cursor-pointer" onClick={() => audioManager.playPop()}>
+            <div className="absolute inset-0 bg-teal-300/30 blur-2xl rounded-full animate-pulse z-0" />
+            <img src="/logo.svg" alt="Game Logo" className="relative z-10 w-32 h-32 md:w-36 md:h-36 drop-shadow-xl" />
+
+            {/* Floating Elements */}
+            <div className="absolute -right-4 top-0 animate-bounce delay-700 bg-white p-2 rounded-lg shadow-sm border border-slate-100 text-xl rotate-12">❓</div>
+            <div className="absolute -left-4 bottom-0 animate-bounce delay-1000 bg-white p-2 rounded-lg shadow-sm border border-slate-100 text-xl -rotate-12">❤️</div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 uppercase text-teal-800 drop-shadow-sm">
-            Stickman <span className="text-orange-600">to the Rescue</span>
-          </h1>
-          <p className="max-w-lg mx-auto text-sm md:text-lg text-slate-600 mb-12 leading-relaxed font-medium">
-            A journey of connection and life-saving support. <br />
-            Learn the <strong className="text-teal-700">QPR Method</strong> to provide hope in the darkness.
-          </p>
+          {/* Title - Ultra Bold */}
+          <div className="mb-8 space-y-1">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-800 leading-none">
+              STICKMAN <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-emerald-500">TO THE RESCUE</span>
+            </h1>
+          </div>
 
+          {/* Start Button - High Contrast */}
           <button
             onClick={() => { audioManager.init(); setGameState('NAMING'); }}
-            className="group relative px-16 py-5 bg-teal-600 text-white rounded-full font-bold uppercase tracking-[0.2em] text-sm hover:bg-teal-700 shadow-2xl shadow-teal-600/40 transition-all duration-500 hover:scale-110"
+            className="group relative w-full max-w-xs py-5 bg-slate-900 text-white rounded-2xl font-black text-lg tracking-widest uppercase shadow-2xl hover:bg-teal-600 transition-all duration-300 hover:scale-105 active:scale-95"
           >
-            <span className="relative z-10">Start Mission</span>
-            <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              Start Journey
+            </span>
+            {/* Hover shine effect */}
+            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine" />
           </button>
 
-          <div className="mt-16 flex justify-center gap-12 opacity-30">
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-black uppercase text-teal-900">Question</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-black uppercase text-teal-900">Persuade</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-black uppercase text-teal-900">Refer</span>
-            </div>
-          </div>
+          <p className="mt-6 text-slate-400 text-xs font-semibold max-w-sm leading-relaxed">
+            A serious game simulation for QPR Suicide Prevention Training.
+          </p>
+
         </div>
       </div>
     );
@@ -344,33 +416,33 @@ const App = () => {
 
   if (gameState === 'GENDER_SELECT') {
     return (
-      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center">
+      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-y-auto relative flex flex-col items-center justify-center p-4">
         <Scenery trust={trust} />
-        <div className="relative z-20 max-w-md w-full p-12 naming-card bg-white/80 backdrop-blur-md rounded-[3rem] shadow-2xl border border-white/50 text-center animate-fade-in">
-          <h2 className="text-3xl font-black uppercase text-teal-800 mb-8">Character Voice</h2>
+        <div className="relative z-20 max-w-md w-full p-8 md:p-12 naming-card bg-white/80 backdrop-blur-md rounded-[2rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto">
+          <h2 className="text-2xl md:text-3xl font-black uppercase text-teal-800 mb-8">Character Voice</h2>
 
           <div className="grid grid-cols-2 gap-4 mb-8">
             <button
               onClick={() => { setPlayerGender('guy'); audioManager.speak("Testing, testing. This is the guy voice.", false, 'guy'); }}
-              className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${playerGender === 'guy' ? 'border-teal-600 bg-teal-50' : 'border-slate-100 bg-white/50'}`}
+              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${playerGender === 'guy' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
             >
-              <div className="text-3xl">👨</div>
+              <img src="/stickman_assets/guy_idle.svg" alt="Guy Character" className="w-16 h-16 md:w-20 md:h-20" />
               <span className="font-bold uppercase text-[10px] tracking-widest text-slate-600">Guy</span>
             </button>
             <button
               onClick={() => { setPlayerGender('girl'); audioManager.speak("Testing, testing. This is the girl voice.", false, 'girl'); }}
-              className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${playerGender === 'girl' ? 'border-teal-600 bg-teal-50' : 'border-slate-100 bg-white/50'}`}
+              className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${playerGender === 'girl' ? 'border-teal-600 bg-teal-50 shadow-lg scale-105' : 'border-slate-100 bg-white/50 hover:bg-slate-50'}`}
             >
-              <div className="text-3xl">👩</div>
+              <img src="/stickman_assets/girl_idle.svg" alt="Girl Character" className="w-16 h-16 md:w-20 md:h-20" />
               <span className="font-bold uppercase text-[10px] tracking-widest text-slate-600">Girl</span>
             </button>
           </div>
 
           <button
             onClick={() => setGameState('LEVEL_SELECT')}
-            className="w-full py-4 bg-teal-600 text-white rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all"
+            className="w-full py-4 bg-teal-600 text-white rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all hover:scale-[1.02] active:scale-95"
           >
-            Mission Select
+            Confirm & Continue
           </button>
         </div>
       </div>
@@ -379,33 +451,85 @@ const App = () => {
 
   if (gameState === 'LEVEL_SELECT') {
     return (
-      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center p-8">
+      <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col justify-center">
         <Scenery theme={selectedLevel.theme} trust={trust} />
-        <div className="relative z-20 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-          {MISSIONS.map((mission) => (
-            <button
-              key={mission.id}
-              onClick={() => { setSelectedLevel(mission); setGameState('APPROACH'); }}
-              onMouseEnter={() => setSelectedLevel(mission)}
-              className={`group p-6 bg-white/80 backdrop-blur-md rounded-3xl border-2 transition-all text-left flex flex-col justify-between h-48 ${selectedLevel.id === mission.id ? 'border-teal-500 shadow-xl translate-y-[-4px]' : 'border-white/50 hover:border-teal-200'}`}
-            >
-              <div>
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">{mission.difficulty}</span>
-                  <div className="w-4 h-4 rounded-full border border-teal-500 flex items-center justify-center">
-                    {selectedLevel.id === mission.id && <div className="w-2 h-2 bg-teal-500 rounded-full" />}
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">{mission.name}</h3>
-                <p className="text-xs text-slate-500">{mission.desc}</p>
-              </div>
-              <div className="text-[9px] font-black uppercase text-slate-400 group-hover:text-teal-500 transition-colors">Launch Mission →</div>
-            </button>
-          ))}
+
+        {/* Header - Fixed at top for context */}
+        <div className="relative z-20 text-center mb-4 md:mb-12 mt-12 md:mt-0 px-4 animate-fade-in">
+          <h2 className="text-3xl md:text-5xl font-black uppercase text-white drop-shadow-lg mb-2 tracking-tight">
+            Select Your Mission
+          </h2>
+          <p className="text-white/90 font-medium text-sm md:text-lg drop-shadow-md">
+            Swipe to explore scenarios
+            ```
+          </p>
         </div>
-        <div className="relative z-20 mt-12 text-center">
-          <h2 className="text-2xl font-black uppercase text-teal-800 mb-2">Select Your Chapter</h2>
-          <p className="text-slate-500 text-sm">Every story starts with a single approach.</p>
+
+        {/* Scrollable Container - Horizontal Slider on Mobile, Grid on Desktop */}
+        <div className="relative z-20 w-full max-w-[90rem] mx-auto px-0 md:px-8">
+          <div
+            ref={sliderRef}
+            onScroll={handleSliderScroll}
+            className="
+              flex flex-row md:grid md:grid-cols-2 
+              gap-4 md:gap-8 
+              overflow-x-auto md:overflow-visible 
+              pb-12 md:pb-0 px-8 md:px-0
+              snap-x snap-mandatory touch-pan-x
+              scrollbar-hide
+            ">
+            {MISSIONS.map((mission) => (
+              <button
+                key={mission.id}
+                onClick={() => launchMission(mission)}
+                onMouseEnter={() => setSelectedLevel(mission)}
+                // Update background immediately on touch interaction for mobile feel
+                onTouchStart={() => setSelectedLevel(mission)}
+                className={`
+                    flex-shrink-0 w-[85vw] md:w-auto snap-center
+                    group relative p-6 md:p-10 
+                    bg-white/80 backdrop-blur-xl rounded-[2.5rem] border-2 transition-all duration-300
+                    text-left flex flex-col justify-between h-[60vh] md:h-64
+                    overflow-hidden
+                    ${selectedLevel.id === mission.id
+                    ? 'border-teal-500 shadow-2xl scale-100 z-10'
+                    : 'border-white/40 hover:border-teal-200 opacity-80 hover:opacity-100 scale-95 md:scale-100'
+                  }
+                  `}
+              >
+                {/* Dynamic Background Tint for active card */}
+                <div className={`absolute inset-0 opacity-0 transition-opacity duration-500 ${selectedLevel.id === mission.id ? 'opacity-10 bg-gradient-to-br from-teal-400 to-transparent' : ''}`} />
+
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className={`px-3 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest border ${mission.difficulty === 'Easy' ? 'bg-green-100 text-green-700 border-green-200' :
+                      mission.difficulty === 'Medium' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                        'bg-red-100 text-red-700 border-red-200'
+                      }`}>
+                      {mission.difficulty}
+                    </span>
+
+                    {/* Selection Indicator */}
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedLevel.id === mission.id ? 'border-teal-500 bg-teal-500 text-white' : 'border-slate-300'}`}>
+                      {selectedLevel.id === mission.id && <span className="text-xs font-bold">✓</span>}
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl md:text-3xl font-black text-slate-800 mb-3 leading-none">
+                    {mission.name}
+                  </h3>
+                  <p className="text-sm md:text-base text-slate-600 leading-relaxed font-medium">
+                    {mission.desc}
+                  </p>
+                </div>
+
+                <div className="relative z-10 pt-6 mt-auto border-t border-slate-200/50 flex items-center justify-between text-slate-400 group-hover:text-teal-600 transition-colors">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Start Simulation</span>
+                  <span className="text-xl">➔</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -462,6 +586,26 @@ const App = () => {
       <Scenery theme={selectedLevel.theme} trust={trust} />
       <div className="tunnel-vision" style={{ opacity: vignetteOpacity }} />
 
+      {/* Clue Inspection Modal */}
+      {viewedClue && CLUE_DETAILS[viewedClue.id] && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in p-4">
+          <div className="bg-white p-6 md:p-8 rounded-2xl max-w-md w-full shadow-2xl transform scale-100 border-2 border-slate-100 relative">
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full font-bold shadow-lg animate-bounce">
+              CLUE FOUND
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">{CLUE_DETAILS[viewedClue.id].title}</h3>
+            <div className="w-full h-px bg-slate-200 mb-4" />
+            <p className="text-slate-600 italic leading-relaxed mb-6">"{CLUE_DETAILS[viewedClue.id].description}"</p>
+            <button
+              onClick={closeClueModal}
+              className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg active:scale-95"
+            >
+              Note & Continue
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Connection HUD */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 z-20">
         <div className="flex justify-between items-center mb-3">
@@ -492,6 +636,7 @@ const App = () => {
               speaker=""
               emotion={npc.emotion}
               position={npc.pos}
+              gender="guy"
             />
           </div>
         ))}
@@ -504,39 +649,95 @@ const App = () => {
           isJumping={isJumping}
           isCrouching={isCrouching}
           currentMessage={playerLastSaid}
+          gender={playerGender}
+          moveDir={moveDir}
         />
 
         <Stickman
           speaker="Sam"
           emotion={currentNode.npc_emotion}
           position={samPos}
-          currentMessage={!playerLastSaid ? currentNode.npc_text : null}
+          currentMessage={(gameState === 'DIALOGUE' && !playerLastSaid) ? currentNode.npc_text : null}
           textEffect={currentNode.text_effect}
+          gender="guy"
         />
 
         {/* Ambient NPC walking in distant background */}
         <div className="animate-[slide_20s_linear_infinite]" style={{ position: 'absolute', width: '100%', top: '65%', opacity: 0.1 }}>
-          <Stickman speaker="" emotion="neutral" position={{ x: -10, y: 0 }} isWalking={true} />
+          <Stickman speaker="" emotion="neutral" position={{ x: -10, y: 0 }} isWalking={true} gender="guy" />
         </div>
 
         {/* Environmental Clue (Artifact) */}
         {CLUE_POSITIONS[selectedLevel.theme] && !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) && (
           <div
-            className="absolute bottom-[30%] animate-bounce cursor-help"
+            onClick={handleInvestigate}
+            className="absolute bottom-[30%] animate-bounce cursor-pointer z-50 hover:scale-110 transition-transform"
             style={{ left: `${CLUE_POSITIONS[selectedLevel.theme].x}%`, transform: 'translateX(-50%) translateY(-100%)' }}
           >
-            <div className="w-6 h-8 bg-white border-2 border-orange-200 rounded-sm shadow-lg rotate-12 flex items-center justify-center p-1">
+            <div className="w-8 h-10 bg-white border-2 border-orange-200 rounded-sm shadow-lg rotate-12 flex items-center justify-center p-1">
               <div className="w-full h-0.5 bg-slate-100 mb-0.5" />
               <div className="w-full h-0.5 bg-slate-100 mb-0.5" />
               <div className="w-2/3 h-0.5 bg-slate-100" />
             </div>
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black uppercase text-orange-600 bg-white/90 px-2 py-0.5 rounded-full border border-orange-100">
-              Investigate
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black uppercase text-orange-600 bg-white/90 px-3 py-1 rounded-full border border-orange-100 shadow-sm">
+              Tap to Investigate
             </div>
           </div>
         )}
 
-        {/* ... (Mobile Input HUD) ... */}
+        {/* Mobile Input HUD */}
+        {isTouchDevice && gameState === 'APPROACH' && (
+          <>
+            <div className="mobile-controls">
+              <button
+                onMouseDown={() => { setMoveDir(-1); setIsWalking(true); }}
+                onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
+                onTouchStart={() => { setMoveDir(-1); setIsWalking(true); }}
+                onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
+                className="control-btn"
+              >
+                ←
+              </button>
+              <button
+                onMouseDown={() => { setMoveDir(1); setIsWalking(true); }}
+                onMouseUp={() => { setMoveDir(0); setIsWalking(false); }}
+                onTouchStart={() => { setMoveDir(1); setIsWalking(true); }}
+                onTouchEnd={() => { setMoveDir(0); setIsWalking(false); }}
+                className="control-btn"
+              >
+                →
+              </button>
+            </div>
+
+            <div className="action-buttons flex flex-col gap-2">
+              <div className="flex gap-2">
+                <button
+                  onTouchStart={() => { setIsJumping(true); setTimeout(() => setIsJumping(false), 500); }}
+                  className="control-btn bg-teal-50"
+                >
+                  JUMP
+                </button>
+                <button
+                  onTouchStart={() => setIsCrouching(true)}
+                  onTouchEnd={() => setIsCrouching(false)}
+                  className="control-btn bg-orange-50"
+                >
+                  HIDE
+                </button>
+              </div>
+              {CLUE_POSITIONS[selectedLevel.theme] &&
+                !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) &&
+                Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 12 && (
+                  <button
+                    onClick={handleInvestigate}
+                    className="w-full py-3 bg-orange-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg animate-pulse"
+                  >
+                    🔎 INVESTIGATE
+                  </button>
+                )}
+            </div>
+          </>
+        )}
 
         {gameState === 'APPROACH' && (
           <div className="absolute bottom-32 left-1/2 -translate-x-1/2 text-center animate-bounce px-4 w-full">
