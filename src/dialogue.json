@@ -150,7 +150,7 @@
             "persuade": {
                 "npc_text": "I don't even know if there's help for someone my age. Who would care?",
                 "npc_emotion": "vulnerable",
-                "required_resource": "Crisis Hotline",
+                "required_resource": "Free Crisis Resource",
                 "options": [
                     {
                         "text": "[REFER: SELECT CRISIS RESOURCE FROM TOOLKIT]",

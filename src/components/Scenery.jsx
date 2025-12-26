@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const Scenery = ({ theme = 'park', trust = 50 }) => {
     const isHighTrust = trust >= 70;
@@ -203,6 +203,15 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
         const skyColorTop = trust < 30 ? '#0f172a' : (trust > 70 ? '#64748b' : '#334155');
         const skyColorBottom = trust < 30 ? '#1e293b' : (trust > 70 ? '#94a3b8' : '#475569');
 
+        // MEMOIZE BUILDINGS to stop them from changing on every re-render (which caused the "fast moving" glitch)
+        const buildings = useMemo(() => {
+            return [...Array(10)].map(() => ({
+                width: 5 + Math.random() * 10,
+                height: 10 + Math.random() * 40,
+                windows: [...Array(Math.floor(Math.random() * 6))].map(() => Math.random() > 0.7)
+            }));
+        }, []);
+
         return (
             <div
                 className="absolute inset-0 pointer-events-none overflow-hidden z-0 transition-all duration-1000"
@@ -210,19 +219,19 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
             >
                 {/* City Skyline Silhouette */}
                 <div className="absolute bottom-[25%] left-0 right-0 flex items-end opacity-60">
-                    {[...Array(10)].map((_, i) => (
+                    {buildings.map((building, i) => (
                         <div
                             key={i}
                             className="bg-slate-800 flex flex-wrap content-end justify-center p-1 gap-1"
                             style={{
-                                width: `${5 + Math.random() * 10}%`,
-                                height: `${10 + Math.random() * 40}vh`,
+                                width: `${building.width}%`,
+                                height: `${building.height}vh`,
                                 marginRight: '2px'
                             }}
                         >
                             {/* Lit Windows */}
-                            {[...Array(Math.floor(Math.random() * 6))].map((__, j) => (
-                                <div key={j} className={`w-1 h-2 ${Math.random() > 0.7 ? 'bg-yellow-200 shadow-[0_0_5px_yellow]' : 'bg-slate-900'} opacity-70`} />
+                            {building.windows.map((isLit, j) => (
+                                <div key={j} className={`w-1 h-2 ${isLit ? 'bg-yellow-200 shadow-[0_0_5px_yellow]' : 'bg-slate-900'} opacity-70`} />
                             ))}
                         </div>
                     ))}
@@ -243,8 +252,8 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 {/* Horizon Line */}
                 <div className="absolute bottom-[25%] left-0 right-0 h-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
 
-                {/* Rain Particles */}
-                {!isHighTrust && (
+                {/* Rain Particles - Always visible in Rainy theme or low trust */}
+                {(theme === 'rainy_street' || !isHighTrust) && (
                     <div className="absolute inset-0">
                         {[...Array(trust < 30 ? 150 : 60)].map((_, i) => (
                             <div

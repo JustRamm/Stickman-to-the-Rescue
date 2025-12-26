@@ -9,29 +9,57 @@ const ResourceWallet = ({ isOpen, resources, onSelectResource, selectedResource 
                 </svg>
                 RESOURCE TOOLKIT
             </h3>
-            <div className="flex flex-col gap-4">
-                {resources.map((resource) => (
-                    <div
-                        key={resource.id}
-                        onClick={() => onSelectResource(resource.name)}
-                        className={`resource-card ${selectedResource === resource.name ? 'selected' : ''}`}
-                    >
-                        <div className="text-[12px] font-black uppercase tracking-wider text-slate-800 mb-1.5 flex justify-between items-center">
-                            {resource.name}
-                            {selectedResource === resource.name && (
-                                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping" />
-                            )}
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-[65vh] pr-2 custom-scrollbar">
+                {resources.map((resource) => {
+                    let icon = '📋';
+                    if (resource.name.includes('Crisis')) icon = '🆘';
+                    else if (resource.name.includes('Therapist')) icon = '🧠';
+                    else if (resource.name.includes('Friend')) icon = '🤝';
+                    else if (resource.name.includes('Counselor')) icon = '🛡️';
+
+                    const isSelected = selectedResource === resource.name;
+
+                    return (
+                        <div
+                            key={resource.id}
+                            onClick={() => onSelectResource(resource.name)}
+                            className={`resource-card group relative p-4 rounded-xl transition-all duration-300 border-2 cursor-pointer
+                                ${isSelected
+                                    ? 'bg-teal-50 border-teal-500 shadow-lg scale-[1.02]'
+                                    : 'bg-white border-slate-100 hover:border-teal-200 hover:shadow-md'}`}
+                        >
+                            <div className="flex items-start gap-3">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0
+                                    ${isSelected ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500 group-hover:bg-teal-50 group-hover:text-teal-600'}`}>
+                                    {icon}
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <h4 className={`text-xs font-black uppercase tracking-wider ${isSelected ? 'text-teal-900' : 'text-slate-700'}`}>
+                                            {resource.name}
+                                        </h4>
+                                        {isSelected && (
+                                            <span className="flex h-2 w-2 relative">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className={`text-[10px] leading-relaxed font-medium ${isSelected ? 'text-teal-700' : 'text-slate-400'}`}>
+                                        {resource.description}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-[11px] text-slate-500 leading-relaxed font-medium">
-                            {resource.description}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
-            <div className="mt-12 bg-teal-50 rounded-2xl p-6 border border-teal-100">
-                <p className="text-[10px] text-teal-800 leading-relaxed font-bold italic text-center">
-                    "Connect them to help. Select the resource Sam needs most right now."
-                </p>
+            <div className="mt-auto pt-6 border-t border-slate-100">
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                    <p className="text-[9px] text-slate-500 font-bold italic text-center leading-normal">
+                        "Your toolkit contains all the resources needed to save a life. Choose wisely."
+                    </p>
+                </div>
             </div>
         </div>
     );
