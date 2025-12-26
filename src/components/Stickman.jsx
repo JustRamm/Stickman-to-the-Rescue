@@ -10,7 +10,8 @@ const Stickman = ({
     currentMessage = null,
     textEffect = null,
     gender = 'guy',
-    moveDir = 0
+    moveDir = 0,
+    theme = 'park' // New prop to handle contrast
 }) => {
     const isIdle = !isWalking && !isJumping && !isCrouching;
 
@@ -38,11 +39,10 @@ const Stickman = ({
 
     return (
         <div
-            className={`absolute stickman-wrapper transition-all duration-300 ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
+            className={`absolute stickman-anchor transition-all duration-300 ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
             style={{
                 left: `${position.x}%`,
                 top: `${position.y}%`,
-                transform: `translate(-50%, -100%)`,
                 zIndex: isJumping ? 100 : 20,
             }}
         >
@@ -62,11 +62,15 @@ const Stickman = ({
             )}
 
             {/* The Character Rendered as SVG Image */}
-            <div className={`stickman-asset-container ${animationClass}`}>
+            <div className={`stickman-asset-container ${animationClass} ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
+                style={{
+                    filter: (theme === 'office' || theme === 'rainy_street' || theme === 'campus') ? 'brightness(0) invert(1) drop-shadow(0 0 2px rgba(255,255,255,0.5))' : 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))'
+                }}
+            >
                 <img
                     src={assetUrl}
                     alt={`${gender} stickman`}
-                    className="w-[100px] h-[125px] select-none pointer-events-none drop-shadow-sm transition-opacity duration-200"
+                    className="w-[100px] h-[125px] select-none pointer-events-none transition-opacity duration-200"
                     draggable="false"
                 />
             </div>

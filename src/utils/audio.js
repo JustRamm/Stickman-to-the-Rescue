@@ -6,6 +6,7 @@ class SoundEngine {
         this.initialized = false;
         this.cache = {}; // Cache for decoded audio assets
         this.voices = []; // Cache for TTS voices
+        this.owlInterval = null; // Interval for owl hooting
     }
 
     init() {
@@ -154,23 +155,122 @@ class SoundEngine {
         gain.connect(this.masterGain);
 
         osc.start();
+        osc.start();
         osc.stop(this.ctx.currentTime + 0.3);
     }
 
+    async playVictory() {
+        if (!this.initialized) return;
+        this.stopMusic();
+
+        try {
+            const buffer = await this.getBuffer('/ThemeAudio/victory.mp3');
+            if (buffer) {
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+
+                const gain = this.ctx.createGain();
+                gain.gain.value = 0.4;
+
+                source.connect(gain);
+                gain.connect(this.masterGain);
+
+                source.start();
+                this.musicNodes = [{ source, gain }];
+            }
+        } catch (e) {
+            console.error("Failed to play victory sound:", e);
+        }
+    }
+
     // Adaptive Ambient Pad
-    async startAmbient(trust, theme = 'park') {
+    async startAmbient(arg1, arg2 = 50) {
         if (!this.initialized) return;
         if (this.musicNodes) this.stopMusic();
 
+        // Handle flexible arguments: startAmbient(theme) or startAmbient(trust, theme)
+        let theme = 'park';
+        let trust = 50;
+
+        if (typeof arg1 === 'string') {
+            theme = arg1; // Called as startAmbient('park')
+            if (typeof arg2 === 'number') trust = arg2;
+        } else if (typeof arg1 === 'number') {
+            trust = arg1; // Called as startAmbient(50, 'park')
+            if (typeof arg2 === 'string') theme = arg2;
+        }
+
         const nodes = [];
+
+        // Special handling for Park Theme with MP3
+        if (theme === 'park') {
+            const buffer = await this.getBuffer('/ThemeAudio/park.mp3');
+            if (buffer) {
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+                const gain = this.ctx.createGain();
+
+                // Softer volume for background
+                gain.gain.value = 0.3;
+
+                source.connect(gain);
+                gain.connect(this.masterGain);
+                source.start();
+                nodes.push({ source, gain });
+                this.musicNodes = nodes;
+                return; // Exit early, don't play synth pad if MP3 works
+            }
+        }
+
+        // Special handling for Campus Theme with MP3
+        if (theme === 'campus') {
+            const buffer = await this.getBuffer('/ThemeAudio/campus.mp3');
+            if (buffer) {
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+                const gain = this.ctx.createGain();
+
+                // Reduced volume as requested
+                gain.gain.value = 0.1;
+
+                source.connect(gain);
+                gain.connect(this.masterGain);
+                source.start();
+                nodes.push({ source, gain });
+                this.musicNodes = nodes;
+                return; // Exit early
+            }
+        }
+
         let freqs = trust > 50 ? [220, 277, 329, 440] : [110, 138, 164, 220];
         let type = 'sine';
         let volume = 0.02;
 
+        // Special handling for Office Theme with Owl sfx
         if (theme === 'office') {
             type = 'square';
             freqs = freqs.map(f => f * 0.5); // Lower, starker
             volume = 0.01;
+
+            // Schedule periodic Owl hooting
+            const playOwl = async () => {
+                const buffer = await this.getBuffer('/ThemeAudio/owl.mp3');
+                if (buffer && this.musicNodes) { // Check musicNodes to ensure we haven't stopped
+                    const source = this.ctx.createBufferSource();
+                    source.buffer = buffer;
+                    const gain = this.ctx.createGain();
+                    gain.gain.value = 0.25; // Subtle background hoot
+                    source.connect(gain);
+                    gain.connect(this.masterGain);
+                    source.start();
+                }
+            };
+
+            // Initial delay then interval
+            setTimeout(playOwl, 5000 + Math.random() * 5000);
+            this.owlInterval = setInterval(playOwl, 25000); // Every 25 seconds
         } else if (theme === 'campus') {
             type = 'triangle';
             freqs = freqs.map(f => f * 1.5); // Higher tension
@@ -203,13 +303,12 @@ class SoundEngine {
                 const source = this.ctx.createBufferSource();
                 source.buffer = buffer;
                 source.loop = true;
-                const rainGain = this.ctx.createGain();
-                rainGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
-                rainGain.gain.exponentialRampToValueAtTime(0.15, this.ctx.currentTime + 2); // Louder for atmosphere
-                source.connect(rainGain);
-                rainGain.connect(this.masterGain);
+                const gain = this.ctx.createGain();
+                gain.gain.value = 0.2;
+                source.connect(gain);
+                gain.connect(this.masterGain);
                 source.start();
-                nodes.push({ source, gain: rainGain });
+                nodes.push({ source, gain });
             }
         }
 
@@ -237,6 +336,11 @@ class SoundEngine {
                 if (n.source) n.source.stop(this.ctx.currentTime + 1.1);
             });
             this.musicNodes = null;
+        }
+
+        if (this.owlInterval) {
+            clearInterval(this.owlInterval);
+            this.owlInterval = null;
         }
     }
 
@@ -330,4 +434,3 @@ class SoundEngine {
 }
 
 export const audioManager = new SoundEngine();
-```

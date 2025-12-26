@@ -14,7 +14,7 @@ const ResourceWallet = ({ isOpen, resources, onSelectResource, selectedResource 
                     <div
                         key={resource.id}
                         onClick={() => onSelectResource(resource.name)}
-                        className={`resource-card border-2 transition-all duration-300 ${selectedResource === resource.name ? 'selected scale-[1.02]' : 'border-slate-50 hover:border-teal-200'}`}
+                        className={`resource-card ${selectedResource === resource.name ? 'selected' : ''}`}
                     >
                         <div className="text-[12px] font-black uppercase tracking-wider text-slate-800 mb-1.5 flex justify-between items-center">
                             {resource.name}

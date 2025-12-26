@@ -5,13 +5,37 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
     const isLowTrust = trust < 30;
 
     // Calculate dynamic styles based on trust
-    const saturation = isLowTrust ? Math.max(0, trust / 30) : 1;
-    const brightness = isLowTrust ? 0.8 : 1 + ((trust - 50) / 200);
-    const worldFilter = `saturate(${saturation}) brightness(${brightness})`;
+    const saturation = isLowTrust ? Math.max(0, trust / 30) : (1 + (trust > 80 ? 0.3 : 0));
+    const brightness = isLowTrust ? 0.6 + (trust / 150) : 1 + ((trust - 50) / 200);
+    const contrast = isLowTrust ? 1.2 : 1;
+    const worldFilter = `saturate(${saturation}) brightness(${brightness}) contrast(${contrast})`;
 
     // Dynamic Sky Colors
-    const skyTop = isHighTrust ? '#bfdbfe' : (isLowTrust ? '#475569' : '#e0f2fe'); // Blue sky vs Grey
-    const skyBottom = isHighTrust ? '#eff6ff' : (isLowTrust ? '#1e293b' : '#f0f9ff');
+    const skyTop = isHighTrust ? '#bfdbfe' : (isLowTrust ? '#1e293b' : '#e0f2fe'); // Blue sky vs Dark Grey
+    const skyBottom = isHighTrust ? '#eff6ff' : (isLowTrust ? '#0f172a' : '#f0f9ff');
+
+    const rainIntensity = isLowTrust ? '0.2s' : '0.5s'; // Faster rain when low trust
+    const windSpeed = isLowTrust ? '1s' : '3s';
+
+    // God Rays for High Trust
+    const GodRays = () => (
+        isHighTrust && (
+            <div className="absolute inset-0 z-20 pointer-events-none opacity-40 mix-blend-overlay">
+                <div className="absolute top-[-50%] left-[-20%] w-[150%] h-[150%] bg-[conic-gradient(from_180deg_at_50%_50%,rgba(255,255,255,0)_0deg,rgba(255,255,255,0.8)_20deg,rgba(255,255,255,0)_40deg)] animate-[spin_60s_linear_infinite]" />
+            </div>
+        )
+    );
+
+    // Dark Vignette for Low Trust
+    const LowTrustVignette = () => (
+        <div
+            className="absolute inset-0 z-30 pointer-events-none transition-opacity duration-1000"
+            style={{
+                background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%)',
+                opacity: isLowTrust ? 0.8 : 0
+            }}
+        />
+    );
 
     if (theme === 'office') {
         return (
@@ -61,6 +85,8 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
 
                 {/* Floor Reflection */}
                 <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-b from-slate-800 to-slate-900 opacity-90" />
+                <GodRays />
+                <LowTrustVignette />
             </div>
         );
     }
@@ -121,6 +147,8 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
 
                 {/* Grass/Lawn */}
                 <div className="absolute bottom-0 inset-x-0 h-[30%] bg-gradient-to-b from-green-800 to-green-900" />
+                <GodRays />
+                <LowTrustVignette />
             </div>
         );
     }
@@ -173,20 +201,23 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 {/* Rain Particles */}
                 {!isHighTrust && (
                     <div className="absolute inset-0">
-                        {[...Array(trust < 30 ? 100 : 50)].map((_, i) => (
+                        {[...Array(trust < 30 ? 150 : 60)].map((_, i) => (
                             <div
                                 key={i}
-                                className="absolute w-px h-12 bg-white/20 animate-rain-drop"
+                                className="absolute w-px h-12 bg-gray-400/30 animate-rain-drop"
                                 style={{
                                     left: `${Math.random() * 100}%`,
                                     top: `-${Math.random() * 20}%`,
                                     animationDelay: `${Math.random() * 2}s`,
-                                    animationDuration: `${(trust < 30 ? 0.3 : 0.6) + Math.random() * 0.4}s`
+                                    animationDuration: `${(isLowTrust ? 0.3 : 0.6) + Math.random() * 0.4}s`,
+                                    opacity: isLowTrust ? 0.8 : 0.4
                                 }}
                             />
                         ))}
                     </div>
                 )}
+                <GodRays />
+                <LowTrustVignette />
             </div>
         );
     }
@@ -198,7 +229,7 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
             style={{ filter: worldFilter, background: `linear-gradient(to b, ${skyTop}, ${skyBottom})` }}
         >
             {/* Rolling Hills Background */}
-            <div className="absolute bottom-[25%] left-0 right-0 h-32 bg-emerald-700 rounded-[50%] blur-xl translate-y-12 scale-150 opacity-60" />
+            <div className="absolute bottom-[25%] left-0 right-0 h-32 bg-emerald-700/80 rounded-[50%] blur-xl translate-y-12 scale-150 opacity-60" />
 
             {/* Clouds */}
             {!isLowTrust && (
@@ -213,6 +244,24 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                                 top: `${Math.random() * 50}%`,
                                 left: `${i * 25}%`,
                                 animationDuration: `${30 + Math.random() * 20}s`
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Storm Clouds for Low Trust */}
+            {isLowTrust && (
+                <div className="absolute top-0 inset-x-0 h-full bg-slate-900/30">
+                    {[...Array(6)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute bg-slate-800/80 rounded-full blur-2xl"
+                            style={{
+                                width: '250px',
+                                height: '100px',
+                                top: `${Math.random() * 20}%`,
+                                left: `${i * 20}%`,
                             }}
                         />
                     ))}
@@ -257,28 +306,19 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                         {/* Flowers blooming at base when trust is high */}
                         {isHighTrust && (
                             <div className="absolute bottom-0 flex gap-4 animate-bounce" style={{ animationDelay: `${i * 0.2}s` }}>
-                                <div className="w-2 h-2 bg-pink-400 rounded-full shadow-[0_0_5px_pink]" />
-                                <div className="w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_5px_purple]" />
+                                <div className="w-2 h-2 rounded-full bg-pink-400" />
+                                <div className="w-2 h-2 rounded-full bg-yellow-400" />
                             </div>
                         )}
                     </div>
                 ))}
             </div>
 
-            {/* Sun with Glow */}
-            <div
-                className="absolute top-10 right-20 transition-all duration-1000 rounded-full border shadow-2xl animate-pulse"
-                style={{
-                    width: isHighTrust ? '100px' : '60px',
-                    height: isHighTrust ? '100px' : '60px',
-                    backgroundColor: isHighTrust ? '#fdba74' : '#fff7ed',
-                    boxShadow: isHighTrust ? '0 0 60px orange' : '0 0 20px white',
-                    opacity: isLowTrust ? 0.2 : 1
-                }}
-            />
+            {/* Ground Grass */}
+            <div className="absolute bottom-0 inset-x-0 h-[30%] bg-gradient-to-b from-emerald-800 to-emerald-900" />
 
-            {/* Grass Foreground */}
-            <div className="absolute bottom-0 inset-x-0 h-[30%] bg-gradient-to-b from-emerald-600 to-emerald-800" />
+            <GodRays />
+            <LowTrustVignette />
         </div>
     );
 };

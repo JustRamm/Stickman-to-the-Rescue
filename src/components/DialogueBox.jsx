@@ -5,10 +5,18 @@ const DialogueBox = ({ options, onSelect, foundClues = [] }) => {
 
     if (!options || options.length === 0) return null;
 
-    // Filter options based on found clues
-    const visibleOptions = options.filter(option =>
-        !option.required_clue || foundClues.includes(option.required_clue)
-    );
+    // Filter and Shuffle options based on found clues
+    const visibleOptions = React.useMemo(() => {
+        const filtered = options.filter(option =>
+            !option.required_clue || foundClues.includes(option.required_clue)
+        );
+        // Fisher-Yates Shuffle
+        for (let i = filtered.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+        }
+        return filtered;
+    }, [options, foundClues]);
 
     return (
         <div className="absolute bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 w-[95%] md:w-full max-w-2xl px-2 md:px-6 animate-slide-up z-[60]">
@@ -22,7 +30,7 @@ const DialogueBox = ({ options, onSelect, foundClues = [] }) => {
                             key={index}
                             onMouseEnter={() => setHoveredOption(index)}
                             onMouseLeave={() => setHoveredOption(null)}
-                            onClick={() => onSelect(option.next, option.trust_impact)}
+                            onClick={() => onSelect(option)}
                             className="group relative w-full text-left p-3 md:p-4 bg-white/50 border border-slate-100 rounded-xl md:rounded-2xl hover:border-teal-400 hover:bg-teal-50 transition-all duration-300"
                         >
                             <div className="flex items-center gap-3 md:gap-4">
