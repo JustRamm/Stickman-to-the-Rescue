@@ -3,8 +3,20 @@ import Stickman from './components/Stickman';
 import DialogueBox from './components/DialogueBox';
 import ResourceWallet from './components/ResourceWallet';
 import Scenery from './components/Scenery';
+import HeartbeatMonitor from './components/HeartbeatMonitor';
 import dialogueData from './dialogue.json';
 import { audioManager } from './utils/audio';
+
+const INNER_THOUGHTS = [
+  "Don't say the wrong thing...",
+  "Stay calm...",
+  "They are listening...",
+  "Just breathe.",
+  "Validate their feelings.",
+  "Don't judge.",
+  "It's about connection.",
+  "Be present."
+];
 
 const RESOURCES = [
   { id: 1, name: 'Free Crisis Resource', description: 'Immediate clinical support via phone or text (Free & Confidential).' },
@@ -96,6 +108,24 @@ const App = () => {
 
   // Landscape Enforcement State
   const [isPortrait, setIsPortrait] = useState(false);
+
+  // Active Listening / Pressure Mechanics
+  const [timeLeft, setTimeLeft] = useState(100);
+  const [activeThought, setActiveThought] = useState(null);
+
+  useEffect(() => {
+    // Inner Thoughts Logic
+    if (gameState === 'DIALOGUE') {
+      const thoughtInterval = setInterval(() => {
+        if (Math.random() > 0.6) {
+          const thought = INNER_THOUGHTS[Math.floor(Math.random() * INNER_THOUGHTS.length)];
+          setActiveThought(thought);
+          setTimeout(() => setActiveThought(null), 4000);
+        }
+      }, 8000);
+      return () => clearInterval(thoughtInterval);
+    }
+  }, [gameState]);
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -616,8 +646,8 @@ const App = () => {
         playerGender,
         null,
         () => {
-          // Wait 3 seconds after speech ends before NPC replies
-          setTimeout(handleStateTransition, 3000);
+          // Wait 1 second after speech ends before NPC replies (Seamless flow)
+          setTimeout(handleStateTransition, 1000);
         }
       );
     } else {
@@ -1932,6 +1962,24 @@ const App = () => {
               <p className="text-sm font-medium leading-relaxed">{coachFeedback.msg}</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Active Listening Mechanics */}
+      <HeartbeatMonitor trust={trust} isActive={gameState === 'DIALOGUE'} />
+
+      {activeThought && (
+        <div className="fixed top-32 left-1/2 -translate-x-1/2 z-[45] animate-fade-in-down pointer-events-none opacity-80 mix-blend-overlay">
+          <p className="text-xl md:text-3xl font-black italic text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] tracking-tighter transform rotate-[-2deg]">
+            "{activeThought}"
+          </p>
+        </div>
+      )}
+
+      {/* Expert Mode Timer */}
+      {selectedLevel.difficulty === 'Expert' && gameState === 'DIALOGUE' && !isNpcSpeaking && (
+        <div className="fixed top-0 inset-x-0 h-1.5 z-[100] bg-slate-900/50">
+          <div className="h-full bg-red-500 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(239,68,68,0.5)]" style={{ width: `${timeLeft}%` }} />
         </div>
       )}
 

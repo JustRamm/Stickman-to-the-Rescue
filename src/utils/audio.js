@@ -108,6 +108,26 @@ class SoundEngine {
         osc.stop(this.ctx.currentTime + 0.5);
     }
 
+    playHeartbeat() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        // Low drum-like sound
+        osc.frequency.setValueAtTime(50, t);
+        osc.frequency.exponentialRampToValueAtTime(30, t + 0.1);
+
+        gain.gain.setValueAtTime(0.4, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(t);
+        osc.stop(t + 0.15);
+    }
+
     // Low "thud" for trust decrease or frown
     playSad() {
         if (!this.initialized) return;

@@ -37,8 +37,7 @@ const DialogueBox = ({ options, onSelect, foundClues = [] }) => {
                                 <span className="text-[9px] md:text-[10px] font-black text-slate-300 group-hover:text-teal-500">
                                     {index + 1}
                                 </span>
-                                <span className={`text-[10px] md:text-sm font-bold group-hover:text-slate-900 leading-tight ${option.required_clue ? 'text-teal-700' : 'text-slate-600'}`}>
-                                    {option.required_clue && <span className="mr-1 md:mr-2">🔍</span>}
+                                <span className="text-[10px] md:text-sm font-bold text-slate-600 group-hover:text-slate-900 leading-tight">
                                     {option.text}
                                 </span>
                             </div>
