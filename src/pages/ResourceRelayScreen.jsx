@@ -99,24 +99,37 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black pointer-events-none"></div>
 
             {/* Header / HUD */}
-            <div className="relative z-10 px-6 py-4 flex justify-between items-center bg-slate-800/50 backdrop-blur-md border-b border-white/10">
-                <div className="flex items-center gap-4">
+            <div className="relative z-10 px-6 py-4 flex justify-between items-center bg-slate-800/80 backdrop-blur-xl border-b border-white/10">
+                <div className="flex items-center gap-6">
+                    <button
+                        onClick={onExit}
+                        className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-black text-red-400 hover:bg-red-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest"
+                    >
+                        Exit Game
+                    </button>
+                    <div className="h-8 w-px bg-white/10 hidden md:block"></div>
                     <div className="flex flex-col">
-                        <span className="text-xs font-black uppercase tracking-widest text-slate-400">Mission</span>
-                        <span className="text-white font-bold">Remove Barriers</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Referral Battle</span>
+                        <span className="text-white font-bold text-sm">Kerala Edition</span>
                     </div>
                 </div>
 
                 {/* Progress Indicators */}
-                <div className="flex gap-2">
-                    {[...Array(resistanceMax)].map((_, i) => (
-                        <div key={i} className={`w-8 h-2 rounded-full transition-all ${i < level ? 'bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.5)]' : 'bg-slate-700'}`}></div>
-                    ))}
+                <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] font-black text-teal-400 uppercase tracking-[0.2em]">
+                        Stage {level + 1} of {resistanceMax}
+                    </span>
+                    <div className="flex gap-1.5">
+                        {[...Array(resistanceMax)].map((_, i) => (
+                            <div
+                                key={i}
+                                className={`h-1.5 rounded-full transition-all duration-500 ${i < level ? 'w-6 bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.5)]' :
+                                        i === level ? 'w-8 bg-white border border-teal-400 animate-pulse' : 'w-4 bg-slate-700'
+                                    }`}
+                            ></div>
+                        ))}
+                    </div>
                 </div>
-
-                <button onClick={onExit} className="px-4 py-2 bg-slate-700 rounded-full text-xs font-bold text-white hover:bg-slate-600 transition-all active:scale-95">
-                    ABORT
-                </button>
             </div>
 
             {/* Main Battle Arena */}
