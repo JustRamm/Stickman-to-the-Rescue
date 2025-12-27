@@ -9,30 +9,34 @@
 
 ## 📖 About The Project
 
-**Stickman to the Rescue** is an interactive, narrative-driven educational game designed to train users in the **QPR Gatekeeper Training** method. Through role-playing scenarios with a distressed stickman character ("Sam"), players learn to:
+**Stickman to the Rescue** is an interactive, narrative-driven educational game designed to train users in the **QPR Gatekeeper Training** method. Through role-playing scenarios with distressed characters, players learn to:
 
 1.  **Question:** Recognize warning signs and ask directly about suicide.
 2.  **Persuade:** Listen with empathy and persuade the person to seek help.
 3.  **Refer:** Connect the person to appropriate resources.
 
-The game features dynamic dialogue choices, trust mechanics, a "Myth vs. Fact" sorting mini-game, and an immersive soundscape.
+The game features dynamic dialogue choices, trust mechanics, multiple mini-games, and an immersive soundscape. It has been culturally adapted with **Indian mental health resources** (e.g., KIRAN, DISHA Kerala).
 
 ## ✨ Key Features
 
-*   **Interactive Narrative:** Branching dialogue paths where your choices affect "Sam's" trust level and the mission outcome.
-*   **"Observation Mode":** Explore 3D-style environments to find physical clues (e.g., unopened mail, pill bottles) that unlock new dialogue options.
-*   **Mini-Games:**
-    *   **Myth vs. Fact:** A Tinder-style card sorting game to debunk common suicide myths. (Mobile-optimized with swipe gestures & haptics!)
-*   **Dynamic Audio:** Ambient soundscapes that shift based on scene tension and trust levels.
-*   **Resource Wallet:** Collect real-world resource cards (Hotlines, Support Groups) to use during the "Refer" phase.
-*   **Mobile PWA:** Installable as a native-like app on iOS and Android with offline support.
+*   **Interactive Narrative:** Branching dialogue paths where your choices affect the "Trust Meter" and the mission outcome.
+*   **"Observation Mode":** Explore environments to find physical clues (e.g., eviction notices, failing grades) that unlock deeper empathetic dialogue options.
+*   **Mini-Games Suite:**
+    *   **🧠 Fact vs. Myth:** A Tinder-style card sorting game to debunk common suicide myths.
+    *   **📡 Signal Scout:** Tune into the right emotional frequencies to identify hidden warning signs in a crowd.
+    *   **🛡️ Resource Relay:** A strategy game where you match specific crises (e.g., Debt, Cyberbullying) to the correct helpline or support service.
+*   **Dynamic Audio:**
+    *   **Text-to-Speech (TTS):** Characters speak with distinct voices and pitches.
+    *   **Adaptive Soundscape:** Ambient music and SFX shift based on scene tension and trust levels.
+*   **Culturally Relevant:** Features real Indian support resources like **KIRAN Helpline (1800-599-0019)**, **DISHA (1056)**, and **Kudumbashree**.
+*   **Mobile Optimized:** Designed for a premium Landscape experience on mobile devices, installable as a PWA.
 
 ## 🛠️ Technology Stack
 
 *   **Frontend:** React 18, Vite
 *   **Styling:** Tailwind CSS (with custom animations and glassmorphism design)
-*   **State Management:** React Hooks (`useState`, `useEffect`, `useRef`)
-*   **Audio:** Custom `SoundEngine` class using Web Audio API
+*   **State Management:** React Hooks (`useState`, `useEffect`) and LocalStorage for persistence
+*   **Audio:** Custom `SoundEngine` class using Web Audio API & Web Speech API
 *   **PWA:** Service Worker & Web App Manifest for offline installation
 
 ## 🚀 Getting Started
