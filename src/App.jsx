@@ -235,10 +235,13 @@ const App = () => {
     const t2 = setTimeout(() => { setResolutionPhase(2); audioManager.playPop(); }, 4500);
     const t3 = setTimeout(() => {
       setResolutionPhase(3);
-      audioManager.speak(`Thank you for being the bridge. We'll take care of ${selectedLevel.npc.name} now.`, false, 'girl');
+      const msg = selectedLevel.id === 'tutorial'
+        ? `Great job! You've mastered the basics. You're ready to help others now.`
+        : `Thank you for being the bridge. We'll take care of ${selectedLevel.npc.name} now.`;
+      audioManager.speak(msg, false, 'girl');
     }, 6500);
     const t4 = setTimeout(() => {
-      setCurrentNodeId('success_end');
+      setCurrentNodeId(selectedLevel.id === 'tutorial' ? 'success_tutorial' : 'success_end');
       setGameState('DIALOGUE');
     }, 12000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); audioManager.stopSpeaking(); };
@@ -317,6 +320,9 @@ const App = () => {
   if (!currentNode) {
     if (currentNodeId === 'success_end') {
       currentNode = { isEnd: true, result: 'success', message: `Mission Complete. ${selectedLevel.npc.name} is now connected to professional support.`, npc_emotion: 'relief' };
+    }
+    else if (currentNodeId === 'success_tutorial') {
+      currentNode = { isEnd: true, result: 'success', message: "Training Complete! You've learned how to Listen, Persuade, and Refer. Alex is proud of your progress.", npc_emotion: 'relief' };
     }
     else if (currentNodeId === 'leave_failure') currentNode = { isEnd: true, result: 'failure', message: `You walked away. ${selectedLevel.npc.name} remains alone and in crisis.`, npc_emotion: 'distressed' };
     else currentNode = currentScenario.nodes['beginning'] || { text: "Error...", options: [] };
@@ -653,7 +659,7 @@ const App = () => {
         <div className="absolute inset-0 z-[100] bg-slate-900/90 backdrop-blur flex items-center justify-center p-6 animate-fade-in">
           <div className="max-w-xl w-full bg-white rounded-3xl p-8 md:p-12 text-center shadow-2xl border-4 border-teal-500 relative overflow-hidden">
             <div className={`w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center text-5xl shadow-xl ${currentNode.result === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{currentNode.result === 'success' ? '🌟' : '💔'}</div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase text-slate-800 mb-4">{currentNode.result === 'success' ? 'Mission Complete' : 'Mission Failed'}</h2>
+            <h2 className="text-3xl md:text-4xl font-black uppercase text-slate-800 mb-4">{selectedLevel.id === 'tutorial' && currentNode.result === 'success' ? 'Training Complete' : currentNode.result === 'success' ? 'Mission Complete' : 'Mission Failed'}</h2>
             <p className="text-slate-600 text-lg md:text-xl font-medium leading-relaxed mb-8">{currentNode.message}</p>
             {currentNode.result === 'failure' && <p className="text-xs text-orange-500 font-bold uppercase tracking-widest bg-orange-50 p-3 rounded-lg border border-orange-100 mb-8">Tip: Try Validation First. Listen more.</p>}
             <button onClick={() => { if (isFeedbackFocused) return; handleEndGameContinue(); }} className="w-full py-4 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">Continue</button>

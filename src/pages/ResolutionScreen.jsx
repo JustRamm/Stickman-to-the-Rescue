@@ -57,7 +57,10 @@ const ResolutionScreen = ({
                     {resolutionPhase >= 3 && (
                         <div className="absolute -top-32 md:-top-40 right-0 bg-white/90 backdrop-blur border-2 border-teal-500 text-slate-800 p-4 md:p-6 rounded-2xl rounded-br-none shadow-2xl w-48 md:w-64 animate-pop-in z-50">
                             <p className="text-xs md:text-sm font-bold leading-relaxed">
-                                "Thank you for being the bridge. We'll take care of {selectedLevel.npc.name} now."
+                                {selectedLevel.id === 'tutorial'
+                                    ? "Great job! You've mastered the basics. You're ready to help others now."
+                                    : `"Thank you for being the bridge. We'll take care of ${selectedLevel.npc.name} now."`
+                                }
                             </p>
                         </div>
                     )}
