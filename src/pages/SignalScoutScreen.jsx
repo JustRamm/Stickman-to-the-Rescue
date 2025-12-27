@@ -60,44 +60,51 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
         if (gameState !== 'PLAYING') return;
 
         const spawnPerson = () => {
-            // Filter scenarios that haven't been used yet
-            const availableScenarios = SCENARIOS.filter(s => !usedScenarioIds.has(s.id));
+            // MAX LIMIT CHECK: 8 people active max
+            setPeople(currentPeople => {
+                if (currentPeople.length >= 8) return currentPeople;
 
-            // If all used, reset or pick random (fail-safe)
-            if (availableScenarios.length === 0) {
-                // Optional: setUsedScenarioIds(new Set()); 
-                // For now, just pick random if exhausted to keep game flowing
-            }
+                // Filter scenarios that haven't been used yet
+                // Note: We need to access the LATEST usedScenarioIds, but since this is inside a Set state update,
+                // we should rely on the ref or the state passed in dependency. 
+                // However, to keep it simple and safe, we can do the filtering here.
 
-            const pool = availableScenarios.length > 0 ? availableScenarios : SCENARIOS;
-            const scenario = pool[Math.floor(Math.random() * pool.length)];
+                // CRITICAL: We need to know what IDs are currently on screen + what have been used previously
+                // actually, usedScenarioIds tracks ALL spawned IDs.
+                const availableScenarios = SCENARIOS.filter(s => !usedScenarioIds.has(s.id));
 
-            // Mark as used
-            setUsedScenarioIds(prev => new Set(prev).add(scenario.id));
+                if (availableScenarios.length === 0) {
+                    return currentPeople; // No more unique sentences
+                }
 
-            const isLeftStart = Math.random() > 0.5;
+                const scenario = availableScenarios[Math.floor(Math.random() * availableScenarios.length)];
 
-            const newPerson = {
-                uid: Date.now() + Math.random(), // Unique ID for key
-                data: scenario,
-                x: isLeftStart ? -15 : 115, // Start further off-screen
-                y: 20 + Math.random() * 55, // Conserve vertical lanes better
-                direction: isLeftStart ? 1 : -1,
-                // Reduced speed significantly for readability 
-                speed: 0.02 + Math.random() * 0.03,
-                asset: getStickmanAsset(scenario.category),
-                isClicked: false
-            };
+                // Mark as used
+                setUsedScenarioIds(prev => {
+                    const next = new Set(prev);
+                    next.add(scenario.id);
+                    return next;
+                });
 
-            setPeople(prev => [...prev, newPerson]);
+                const isLeftStart = Math.random() > 0.5;
+
+                const newPerson = {
+                    uid: Date.now() + Math.random(), // Unique ID for key
+                    data: scenario,
+                    x: isLeftStart ? -15 : 115, // Start further off-screen
+                    y: 15 + Math.random() * 60, // Conserve vertical lanes better
+                    direction: isLeftStart ? 1 : -1,
+                    speed: 0.03 + Math.random() * 0.04, // Varied speeds for "different phase"
+                    asset: getStickmanAsset(scenario.category),
+                    isClicked: false
+                };
+
+                return [...currentPeople, newPerson];
+            });
         };
 
-        // Initial spawn - Call twice immediately to populate screen
-        spawnPerson();
-        spawnPerson();
-
-        // Spawn interval
-        spawnTimerRef.current = setInterval(spawnPerson, 2000);
+        // Spawn interval - slightly slower to prevent chaos
+        spawnTimerRef.current = setInterval(spawnPerson, 2500);
 
         return () => clearInterval(spawnTimerRef.current);
     }, [gameState, usedScenarioIds]);
@@ -199,7 +206,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                             onClick={() => handlePersonClick(person)}
                         >
 
-                            {/* Speech Bubble Cue */}
+                            {/* Speech Bubble Cue - EMOJI REMOVED */}
                             <div
                                 className={`
                                     relative bg-white text-slate-900 p-3 rounded-2xl shadow-xl border-2 mb-2 cursor-pointer
@@ -208,12 +215,6 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                                 `}
                             >
                                 <p className="text-[10px] md:text-xs font-bold leading-snug">{person.data.text}</p>
-
-                                {/* Emoji Tag */}
-                                <div className="absolute -top-3 -right-2 w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-xs shadow-sm border border-white">
-                                    {person.data.emoji}
-                                </div>
-
                                 {/* Tail */}
                                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-inherit transform rotate-45"></div>
                             </div>
