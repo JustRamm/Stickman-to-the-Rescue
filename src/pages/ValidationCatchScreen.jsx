@@ -168,39 +168,37 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-950 flex flex-col font-sans overflow-hidden select-none">
-            {/* Liquid Background Effect */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-teal-600/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-            </div>
+        <div className="fixed inset-0 flex flex-col font-sans overflow-hidden select-none bg-slate-50">
+            {/* Bright Patterned Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_100%_200px,#14b8a61a,transparent)] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_0%_300px,#6366f11a,transparent)] pointer-events-none"></div>
 
             {/* Header / HUD */}
-            <div className="relative z-20 px-6 py-5 flex justify-between items-center bg-slate-900/40 backdrop-blur-2xl border-b border-white/5 shadow-2xl">
+            <div className="relative z-20 px-6 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
                 <div className="flex items-center gap-6">
-                    <button onClick={onExit} className="group relative px-6 py-2.5 overflow-hidden rounded-xl transition-all active:scale-95">
-                        <div className="absolute inset-0 bg-red-500/10 group-hover:bg-red-500 transition-colors"></div>
-                        <span className="relative text-[11px] font-black text-red-400 group-hover:text-white uppercase tracking-[0.2em]">Exit Training</span>
+                    <button onClick={onExit} className="group relative px-6 py-2.5 overflow-hidden rounded-xl bg-slate-100 hover:bg-red-50 transition-all active:scale-95 border border-slate-200 hover:border-red-200">
+                        <span className="relative text-[11px] font-black text-slate-500 group-hover:text-red-500 uppercase tracking-[0.2em] transition-colors">Exit Lab</span>
                     </button>
-                    <div className="h-10 w-px bg-white/10 hidden md:block"></div>
+                    <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
                     <div className="flex flex-col hidden sm:flex">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-400/70">Skill Lab</span>
-                        <span className="text-white font-black text-base tracking-tight uppercase">Validation Catch</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-600">Active Listening</span>
+                        <span className="text-slate-900 font-black text-base tracking-tight uppercase">Validation Training</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-10 bg-black/30 px-8 py-3 rounded-2xl border border-white/5 shadow-inner">
+                <div className="flex items-center gap-8 bg-white px-8 py-3 rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50">
                     <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Impact score</span>
-                        <div className="text-3xl font-black text-teal-400 tabular-nums">
-                            {score}<span className="text-sm text-slate-600 ml-1">/{WIN_SCORE}</span>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Score</span>
+                        <div className="text-3xl font-black text-slate-800 tabular-nums">
+                            {score}<span className="text-sm text-slate-400 ml-1">/{WIN_SCORE}</span>
                         </div>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Empathy Health</span>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Resilience</span>
                         <div className="flex gap-2.5">
                             {[...Array(3)].map((_, i) => (
-                                <div key={i} className={`w-3.5 h-3.5 rounded-full transition-all duration-700 ${i < health ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.7)]' : 'bg-slate-800 scale-75 opacity-20'}`}></div>
+                                <div key={i} className={`w-3.5 h-3.5 rounded-full transition-all duration-500 ${i < health ? 'bg-red-500 shadow-lg shadow-red-500/30' : 'bg-slate-200'}`}></div>
                             ))}
                         </div>
                     </div>
@@ -211,27 +209,27 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
             <div ref={gameContainerRef} className="flex-1 relative w-full h-full overflow-hidden cursor-none z-10">
 
                 {gameState === 'INTRO' && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl">
-                        <div className="max-w-md w-full bg-white rounded-[3.5rem] p-12 text-center shadow-[0_40px_100px_rgba(0,0,0,0.6)] border border-white/20 animate-scale-in">
-                            <div className="w-28 h-28 bg-teal-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner animate-bounce-subtle">
-                                <span className="text-6xl drop-shadow-md">🤲</span>
+                    <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-white/60 backdrop-blur-md">
+                        <div className="max-w-md w-full bg-white rounded-[3rem] p-12 text-center shadow-[0_20px_60px_rgba(0,0,0,0.1)] border border-slate-100 animate-scale-in">
+                            <div className="w-24 h-24 bg-teal-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm animate-bounce-subtle">
+                                <span className="text-5xl">👂</span>
                             </div>
-                            <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tighter uppercase leading-none">The Active Listener</h2>
-                            <p className="text-slate-500 font-medium mb-10 leading-relaxed text-lg italic px-4">
-                                "Being heard is so close to being loved that for the average person, they are almost indistinguishable."
+                            <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight uppercase">Catch The Good</h2>
+                            <p className="text-slate-500 font-medium mb-8 leading-relaxed text-sm px-4">
+                                "Validation is the art of hearing the person, not just the problem."
                             </p>
-                            <div className="space-y-4 mb-10 text-left bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                            <div className="space-y-3 mb-8 text-left bg-slate-50 p-6 rounded-2xl border border-slate-100">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-4 h-4 bg-teal-500 rounded-full shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
-                                    <span className="text-sm font-black text-slate-700 uppercase tracking-wide">Catch validation</span>
+                                    <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold border border-teal-200">✓</div>
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Catch Validating Phrases</span>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-4 h-4 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-                                    <span className="text-sm font-black text-slate-700 uppercase tracking-wide">Avoid toxicity</span>
+                                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 font-bold border border-red-200">✕</div>
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Avoid Toxic Positivity</span>
                                 </div>
                             </div>
-                            <button onClick={startGame} className="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-[0.3em] text-xs shadow-2xl hover:bg-indigo-700 transition-all active:scale-95 hover:-translate-y-1">
-                                Begin Lab Session
+                            <button onClick={startGame} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:-translate-y-1 active:scale-95">
+                                Start Session
                             </button>
                         </div>
                     </div>
@@ -239,49 +237,53 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
 
                 {gameState === 'PLAYING' && (
                     <>
-                        {/* Falling Phrases */}
+                        {/* Falling Phrases - High Contrast */}
                         {fallingItems.map(item => (
                             <div
                                 key={item.id}
-                                className={`absolute px-8 py-4 rounded-full border-2 whitespace-nowrap shadow-2xl transition-all duration-300 pointer-events-none flex items-center gap-4 ${item.type === 'validating'
-                                    ? 'bg-teal-500 text-white border-teal-300'
-                                    : 'bg-red-600 text-white border-red-400'
-                                    }`}
+                                className={`absolute px-5 py-3 rounded-xl border-b-4 shadow-xl transition-all duration-300 flex items-center gap-3 whitespace-nowrap 
+                                ${item.type === 'validating'
+                                        ? 'bg-teal-500 border-teal-700 text-white'
+                                        : 'bg-white border-slate-200 text-slate-400 opacity-60' // Dim wrong ones slightly for focus, OR make them distinct bad
+                                    }
+                                ${item.type === 'toxic' ? 'bg-orange-500 border-orange-700 text-white opacity-100' : ''} 
+                                `}
                                 style={{
                                     left: `${item.x}%`,
                                     top: `${item.y}%`,
-                                    transform: `translateX(-50%) scale(${item.scale})`,
-                                    boxShadow: item.type === 'validating' ? '0 15px 40px rgba(20, 184, 166, 0.5)' : '0 15px 40px rgba(220, 38, 38, 0.5)'
+                                    transform: `translateX(-50%) scale(${item.scale}) rotate(${Math.sin(item.y * 0.1) * 5}deg)`,
+                                    zIndex: 30
                                 }}
                             >
-                                <span className="text-2xl font-bold">{item.type === 'validating' ? '✓' : '⚠'}</span>
-                                <span className="font-black text-sm uppercase tracking-widest leading-loose">{item.text}</span>
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black bg-white/20`}>
+                                    {item.type === 'validating' ? '✓' : '!'}
+                                </span>
+                                <span className="font-bold text-xs uppercase tracking-wider">{item.text}</span>
                             </div>
                         ))}
 
                         {/* Player / Character */}
                         <div
-                            className="absolute bottom-16 transition-all duration-75"
+                            className="absolute bottom-12 transition-all duration-75 z-40"
                             style={{ left: `${playerX}%`, transform: `translateX(-50%)` }}
                         >
                             <div className="relative group">
-                                {/* Enhanced Catch Zone (Glassmorphism) */}
-                                <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 h-12 flex flex-col items-center">
-                                    <div className="w-full h-full bg-white/5 backdrop-blur-xl border-2 border-white/20 rounded-b-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-center relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-teal-400/20 to-transparent"></div>
-                                        <div className="w-32 h-0.5 bg-white/40 rounded-full relative z-10"></div>
-                                    </div>
-                                    <div className="w-1.5 h-6 bg-white/10 rounded-full mt-1"></div>
+                                {/* Catch Basket Visual */}
+                                <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-40 h-10 bg-slate-900/5 backdrop-blur-sm border-2 border-slate-900/10 rounded-full flex items-center justify-center">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Catch Zone</span>
                                 </div>
-                                <div className="animate-float-slow">
-                                    <Stickman scale={1.6} emotion="happy" noWrapper />
-                                </div>
+
+                                <Stickman scale={1.5} emotion="happy" noWrapper theme="neutral" />
                             </div>
                         </div>
 
                         {/* Visual Instruction Overlay */}
-                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-black/40 backdrop-blur-xl px-10 py-3 rounded-full border border-white/10 shadow-2xl">
-                            <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.5em] animate-pulse">Use Keys [← →] or Mouse to Catch</span>
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/80 backdrop-blur-md px-6 py-2 rounded-full border border-slate-200 shadow-lg">
+                            <div className="flex gap-1">
+                                <span className="w-5 h-5 flex items-center justify-center bg-slate-100 rounded border border-slate-200 text-[10px] font-bold text-slate-500">←</span>
+                                <span className="w-5 h-5 flex items-center justify-center bg-slate-100 rounded border border-slate-200 text-[10px] font-bold text-slate-500">→</span>
+                            </div>
+                            <span className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">Move to Catch</span>
                         </div>
                     </>
                 )}
