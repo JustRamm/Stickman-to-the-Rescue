@@ -26,8 +26,11 @@ const LevelSelectScreen = ({
         if (missionId === 'campus') {
             return !(completedLevels.includes('park') && completedLevels.includes('office'));
         }
-        if (missionId === 'rainy') {
+        if (missionId === 'rainy_street') {
             return !completedLevels.includes('campus');
+        }
+        if (missionId === 'bridge') {
+            return !completedLevels.includes('rainy_street');
         }
         return true;
     };
