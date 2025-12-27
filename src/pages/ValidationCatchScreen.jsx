@@ -109,7 +109,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
                     id: Date.now() + Math.random(),
                     ...randomPhrase,
                     x: Math.random() * 80 + 10,
-                    y: 0, // Start at very top visible edge
+                    y: -15, // Start above the screen to fall in naturally
                     speed: (0.2 + Math.random() * 0.1) * difficultyMultiplier,
                     scale: 1
                 };
@@ -258,10 +258,11 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
                                 key={item.id}
                                 className={`absolute px-5 py-3 rounded-xl border-b-4 shadow-xl transition-all duration-300 flex items-center gap-3 whitespace-nowrap 
                                 ${item.type === 'validating'
-                                        ? 'bg-teal-500 border-teal-700 text-white'
-                                        : 'bg-white border-slate-200 text-slate-400 opacity-60' // Dim wrong ones slightly for focus, OR make them distinct bad
+                                        ? 'bg-teal-500 border-teal-700 text-white shadow-teal-500/30'
+                                        : item.type === 'toxic'
+                                            ? 'bg-red-500 border-red-700 text-white shadow-red-500/30 opacity-100'
+                                            : 'bg-white border-slate-200 text-slate-400 opacity-60'
                                     }
-                                ${item.type === 'toxic' ? 'bg-orange-500 border-orange-700 text-white opacity-100' : ''} 
                                 `}
                                 style={{
                                     left: `${item.x}%`,
