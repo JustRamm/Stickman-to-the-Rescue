@@ -31,6 +31,14 @@ const SettingsOverlay = ({
                 >
                     <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
                 </button>
+
+                <button
+                    onClick={() => { onResetGame && onResetGame(); onNavigate('RESOURCE_RELAY'); setIsSettingsOpen(false); }}
+                    className="w-8 h-8 md:w-10 md:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-indigo-600 hover:shadow-lg transition-all border border-white/50 shadow-sm p-1"
+                    title="Referral Battle"
+                >
+                    <img src="/stickman_assets/shield_stickman.svg" alt="Referral" className="w-full h-full object-contain" />
+                </button>
             </div>
 
             {/* Settings Modal */}

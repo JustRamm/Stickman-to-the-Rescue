@@ -143,9 +143,9 @@ const LevelSelectScreen = ({
                                 <div className="relative z-10">
                                     <div className="flex justify-between items-start mb-2 md:mb-4">
                                         <span className={`px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest border ${mission.difficulty === 'Easy' ? 'bg-green-100 text-green-700 border-green-200' :
-                                                mission.difficulty === 'Medium' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                                                    mission.difficulty === 'Hard' ? 'bg-red-100 text-red-700 border-red-200' :
-                                                        'bg-slate-900 text-white border-slate-900'
+                                            mission.difficulty === 'Medium' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                mission.difficulty === 'Hard' ? 'bg-red-100 text-red-700 border-red-200' :
+                                                    'bg-slate-900 text-white border-slate-900'
                                             }`}>
                                             {mission.difficulty}
                                         </span>
@@ -186,24 +186,6 @@ const LevelSelectScreen = ({
                         );
                     })}
                 </div>
-            </div>
-
-            {/* Minimal Training Floating Button */}
-            <div className="absolute top-6 right-16 z-50 flex gap-2">
-                <button
-                    onClick={() => onNavigate('QUIZ_MODE')}
-                    title="Skill Quiz"
-                    className="w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center shadow-lg border-2 border-teal-500 hover:scale-110 transition-all text-xl"
-                >
-                    🎓
-                </button>
-                <button
-                    onClick={() => onNavigate('RESOURCE_RELAY')}
-                    title="Referral Battle"
-                    className="w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center shadow-lg border-2 border-indigo-500 hover:scale-110 transition-all text-xl"
-                >
-                    🛡️
-                </button>
             </div>
         </div>
     );
