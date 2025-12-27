@@ -75,10 +75,9 @@ const ResolutionScreen = ({
                         </>
                     ) : (
                         <div className="absolute left-[45%] bottom-[25%] -translate-x-1/2 flex flex-col items-center animate-fade-in">
-                            {/* Dynamic Hug Asset based on Player + NPC Gender */}
+                            {/* Hug Asset */}
                             <img
-                                src={`/stickman_assets/hug_${playerGender}_${selectedLevel.npc.gender}.svg`}
-                                onError={(e) => { e.target.onerror = null; e.target.src = "/stickman_assets/group_hug.svg"; }}
+                                src="/stickman_assets/group_hug.svg"
                                 alt="Hug"
                                 className="w-[200px] h-[200px] md:w-[300px] md:h-[300px] drop-shadow-2xl filter brightness-110"
                             />
