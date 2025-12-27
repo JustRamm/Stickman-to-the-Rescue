@@ -26,14 +26,23 @@ const NamingScreen = ({ trust, playerName, setPlayerName, onNext, onNavigate }) 
                 <input
                     type="text"
                     placeholder="Enter your name..."
-                    className="w-full px-4 py-3 md:py-3 bg-slate-100 border-2 border-slate-200 rounded-lg md:rounded-xl mb-4 text-center text-lg font-bold text-slate-800 focus:border-teal-500 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 md:py-3 bg-slate-100 border-2 border-slate-200 rounded-lg md:rounded-xl mb-2 text-center text-lg font-bold text-slate-800 focus:border-teal-500 focus:outline-none transition-colors"
                     value={playerName === 'You' ? '' : playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && playerName.trim() && onNext()}
+                    onKeyDown={(e) => e.key === 'Enter' && playerName.trim().length >= 4 && onNext()}
+                    maxLength={15}
                 />
 
+                <div className="mb-6 h-4">
+                    {playerName.trim().length > 0 && playerName.trim().length < 4 && (
+                        <p className="text-[10px] md:text-xs font-bold text-red-500 animate-pulse">
+                            Name must be at least 4 characters
+                        </p>
+                    )}
+                </div>
+
                 <button
-                    disabled={!playerName.trim()}
+                    disabled={playerName.trim().length < 4}
                     onClick={onNext}
                     className="w-full py-2 md:py-3 bg-teal-600 text-white rounded-lg md:rounded-xl font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
                 >
