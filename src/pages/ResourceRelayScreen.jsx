@@ -153,11 +153,35 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
 
                 {/* Player Hand Area */}
                 {gameState === 'WIN' ? (
-                    <div className="text-center animate-fade-in-up">
-                        <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400 mb-4">You Connected!</h2>
-                        <button onClick={onComplete} className="px-8 py-4 bg-white text-slate-900 rounded-full font-black uppercase tracking-widest shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-all active:scale-95">
-                            Continue Mission
-                        </button>
+                    <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-fade-in">
+                        <div className="max-w-md w-full bg-white rounded-[3rem] p-10 text-center shadow-2xl border-b-8 border-teal-500 relative overflow-hidden">
+                            {/* Decorative background circle */}
+                            <div className="absolute -top-20 -right-20 w-48 h-48 bg-teal-50 rounded-full opacity-50"></div>
+
+                            <div className="relative z-10">
+                                <div className="w-24 h-24 bg-teal-100 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-6 shadow-inner animate-bounce-subtle">
+                                    🏆
+                                </div>
+                                <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Master Referral!</h2>
+                                <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+                                    You've successfully matched barriers to the right support systems. You're becoming a vital lifeline.
+                                </p>
+
+                                <button
+                                    onClick={onComplete}
+                                    className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 hover:-translate-y-1 transition-all active:scale-95"
+                                >
+                                    Continue Mission
+                                </button>
+
+                                <button
+                                    onClick={onExit}
+                                    className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
+                                >
+                                    Back to Level Select
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className={`w-full max-w-4xl flex justify-center items-end gap-2 md:gap-4 h-[220px] pb-4 transition-all duration-500 ${gameState === 'RESOLVING' ? 'translate-y-full opacity-50' : 'translate-y-0 opacity-100'}`}>
@@ -165,19 +189,19 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                             <button
                                 key={card.id + i}
                                 onClick={() => handleCardPlay(card)}
-                                className="group relative w-32 h-44 md:w-40 md:h-56 bg-slate-100 rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out border-4 border-slate-200 hover:border-indigo-400 hover:z-50 active:scale-95"
+                                className="group relative w-32 h-44 md:w-40 md:h-56 bg-white rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out border-4 border-slate-100 hover:border-indigo-400 hover:z-50 active:scale-95 translate-y-0"
                                 style={{
                                     transform: `rotate(${(i - (playerHand.length - 1) / 2) * 5}deg) translateY(${Math.abs((i - (playerHand.length - 1) / 2) * 10)}px)`,
                                     zIndex: 10 + i
                                 }}
                             >
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition-transform">
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition-transform">
                                     <img src={card.icon} alt={card.type} className="w-6 h-6 object-contain" />
                                 </div>
                                 <div className="mt-6 flex-1 flex flex-col items-center justify-center">
-                                    <h4 className="font-black text-slate-800 text-sm md:text-base leading-tight mb-2">{card.title}</h4>
-                                    <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">{card.type}</span>
-                                    <p className="text-[10px] text-slate-500 leading-snug line-clamp-3 md:line-clamp-4">{card.desc}</p>
+                                    <h4 className="font-black text-slate-800 text-xs md:text-sm leading-tight mb-2 tracking-tight">{card.title}</h4>
+                                    <span className="bg-indigo-50 text-indigo-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2">{card.type}</span>
+                                    <p className="text-[9px] md:text-[10px] text-slate-400 leading-snug font-medium line-clamp-3 md:line-clamp-4">{card.desc}</p>
                                 </div>
                             </button>
                         ))}

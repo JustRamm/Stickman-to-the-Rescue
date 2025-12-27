@@ -1,44 +1,37 @@
 export const OBSTACLES = [
     {
-        id: 'cost',
-        text: "I can't afford therapy. It costs way too much.",
-        weaknesses: ['counselor', 'hotline', 'textline', 'support_group'],
-        sfx: 'sigh',
-        stickman_emotion: 'worried'
+        id: 'exams',
+        text: "I cannot face my parents if I fail NEET. The pressure is too much.",
+        weaknesses: ['hotline', 'counselor', 'textline'],
+        sfx: 'anxious',
+        stickman_emotion: 'distressed'
     },
     {
-        id: 'parents',
-        text: "I don't want my parents to find out.",
-        weaknesses: ['textline', 'hotline', 'forum'],
-        sfx: 'anxious',
+        id: 'reputation',
+        text: "If people in our colony find out I'm seeing a doctor for 'nerves', our family's name is ruined.",
+        weaknesses: ['textline', 'forum', 'hotline'],
+        sfx: 'shy',
         stickman_emotion: 'scared'
     },
     {
-        id: 'time',
-        text: "It's 2 AM. Everyone is asleep.",
-        weaknesses: ['hotline', 'textline', '911'],
-        sfx: 'tired',
-        stickman_emotion: 'tired'
+        id: 'kerala_disha',
+        text: "I need help but I only feel comfortable speaking in Malayalam. Who will understand me?",
+        weaknesses: ['disha_kerala', 'hotline'],
+        sfx: 'sad',
+        stickman_emotion: 'vulnerable'
     },
     {
-        id: 'stranger',
-        text: "It's too awkward to talk to a stranger face-to-face.",
-        weaknesses: ['textline', 'forum'],
-        sfx: 'shy',
-        stickman_emotion: 'neutral'
-    },
-    {
-        id: 'severe',
-        text: "I think I might actually hurt myself right now.",
-        weaknesses: ['911'],
+        id: 'harassment',
+        text: "Someone is sharing my private photos online. I don't know who to trust.",
+        weaknesses: ['cyber_cell', 'hotline'],
         sfx: 'panic',
         stickman_emotion: 'distressed'
     },
     {
-        id: 'alone',
-        text: "No one understands what I'm going through.",
-        weaknesses: ['support_group', 'forum'],
-        sfx: 'sad',
+        id: 'elderly_kerala',
+        text: "My children are in Dubai. I am all alone in this big house with just my thoughts.",
+        weaknesses: ['kudumbashree', 'hotline', 'disha_kerala'],
+        sfx: 'tired',
         stickman_emotion: 'sad'
     }
 ];
@@ -46,44 +39,44 @@ export const OBSTACLES = [
 export const PLAYER_CARDS = [
     {
         id: 'hotline',
-        title: "988 Lifeline",
-        type: "Phone",
-        desc: "Call 988. Free, 24/7, Confidential. Available anywhere.",
+        title: "KIRAN Helpline",
+        type: "National",
+        desc: "1800-599-0019. Free, 24/7 mental health support in 13 languages.",
+        icon: "/stickman_assets/stickman_phone.svg"
+    },
+    {
+        id: 'disha_kerala',
+        title: "DISHA Kerala",
+        type: "Local",
+        desc: "Call 1056. Kerala's dedicated health helpline. Trusted and local.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
         id: 'counselor',
-        title: "Professional Counselor",
+        title: "Trustworthy Teacher",
         type: "In-Person",
-        desc: "Specialized, one-on-one professional support for long-term care.",
+        desc: "A teacher or professor who can provide guidance and academic support.",
         icon: "/stickman_assets/scholar_stickman.svg"
     },
     {
         id: 'textline',
-        title: "Crisis Text Line",
-        type: "Message",
-        desc: "Text HOME to 741741. Perfect for when you can't talk aloud.",
+        title: "AASRA Support",
+        type: "Confidential",
+        desc: "Expert crisis support for those feeling alone or suicidal.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
-        id: 'support_group',
-        title: "Support Group",
+        id: 'cyber_cell',
+        title: "Cyber Cell India",
+        type: "Security",
+        desc: "Report online harassment and protect your digital privacy.",
+        icon: "/stickman_assets/stickman_phone.svg"
+    },
+    {
+        id: 'kudumbashree',
+        title: "Kudumbashree Network",
         type: "Community",
-        desc: "Connect with others who share similar lived experiences.",
+        desc: "Local community support system in Kerala for social and mental well-being.",
         icon: "/stickman_assets/stickman_hands.svg"
-    },
-    {
-        id: 'forum',
-        title: "Peer Forum",
-        type: "Online",
-        desc: "Safe, moderated online spaces for anonymous peer support.",
-        icon: "/stickman_assets/stickman_phone.svg"
-    },
-    {
-        id: '911',
-        title: "Emergency Services",
-        type: "Emergency",
-        desc: "Call 911 immediately if there is a threat of physical harm.",
-        icon: "/stickman_assets/stickman_phone.svg"
     }
 ];
