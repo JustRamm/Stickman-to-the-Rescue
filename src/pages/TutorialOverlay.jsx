@@ -34,17 +34,17 @@ const TutorialOverlay = ({ gameState, playerPos, foundClues }) => {
                     <div>
                         <h4 className="font-black text-slate-800 uppercase tracking-wider text-xs mb-1">Training Mission</h4>
                         <p className="text-slate-600 font-medium text-sm leading-tight">
-                            {step === 0 && "Use RIGHT ARROW to move towards the person."}
-                            {step === 1 && "Use LEFT ARROW to step back. Give them space."}
-                            {step === 2 && "Press 'Z' or tap the paper icon near objects to inspect clues."}
-                            {step === 3 && "Approach the person to start the conversation."}
+                            {step === 0 && "Use D or RIGHT ARROW to move towards the person."}
+                            {step === 1 && "Use A or LEFT ARROW to step back. Give them space."}
+                            {step === 2 && "Press 'Z' (or tap paper) near the floating note to inspect clues."}
+                            {step === 3 && "Walk close to Alex to start your training conversation."}
                         </p>
                     </div>
                     {/* Key Hint */}
                     <div className="ml-auto flex gap-1">
-                        {step === 0 && <span className="px-2 py-1 bg-slate-200 rounded text-xs font-bold font-mono">➡</span>}
-                        {step === 1 && <span className="px-2 py-1 bg-slate-200 rounded text-xs font-bold font-mono">⬅</span>}
-                        {step === 2 && <span className="px-2 py-1 bg-slate-200 rounded text-xs font-bold font-mono">Z</span>}
+                        {step === 0 && <span className="px-2 py-1 bg-slate-200 rounded text-[10px] font-black font-mono">D / ⮕</span>}
+                        {step === 1 && <span className="px-2 py-1 bg-slate-200 rounded text-[10px] font-black font-mono">A / ⬅</span>}
+                        {step === 2 && <span className="px-2 py-1 bg-slate-200 rounded text-[10px] font-black font-mono">Z</span>}
                     </div>
                 </div>
             </div>

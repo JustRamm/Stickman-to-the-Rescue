@@ -184,17 +184,17 @@ const App = () => {
     if (gameState !== 'APPROACH') return;
     const handleKeyDown = (e) => {
       audioManager.init();
-      if (e.key === 'ArrowRight') setMoveDir(1);
-      else if (e.key === 'ArrowLeft') setMoveDir(-1);
-      else if (e.key === 'ArrowUp') {
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') setMoveDir(1);
+      else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') setMoveDir(-1);
+      else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
         setIsJumping(true); setTimeout(() => setIsJumping(false), 500);
-      } else if (e.key === 'ArrowDown') setIsCrouching(true);
+      } else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') setIsCrouching(true);
       else if (e.key.toLowerCase() === 'z') handleInvestigate();
     };
     const handleKeyUp = (e) => {
-      if (e.key === 'ArrowRight' && moveDir === 1) setMoveDir(0);
-      if (e.key === 'ArrowLeft' && moveDir === -1) setMoveDir(0);
-      if (e.key === 'ArrowDown') setIsCrouching(false);
+      if ((e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') && moveDir === 1) setMoveDir(0);
+      if ((e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') && moveDir === -1) setMoveDir(0);
+      if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') setIsCrouching(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
@@ -647,12 +647,14 @@ const App = () => {
       {/* Toolkit Phase Instruction Overlay */}
       {gameState === 'DIALOGUE' && !isNpcSpeaking && !playerLastSaid && currentNode?.required_resource && (
         <div className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[100] animate-bounce-subtle pointer-events-none">
-          <div className="bg-orange-500 text-white px-8 py-4 rounded-2xl shadow-[0_0_30px_rgba(249,115,22,0.5)] border-4 border-white flex flex-col items-center gap-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80">Critical Choice</span>
-            <span className="text-xl font-black uppercase tracking-widest text-center">Select a Resource from Toolkit</span>
+          <div className="bg-indigo-600 text-white px-8 py-4 rounded-2xl shadow-[0_0_30px_rgba(79,70,229,0.5)] border-4 border-white flex flex-col items-center gap-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 text-indigo-100">Critical Choice</span>
+            <span className="text-xl font-black uppercase tracking-widest text-center">Open Toolkit & Select Resource</span>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-2xl animate-pulse">👉</span>
-              <span className="text-[10px] font-bold bg-white/20 px-3 py-1 rounded-full">{currentNode.required_resource} Needed</span>
+              <span className="text-[10px] font-bold bg-white/20 px-3 py-1 rounded-full uppercase tracking-widest leading-none">
+                {walletResources.find(r => r.id === currentNode.required_resource)?.name || currentNode.required_resource} Needed
+              </span>
             </div>
           </div>
         </div>

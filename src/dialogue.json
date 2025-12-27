@@ -3,76 +3,82 @@
         "startNode": "intro",
         "nodes": {
             "intro": {
-                "npc_text": "Welcome to the Gatekeeper Training. I'm Alex, your guide. Ready to learn the basics of saving lives?",
-                "npc_emotion": "neutral",
+                "npc_text": "Hello! I'm Alex. Welcome to Gatekeeper Training. Our goal is simple: learn how to support someone in crisis and guide them to safety. Ready?",
+                "npc_emotion": "happy",
                 "options": [
                     {
-                        "text": "Yes, Alex. Show me how this works.",
-                        "next": "trust_lesson",
+                        "text": "Yes, Alex. Show me the ropes.",
+                        "next": "ui_lesson",
                         "trust_impact": 10,
                         "inner_thought": "Build rapport by acknowledging the guide."
-                    },
-                    {
-                        "text": "I'm a bit nervous, but I'm ready to learn.",
-                        "next": "trust_lesson",
-                        "trust_impact": 5,
-                        "inner_thought": "Express honesty and willingness."
                     }
                 ]
             },
-            "trust_lesson": {
-                "npc_text": "The bar at the top is Empathy. Helpful, validating responses increase it. Dismissive ones decrease it.",
+            "ui_lesson": {
+                "npc_text": "First, look at the top bar. That's Empathy. Helpful, validating responses increase it; dismissive ones decrease it. If it gets too low, people will close off.",
                 "npc_emotion": "neutral",
                 "options": [
                     {
-                        "text": "I see. What happens if Empathy gets too low?",
-                        "next": "clue_lesson",
+                        "text": "What about the icons in the top right corner?",
+                        "next": "minigames_intro",
                         "trust_impact": 5,
-                        "inner_thought": "Learn about the consequences of low trust."
-                    },
-                    {
-                        "text": "So validating someone's feelings is key to keeping them open?",
-                        "next": "clue_lesson",
-                        "trust_impact": 10,
-                        "inner_thought": "Confirm understanding of empathy."
+                        "inner_thought": "Curiosity about the UI."
                     }
                 ]
             },
-            "clue_lesson": {
-                "npc_text": "If Empathy is low, people close off. But if you find clues in the environment, you can unlock better responses marked with a magnifying glass.",
+            "minigames_intro": {
+                "npc_text": "Those are your training modules! 🎓 is 'Fact vs Myth' to test your knowledge, and 🛡️ is 'Referral Battle' where you practice matching crises to the right Indian helplines like DISHA or KIRAN.",
+                "npc_emotion": "happy",
+                "options": [
+                    {
+                        "text": "Got it. How do I move around and interact with things?",
+                        "next": "movement_lesson",
+                        "trust_impact": 10,
+                        "inner_thought": "Asking about mechanics."
+                    }
+                ]
+            },
+            "movement_lesson": {
+                "npc_text": "Use the A/D keys (or arrows) to walk. When you see something suspicious, press 'Z' to investigate. Finding clues unlocks special responses marked with a 🔍.",
                 "npc_emotion": "neutral",
                 "options": [
                     {
-                        "text": "Got it. How do I actually help someone in crisis?",
-                        "next": "refer_lesson",
+                        "text": "And if I need to leave or restart a scenario?",
+                        "next": "exit_lesson",
                         "trust_impact": 5,
-                        "inner_thought": "Transition to the goal: Referral."
-                    },
+                        "inner_thought": "Safety first: knowing how to exit."
+                    }
+                ]
+            },
+            "exit_lesson": {
+                "npc_text": "Simple! The 'Exit to Title' button is always in the top-left during level selection. Inside mini-games, there's always an 'Exit' or 'Abort' button in the same spot.",
+                "npc_emotion": "neutral",
+                "options": [
                     {
-                        "text": "Searching for clues helps me understand their world better. What's the next step?",
+                        "text": "Ready to finish this training. What's the final step?",
                         "next": "refer_lesson",
                         "trust_impact": 10,
-                        "inner_thought": "Engage with the clue mechanic."
+                        "inner_thought": "Final tutorial step."
                     }
                 ]
             },
             "refer_lesson": {
-                "npc_text": "When you've built trust and identified the risk, use the 'Refer' action. Open your toolkit and select the 988 Lifeline to finish the tutorial.",
+                "npc_text": "Final step: Referral. Once you've built trust, open your Toolkit (the briefcase icon) and select a resource like 'KIRAN Helpline' to help me get professional support.",
                 "npc_emotion": "neutral",
-                "required_resource": "988 Lifeline",
+                "required_resource": "hotline",
                 "options": [
                     {
-                        "text": "I'm ready to try a real scenario! Let's save some lives.",
+                        "text": "I'm referring you to the KIRAN Helpline for professional support, Alex.",
                         "next": "success_tutorial",
                         "trust_impact": 20,
-                        "inner_thought": "Confirm readiness by referring."
+                        "inner_thought": "Practice actual referral."
                     }
                 ]
             },
             "success_tutorial": {
                 "isEnd": true,
                 "result": "success",
-                "message": "Tutorial Complete! You're ready to help. Name: Alex (Guide). Result: Prepared.",
+                "message": "Tutorial Complete! You've mastered the controls, discovered the mini-games, and learned how to refer. Alex is safe. You're ready for the Park mission.",
                 "npc_emotion": "relief"
             }
         }
