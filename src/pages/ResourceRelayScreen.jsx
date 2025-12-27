@@ -11,6 +11,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
     const [gameState, setGameState] = useState('INTRO'); // INTRO, PLAYING, RESOLVING, WIN, LOSE
     const [feedback, setFeedback] = useState(null); // { type: 'success' | 'failure', msg: string }
     const [samEmotion, setSamEmotion] = useState('anxious');
+    const [inspectedCard, setInspectedCard] = useState(null);
 
     // Animation States
     const [isSamAttacking, setIsSamAttacking] = useState(false);
@@ -59,7 +60,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
 
     const handleCardPlay = (card) => {
         if (gameState !== 'PLAYING') return;
-
+        setInspectedCard(null);
         setGameState('RESOLVING');
 
         // Check match
@@ -151,6 +152,43 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                     )}
                 </div>
 
+                {/* Info Modal Overlay */}
+                {inspectedCard && (
+                    <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+                        <div className="max-w-sm w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl border-t-8 border-indigo-500 animate-slide-up relative">
+                            <button onClick={() => setInspectedCard(null)} className="absolute top-6 right-6 text-slate-300 hover:text-slate-500 transition-colors py-2 px-2">✕</button>
+
+                            <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <img src={inspectedCard.icon} alt={inspectedCard.title} className="w-12 h-12 object-contain" />
+                            </div>
+
+                            <span className="inline-block bg-indigo-100 text-indigo-700 text-[10px] font-black px-3 py-1 rounded-full uppercase mb-2">Resource Profile</span>
+                            <h2 className="text-2xl font-black text-slate-900 mb-4">{inspectedCard.title}</h2>
+
+                            <div className="bg-slate-50 p-4 rounded-2xl mb-8">
+                                <p className="text-slate-600 text-sm font-medium leading-relaxed italic">
+                                    "{inspectedCard.learn_info}"
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => handleCardPlay(inspectedCard)}
+                                    className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg active:scale-95"
+                                >
+                                    Use this Resource
+                                </button>
+                                <button
+                                    onClick={() => setInspectedCard(null)}
+                                    className="w-full py-2 text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors"
+                                >
+                                    Keep Browsing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Player Hand Area */}
                 {gameState === 'WIN' ? (
                     <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-fade-in">
@@ -188,7 +226,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                         {playerHand.map((card, i) => (
                             <button
                                 key={card.id + i}
-                                onClick={() => handleCardPlay(card)}
+                                onClick={() => setInspectedCard(card)}
                                 className="group relative w-32 h-44 md:w-40 md:h-56 bg-white rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out border-4 border-slate-100 hover:border-indigo-400 hover:z-50 active:scale-95 translate-y-0"
                                 style={{
                                     transform: `rotate(${(i - (playerHand.length - 1) / 2) * 5}deg) translateY(${Math.abs((i - (playerHand.length - 1) / 2) * 10)}px)`,

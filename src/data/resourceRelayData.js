@@ -42,6 +42,7 @@ export const PLAYER_CARDS = [
         title: "KIRAN Helpline",
         type: "National",
         desc: "1800-599-0019. Free, 24/7 mental health support in 13 languages.",
+        learn_info: "KIRAN is India's national 24/7 toll-free mental health rehabilitation helpline. It offers early screening, psychological support, and crisis management in 13 regional languages. It is managed by the Ministry of Social Justice and Empowerment.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
@@ -49,6 +50,7 @@ export const PLAYER_CARDS = [
         title: "DISHA Kerala",
         type: "Local",
         desc: "Call 1056. Kerala's dedicated health helpline. Trusted and local.",
+        learn_info: "DISHA (1056) is Kerala's 24-hour health helpline. It provides accurate health information, psychosocial support, and referral services. It is a vital link for Malayalis to access government health services and crisis intervention.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
@@ -56,6 +58,7 @@ export const PLAYER_CARDS = [
         title: "Trustworthy Teacher",
         type: "In-Person",
         desc: "A teacher or professor who can provide guidance and academic support.",
+        learn_info: "In the Indian academic system, a trusted teacher can act as a bridge between students and parents. They can advocate for 'academic grace' and help navigate high-pressure exam cycles like NEET or JEE.",
         icon: "/stickman_assets/scholar_stickman.svg"
     },
     {
@@ -63,6 +66,7 @@ export const PLAYER_CARDS = [
         title: "AASRA Support",
         type: "Confidential",
         desc: "Expert crisis support for those feeling alone or suicidal.",
+        learn_info: "AASRA is a non-profit organization that provides voluntary, professional, and confidential support to people who are suicidal or in deep emotional distress. They are pioneers in suicide prevention in India.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
@@ -70,6 +74,7 @@ export const PLAYER_CARDS = [
         title: "Cyber Cell India",
         type: "Security",
         desc: "Report online harassment and protect your digital privacy.",
+        learn_info: "The National Cyber Crime Reporting Portal (1930) allows Indian citizens to report digital harassment, stalking, and non-consensual image sharing anonymously. It is the primary legal resource for digital safety.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
@@ -77,6 +82,7 @@ export const PLAYER_CARDS = [
         title: "Kudumbashree Network",
         type: "Community",
         desc: "Local community support system in Kerala for social and mental well-being.",
+        learn_info: "Kudumbashree is the poverty eradication and women empowerment programme of Kerala. Their 'Snehitha' gender help desks provide short-stay facilities, counseling, and legal aid for women in crisis.",
         icon: "/stickman_assets/stickman_hands.svg"
     }
 ];
