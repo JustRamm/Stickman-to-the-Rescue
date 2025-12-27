@@ -294,13 +294,16 @@ const App = () => {
       setTimeout(() => setCoachFeedback(null), 5000);
     }
 
+    // Dynamic timeout based on text length to prevent cutoff
+    const readTime = Math.max(2500, selectedOption.text.length * 80);
+
     audioManager.speak(selectedOption.text, false, playerGender, null, () => {
       setTimeout(() => {
         setPlayerLastSaid(null);
         // Pre-emptively set speaking state to prevent DialogueBox flicker
         setIsNpcSpeaking(true);
         setCurrentNodeId(nextNodeId);
-      }, 1000);
+      }, readTime);
     });
   };
 
@@ -352,8 +355,12 @@ const App = () => {
 
       const timer = setTimeout(() => {
         audioManager.speak(text, true, npcGender, npcVoice, () => {
-          setIsNpcSpeaking(false);
-          if (!isEnd) setNpcLastSaid(null);
+          // Add a "Read Buffer" after audio ends so text doesn't vanish instantly
+          const bufferTime = Math.max(1500, text.length * 30);
+          setTimeout(() => {
+            setIsNpcSpeaking(false);
+            if (!isEnd) setNpcLastSaid(null);
+          }, bufferTime);
         });
       }, 500);
 
@@ -385,6 +392,8 @@ const App = () => {
       setSelectedResource(null);
       setTrust(25);
       setPlayerPos({ x: 5, y: 70 });
+      setMoveDir(0); // Ensure FORCE RESET of movement to prevent auto-walk
+
       setCamera({ scale: 1, x: 0, y: 0 });
       setGameState('APPROACH');
       audioManager.startAmbient(mission.theme);
