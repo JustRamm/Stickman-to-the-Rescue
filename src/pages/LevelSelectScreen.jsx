@@ -200,7 +200,15 @@ const LevelSelectScreen = ({
                     <div className="w-6 h-6">
                         <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
                     </div>
-                    <span>Myth vs Fact Game</span>
+                    <span>Myth vs Fact</span>
+                </button>
+
+                <button
+                    onClick={() => onNavigate('RESOURCE_RELAY')}
+                    className="px-6 py-3 bg-white/80 hover:bg-white text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 backdrop-blur-sm border border-indigo-100 shadow-md hover:shadow-xl hover:-translate-y-1"
+                >
+                    <span className="text-lg">🛡️</span>
+                    <span>Referral Battle</span>
                 </button>
 
                 <button

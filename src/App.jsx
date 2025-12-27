@@ -17,6 +17,7 @@ import ResourcesScreen from './pages/ResourcesScreen';
 import FinalSuccessScreen from './pages/FinalSuccessScreen';
 import ResolutionScreen from './pages/ResolutionScreen';
 import HandoffScreen from './pages/HandoffScreen';
+import ResourceRelayScreen from './pages/ResourceRelayScreen';
 
 // Data
 import dialogueData from './dialogue.json';
@@ -379,6 +380,7 @@ const App = () => {
   if (gameState === 'FINAL_SUCCESS') return <FinalSuccessScreen onRestart={() => { setGameState('START'); setCompletedLevels([]); audioManager.playVictory(); }} />;
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
+  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
 
   // Main Game View (APPROACH / DIALOGUE)
   return (
