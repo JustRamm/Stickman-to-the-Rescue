@@ -313,9 +313,44 @@ const App = () => {
   // --- RENDER ---
 
   if (isPortrait) return (
-    <div className="fixed inset-0 z-[9999] bg-slate-900 flex flex-col items-center justify-center text-center p-8 text-white">
-      <div className="text-4xl animate-bounce">📱</div>
-      <p className="mt-4 font-bold uppercase tracking-widest">Please Rotate Device</p>
+    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 to-indigo-950 flex flex-col items-center justify-center text-center p-8 text-white overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-10 right-10 w-40 h-40 bg-teal-500 rounded-full blur-[100px]"></div>
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center">
+        {/* Animated Icon */}
+        <div className="w-24 h-24 mb-8 relative">
+          <div className="absolute inset-0 bg-white/10 rounded-full animate-ping"></div>
+          <div className="relative w-full h-full bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl">
+            <svg className="w-10 h-10 text-white animate-spin-slow-pause" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </div>
+          <div className="absolute -right-2 -bottom-2">
+            <img src="/stickman_assets/pointing_stickman.svg" className="w-12 h-12 filter invert drop-shadow-md animate-bounce" alt="" />
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-black uppercase tracking-[0.2em] mb-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-indigo-200">
+          Mobile View
+        </h2>
+        <p className="text-slate-300 font-medium text-sm max-w-[260px] leading-relaxed">
+          For the best experience, please rotate your device to <span className="text-white font-bold">Landscape Mode</span>.
+        </p>
+
+        <div className="mt-12 flex items-center gap-4 opacity-50">
+          <div className="w-12 h-8 border-2 border-white/30 rounded flex items-center justify-center">
+            <span className="text-[10px] font-bold">Portrait</span>
+          </div>
+          <span className="text-xl">→</span>
+          <div className="w-16 h-8 border-2 border-white rounded bg-white/10 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <span className="text-[10px] font-bold text-teal-200">Landscape</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 
 const QuizGameScreen = ({ audioManager, onExit }) => {
@@ -6,9 +6,12 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
     const [quizCards, setQuizCards] = useState({ deck: [], myth: [], fact: [] });
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
+    const [isThrowing, setIsThrowing] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [activeDragCard, setActiveDragCard] = useState(null);
     const [showResults, setShowResults] = useState(false);
+    const dragStartTime = useRef(0);
+    const lastHapticTarget = useRef(null);
 
     useEffect(() => {
         setQuizCards({
@@ -46,28 +49,57 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
         setDragStart({ x: clientX, y: clientY });
         setDragPosition({ x: 0, y: 0 });
         setActiveDragCard({ card, source });
+        dragStartTime.current = Date.now();
     };
 
     const handleCardDragMove = (e) => {
         if (!isDragging) return;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const currentMoveX = clientX - dragStart.x;
+
         setDragPosition({
-            x: clientX - dragStart.x,
+            x: currentMoveX,
             y: clientY - dragStart.y
         });
+
+        // Zone Entry Haptics
+        let currentTarget = null;
+        if (activeDragCard?.source === 'deck') {
+            if (currentMoveX < -100) currentTarget = 'myth';
+            else if (currentMoveX > 100) currentTarget = 'fact';
+        }
+
+        if (currentTarget && currentTarget !== lastHapticTarget.current) {
+            if (navigator.vibrate) navigator.vibrate(10); // Light tick on entry
+            lastHapticTarget.current = currentTarget;
+        } else if (!currentTarget) {
+            lastHapticTarget.current = null;
+        }
     };
 
     const handleCardDragEnd = () => {
-        if (!isDragging || !activeDragCard) return;
-        setIsDragging(false);
+        if ((!isDragging && !isThrowing) || !activeDragCard) return;
 
-        let target = 'deck';
+        const timeElapsed = Date.now() - dragStartTime.current;
         const moveX = dragPosition.x;
+        const velocity = Math.abs(moveX) / (timeElapsed || 1); // px/ms
 
+        let target = activeDragCard.source;
+        let isFlick = false;
+
+        // Logic for deck source (throwing cards from deck)
         if (activeDragCard.source === 'deck') {
-            if (moveX < -100) target = 'myth';
-            if (moveX > 100) target = 'fact';
+            // Flick threshold: >0.5 px/ms velocity AND moved at least 20px
+            if (velocity > 0.5 && Math.abs(moveX) > 20) {
+                isFlick = true;
+                if (moveX < 0) target = 'myth';
+                else target = 'fact';
+            } else {
+                // Classic distance threshold
+                if (moveX < -100) target = 'myth';
+                if (moveX > 100) target = 'fact';
+            }
         } else if (activeDragCard.source === 'myth') {
             if (moveX > 300) target = 'fact';
             else if (moveX > 100) target = 'deck';
@@ -78,15 +110,56 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
             else target = 'fact';
         }
 
-        if (target !== activeDragCard.source) {
-            moveCard(activeDragCard.card, activeDragCard.source, target);
+        // Handle Flick/Throw Animation
+        if (isFlick && target !== activeDragCard.source) {
+            setIsDragging(false);
+            setIsThrowing(true);
+            const throwDistance = window.innerWidth;
+            const throwX = moveX > 0 ? throwDistance : -throwDistance;
+            // Add a slight Y arc or continuation based on trajectory
+            const throwY = dragPosition.y * 2;
+
+            setDragPosition({ x: throwX, y: throwY });
+
+            // Wait for transition to complete before updating state
+            setTimeout(() => {
+                finalizeMove(activeDragCard.card, activeDragCard.source, target);
+                setIsThrowing(false);
+                setDragPosition({ x: 0, y: 0 });
+                setActiveDragCard(null);
+            }, 300); // Matches CSS transition duration
+            return;
+        }
+
+        // Standard drop (no flick or piledrop)
+        finalizeMove(activeDragCard.card, activeDragCard.source, target);
+        setIsDragging(false);
+        if (!isFlick) {
+            setDragPosition({ x: 0, y: 0 });
+            setActiveDragCard(null);
+        }
+    };
+
+    const finalizeMove = (card, from, to) => {
+        if (to !== from) {
+            moveCard(card, from, to);
+
+            // Result Haptics
+            if (to === 'myth' || to === 'fact') {
+                const isCorrect = (to === 'myth' && card.answer === 'Myth') || (to === 'fact' && card.answer === 'Fact');
+                if (navigator.vibrate) {
+                    if (isCorrect) navigator.vibrate(50); // Crisp success
+                    else navigator.vibrate([50, 50, 50]); // Heavy failure buzz
+                }
+            }
+
+            // Haptic feedback for drops (generic)
+            if (navigator.vibrate) navigator.vibrate(10);
+
             if (audioManager && typeof audioManager.playDing === 'function') {
                 audioManager.playDing();
             }
         }
-
-        setDragPosition({ x: 0, y: 0 });
-        setActiveDragCard(null);
     };
 
     const moveCard = (card, from, to) => {
@@ -144,7 +217,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
             <div className="relative z-50 px-6 py-4 flex justify-between items-center bg-white/10 backdrop-blur-md border-b border-white/10 shadow-lg">
                 <button
                     onClick={onExit}
-                    className="group flex items-center gap-2 px-6 py-2 rounded-full bg-red-500 hover:bg-red-600 transition-all border border-red-400 shadow-md transform hover:scale-105"
+                    className="group flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-full bg-red-500 hover:bg-red-600 transition-all border border-red-400 shadow-md transform hover:scale-105 active:scale-95"
                 >
                     <span className="text-white text-xs font-bold uppercase tracking-widest">Exit</span>
                 </button>
@@ -163,7 +236,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                     {isDeckEmpty && !showResults && (
                         <button
                             onClick={finishQuiz}
-                            className="bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:from-teal-300 hover:to-emerald-400 shadow-lg shadow-teal-500/30 transform hover:scale-105 transition-all outline-none border border-white/20"
+                            className="bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-6 py-3 min-h-[44px] rounded-full text-xs font-bold uppercase tracking-wider hover:from-teal-300 hover:to-emerald-400 shadow-lg shadow-teal-500/30 transform hover:scale-105 active:scale-95 transition-all outline-none border border-white/20"
                         >
                             Finish
                         </button>
@@ -175,82 +248,80 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                 <div className="flex-1 relative flex items-center justify-center overflow-hidden">
 
                     {/* Left Zone: MYTH */}
-                    <div className="absolute inset-y-4 left-4 w-[30%] md:w-1/3 bg-white/5 backdrop-blur-sm border-2 border-orange-400/30 rounded-3xl flex flex-col items-center justify-start pt-20 p-4 z-10 overflow-visible transition-colors hover:bg-orange-500/10 hover:border-orange-400/50">
+                    <div className="absolute bottom-4 left-4 w-[42%] h-40 md:inset-y-4 md:w-1/3 md:h-auto bg-white/5 backdrop-blur-sm border-2 border-orange-400/30 rounded-3xl flex flex-col items-center justify-start md:pt-20 p-2 md:p-4 z-10 overflow-visible transition-colors hover:bg-orange-500/10 hover:border-orange-400/50">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none mix-blend-overlay">
-                            <img src="/stickman_assets/guy_distressed.svg" alt="Myth" className="w-64 h-64 filter invert" />
+                            <img src="/stickman_assets/guy_distressed.svg" alt="Myth" className="w-24 h-24 md:w-64 md:h-64 filter invert" />
                         </div>
-                        <div className="absolute top-6 left-0 w-full text-center">
-                            <h2 className="text-3xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-orange-300 to-orange-500 tracking-[0.2em] drop-shadow-sm">MYTH</h2>
+                        <div className="absolute md:top-6 top-2 left-0 w-full text-center">
+                            <h2 className="text-xl md:text-3xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-orange-300 to-orange-500 tracking-[0.2em] drop-shadow-sm">MYTH</h2>
                         </div>
 
                         {/* Myth Pile - Cascading */}
-                        <div className="relative w-full max-w-[220px] flex flex-col items-center mt-8">
+                        <div className="relative w-full max-w-[220px] flex flex-col items-center mt-8 md:mt-8 h-full justify-center md:justify-start">
                             {quizCards.myth.length === 0 && (
-                                <div className="absolute top-0 w-full h-[240px] border-3 border-dashed border-orange-400/30 rounded-2xl flex flex-col items-center justify-center opacity-70 group">
-                                    <div className="w-20 h-20 rounded-full bg-orange-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                        <img src="/stickman_assets/pointing_stickman.svg" className="w-12 h-12 opacity-60" alt="Drop Here" />
+                                <div className="absolute top-0 w-full h-full md:h-[240px] border-2 md:border-3 border-dashed border-orange-400/30 rounded-2xl flex flex-col items-center justify-center opacity-70 group">
+                                    <div className="w-10 h-10 md:w-20 md:h-20 rounded-full bg-orange-500/20 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform">
+                                        <img src="/stickman_assets/pointing_stickman.svg" className="w-6 h-6 md:w-12 md:h-12 opacity-60" alt="Drop Here" />
                                     </div>
-                                    <span className="text-orange-200 font-bold uppercase text-xs tracking-widest">Drop Myths Here</span>
+                                    <span className="text-orange-200 font-bold uppercase text-[8px] md:text-xs tracking-widest text-center">Drop<br className="md:hidden" /> Myths</span>
                                 </div>
                             )}
                             {quizCards.myth.map((card, i) => (
                                 <div
                                     key={card.id}
-                                    className="absolute w-full h-[160px] md:h-[220px] bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-xl border-2 border-orange-200 flex flex-col items-center p-4 text-center cursor-grab active:cursor-grabbing hover:-translate-y-2 transition-all duration-300"
+                                    className="absolute w-full h-[120px] md:h-[220px] bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl md:rounded-2xl shadow-xl border-2 border-orange-200 flex flex-col items-center p-2 md:p-4 text-center cursor-grab active:cursor-grabbing hover:-translate-y-2 transition-all duration-300 transform scale-75 md:scale-100 origin-bottom"
                                     style={{
                                         zIndex: i,
-                                        top: `${i * 35}px`,
-                                        transform: `scale(${1 - (quizCards.myth.length - 1 - i) * 0.05})`,
+                                        top: `${i * 10}px`, // Tighter stack on mobile
                                         opacity: (activeDragCard?.card.id === card.id) ? 0 : 1
                                     }}
                                     onMouseDown={(e) => handleCardDragStart(e, card, 'myth')}
                                     onTouchStart={(e) => handleCardDragStart(e, card, 'myth')}
                                 >
-                                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center shadow-md border-2 border-white">
-                                        <img src="/stickman_assets/sad_stickman.svg" className="w-5 h-5 filter invert" alt="Wrong" />
+                                    <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-8 md:h-8 bg-orange-500 rounded-full flex items-center justify-center shadow-md border-2 border-white">
+                                        <img src="/stickman_assets/sad_stickman.svg" className="w-4 h-4 md:w-5 md:h-5 filter invert" alt="Wrong" />
                                     </div>
-                                    <p className="mt-4 text-[10px] md:text-sm font-bold text-slate-800 leading-snug pointer-events-none line-clamp-4">{card.question}</p>
+                                    <p className="mt-2 md:mt-4 text-[8px] md:text-sm font-bold text-slate-800 leading-snug pointer-events-none line-clamp-3 md:line-clamp-4">{card.question}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     {/* Right Zone: FACT */}
-                    <div className="absolute inset-y-4 right-4 w-[30%] md:w-1/3 bg-white/5 backdrop-blur-sm border-2 border-teal-400/30 rounded-3xl flex flex-col items-center justify-start pt-20 p-4 z-10 overflow-visible transition-colors hover:bg-teal-500/10 hover:border-teal-400/50">
+                    <div className="absolute bottom-4 right-4 w-[42%] h-40 md:inset-y-4 md:w-1/3 md:h-auto bg-white/5 backdrop-blur-sm border-2 border-teal-400/30 rounded-3xl flex flex-col items-center justify-start md:pt-20 p-2 md:p-4 z-10 overflow-visible transition-colors hover:bg-teal-500/10 hover:border-teal-400/50">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none mix-blend-overlay">
-                            <img src="/stickman_assets/scholar_stickman.svg" alt="Fact" className="w-64 h-64 filter invert" />
+                            <img src="/stickman_assets/scholar_stickman.svg" alt="Fact" className="w-24 h-24 md:w-64 md:h-64 filter invert" />
                         </div>
-                        <div className="absolute top-6 left-0 w-full text-center">
-                            <h2 className="text-3xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-teal-300 to-teal-500 tracking-[0.2em] drop-shadow-sm">FACT</h2>
+                        <div className="absolute md:top-6 top-2 left-0 w-full text-center">
+                            <h2 className="text-xl md:text-3xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-teal-300 to-teal-500 tracking-[0.2em] drop-shadow-sm">FACT</h2>
                         </div>
 
                         {/* Fact Pile - Cascading */}
-                        <div className="relative w-full max-w-[220px] flex flex-col items-center mt-8">
+                        <div className="relative w-full max-w-[220px] flex flex-col items-center mt-8 md:mt-8 h-full justify-center md:justify-start">
                             {quizCards.fact.length === 0 && (
-                                <div className="absolute top-0 w-full h-[240px] border-3 border-dashed border-teal-400/30 rounded-2xl flex flex-col items-center justify-center opacity-70 group">
-                                    <div className="w-20 h-20 rounded-full bg-teal-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                        <img src="/stickman_assets/pointing_stickman.svg" className="w-12 h-12 opacity-60" alt="Drop Here" />
+                                <div className="absolute top-0 w-full h-full md:h-[240px] border-2 md:border-3 border-dashed border-teal-400/30 rounded-2xl flex flex-col items-center justify-center opacity-70 group">
+                                    <div className="w-10 h-10 md:w-20 md:h-20 rounded-full bg-teal-500/20 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform">
+                                        <img src="/stickman_assets/pointing_stickman.svg" className="w-6 h-6 md:w-12 md:h-12 opacity-60" alt="Drop Here" />
                                     </div>
-                                    <span className="text-teal-200 font-bold uppercase text-xs tracking-widest">Drop Facts Here</span>
+                                    <span className="text-teal-200 font-bold uppercase text-[8px] md:text-xs tracking-widest text-center">Drop<br className="md:hidden" /> Facts</span>
                                 </div>
                             )}
                             {quizCards.fact.map((card, i) => (
                                 <div
                                     key={card.id}
-                                    className="absolute w-full h-[160px] md:h-[220px] bg-gradient-to-br from-teal-50 to-teal-100 rounded-2xl shadow-xl border-2 border-teal-200 flex flex-col items-center p-4 text-center cursor-grab active:cursor-grabbing hover:-translate-y-2 transition-all duration-300"
+                                    className="absolute w-full h-[120px] md:h-[220px] bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl md:rounded-2xl shadow-xl border-2 border-teal-200 flex flex-col items-center p-2 md:p-4 text-center cursor-grab active:cursor-grabbing hover:-translate-y-2 transition-all duration-300 transform scale-75 md:scale-100 origin-bottom"
                                     style={{
                                         zIndex: i,
-                                        top: `${i * 35}px`,
-                                        transform: `scale(${1 - (quizCards.fact.length - 1 - i) * 0.05})`,
+                                        top: `${i * 10}px`, // Tighter stack on mobile
                                         opacity: (activeDragCard?.card.id === card.id) ? 0 : 1
                                     }}
                                     onMouseDown={(e) => handleCardDragStart(e, card, 'fact')}
                                     onTouchStart={(e) => handleCardDragStart(e, card, 'fact')}
                                 >
-                                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center shadow-md border-2 border-white">
-                                        <img src="/stickman_assets/happy_stickman.svg" className="w-5 h-5 filter invert" alt="Correct" />
+                                    <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-8 md:h-8 bg-teal-500 rounded-full flex items-center justify-center shadow-md border-2 border-white">
+                                        <img src="/stickman_assets/happy_stickman.svg" className="w-4 h-4 md:w-5 md:h-5 filter invert" alt="Correct" />
                                     </div>
-                                    <p className="mt-4 text-[10px] md:text-sm font-bold text-slate-800 leading-snug pointer-events-none line-clamp-4">{card.question}</p>
+                                    <p className="mt-2 md:mt-4 text-[8px] md:text-sm font-bold text-slate-800 leading-snug pointer-events-none line-clamp-3 md:line-clamp-4">{card.question}</p>
                                 </div>
                             ))}
                         </div>
@@ -275,7 +346,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                         {topDeckCard && (
                             <div
                                 className={`w-[300px] h-[420px] bg-white rounded-3xl shadow-2xl border-[6px] border-white flex flex-col items-center justify-center p-8 text-center cursor-grab active:cursor-grabbing transition-all duration-200 relative z-20 overflow-hidden group
-                                ${(isDragging && activeDragCard?.card.id === topDeckCard.id) ? 'scale-105 opacity-0' : 'scale-100 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]'}
+                                ${((isDragging || isThrowing) && activeDragCard?.card.id === topDeckCard.id) ? 'scale-105 opacity-0 pointer-events-none' : 'scale-100 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]'}
                                 `}
                                 onMouseDown={(e) => handleCardDragStart(e, topDeckCard, 'deck')}
                                 onTouchStart={(e) => handleCardDragStart(e, topDeckCard, 'deck')}
@@ -315,9 +386,9 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                     </div>
 
                     {/* Dragging Ghost/Cursor Follower */}
-                    {isDragging && activeDragCard && (
+                    {(isDragging || isThrowing) && activeDragCard && (
                         <div
-                            className="fixed z-[9999] pointer-events-none w-[200px] h-[40px] md:h-auto bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.4)] rounded-2xl border-4 border-indigo-400 flex items-center justify-center p-4 md:p-6 text-center transform -translate-x-1/2 -translate-y-1/2 rotate-3"
+                            className={`fixed z-[9999] pointer-events-none w-[200px] h-[40px] md:h-auto bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.4)] rounded-2xl border-4 border-indigo-400 flex items-center justify-center p-4 md:p-6 text-center transform -translate-x-1/2 -translate-y-1/2 rotate-3 ${isThrowing ? 'transition-all duration-300 ease-out' : ''}`}
                             style={{
                                 left: dragStart.x + dragPosition.x,
                                 top: dragStart.y + dragPosition.y,
@@ -354,13 +425,13 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                         <div className="flex gap-3">
                             <button
                                 onClick={restartQuiz}
-                                className="px-5 py-2 bg-white text-indigo-600 border-2 border-indigo-100 rounded-full font-bold uppercase tracking-widest hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] md:text-xs shadow-sm"
+                                className="px-5 py-3 min-h-[44px] bg-white text-indigo-600 border-2 border-indigo-100 rounded-full font-bold uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95 flex items-center gap-2 text-[10px] md:text-xs shadow-sm"
                             >
                                 <span className="text-base">↺</span> Restart
                             </button>
                             <button
                                 onClick={onExit}
-                                className="px-6 py-2 bg-slate-900 text-white rounded-full font-bold uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 text-[10px] md:text-xs shadow-md hover:shadow-lg"
+                                className="px-6 py-3 min-h-[44px] bg-slate-900 text-white rounded-full font-bold uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2 text-[10px] md:text-xs shadow-md hover:shadow-lg"
                             >
                                 Menu <span className="text-base">→</span>
                             </button>

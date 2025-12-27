@@ -1,0 +1,27 @@
+{
+    "name": "Stickman to the Rescue",
+    "short_name": "Stickman QPR",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "description": "A serious game simulator teaching the QPR (Question, Persuade, Refer) method for suicide prevention.",
+    "orientation": "landscape",
+    "icons": [
+        {
+            "src": "logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "logo.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "logo.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ]
+}
