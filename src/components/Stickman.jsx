@@ -14,7 +14,9 @@ const Stickman = ({
     gender = 'guy',
     moveDir = 0,
     theme = 'park',
-    textSpeed = 50
+    textSpeed = 50,
+    scale = 1,
+    noWrapper = false
 }) => {
     const isIdle = !isWalking && !isJumping && !isCrouching && !isSitting && !isPhoneChecking;
     const [displayedText, setDisplayedText] = React.useState('');
@@ -78,11 +80,13 @@ const Stickman = ({
 
     return (
         <div
-            className={`absolute stickman-anchor transition-all duration-300 ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
+            className={`${noWrapper ? 'relative' : 'absolute stickman-anchor'} transition-all duration-300 ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
             style={{
-                left: `${position.x}%`,
-                top: `${position.y}%`,
+                left: noWrapper ? undefined : `${position.x}%`,
+                top: noWrapper ? undefined : `${position.y}%`,
                 zIndex: isJumping ? 100 : 20,
+                transform: `scale(${scale})`,
+                transformOrigin: 'bottom center'
             }}
         >
             {/* Distress Visual Cues (Pulse) */}

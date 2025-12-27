@@ -63,7 +63,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         if (gameState !== 'PLAYING') return;
 
         // Keyboard Movement logic
-        const keySpeed = 1.2; // Speed of movement via keys
+        const keySpeed = 1.5;
         if (keysPressed.current['ArrowLeft'] || keysPressed.current['a'] || keysPressed.current['A']) {
             targetXRef.current = Math.max(5, targetXRef.current - keySpeed);
         }
@@ -72,12 +72,16 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         }
 
         // Smooth Movement (Lerp)
-        const lerpFactor = 0.12;
+        const lerpFactor = 0.15;
         currentXRef.current += (targetXRef.current - currentXRef.current) * lerpFactor;
         setPlayerX(currentXRef.current);
 
-        // Spawn items (Much slower spawn rate for better spacing)
-        if (time - lastItemTimeRef.current > 2000) {
+        // Difficulty Scaling
+        const difficultyMultiplier = 1 + (scoreRef.current / 500); // Speed up as score increases
+        const spawnDelay = Math.max(800, 2000 - (scoreRef.current * 2));
+
+        // Spawn items
+        if (time - lastItemTimeRef.current > spawnDelay) {
             const pool = VALIDATION_PHRASES;
             const randomPhrase = pool[Math.floor(Math.random() * pool.length)];
             const newItem = {
@@ -85,9 +89,8 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
                 ...randomPhrase,
                 x: Math.random() * 80 + 10,
                 y: -10, // Start just above visible area
-                // Consistent speed for better rhythm
-                speed: 0.2 + Math.random() * 0.15,
-                scale: 0.9 + Math.random() * 0.1
+                speed: (0.15 + Math.random() * 0.1) * difficultyMultiplier,
+                scale: 0.8 + Math.random() * 0.2
             };
             setFallingItems(prev => [...prev, newItem]);
             lastItemTimeRef.current = time;
@@ -100,21 +103,23 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
                 const newY = item.y + item.speed;
 
                 // Collision check (Basket area)
-                const isColliding = newY > 75 && newY < 85 && Math.abs(item.x - currentXRef.current) < 12;
+                // Expanded hitbox slightly for better feel
+                const isColliding = newY > 72 && newY < 88 && Math.abs(item.x - currentXRef.current) < 15;
 
                 if (isColliding) {
                     if (item.type === 'validating') {
                         scoreRef.current += 10;
                         setScore(scoreRef.current);
                         if (audioManager) audioManager.playDing();
+                        // Haptics
                         if (navigator.vibrate) navigator.vibrate(20);
                     } else {
                         healthRef.current -= 1;
                         setHealth(healthRef.current);
                         if (audioManager) audioManager.playSad();
-                        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
                     }
-                    continue; // Caught item, don't add to nextItems
+                    continue; // Caught
                 }
 
                 if (newY > 105) continue; // Off screen
@@ -135,11 +140,10 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         }
     }, [gameState, audioManager]);
 
+    // Cleanup Loop on Unmount/State Change
     useEffect(() => {
         if (gameState === 'PLAYING') {
             requestRef.current = requestAnimationFrame(update);
-        } else {
-            cancelAnimationFrame(requestRef.current);
         }
         return () => cancelAnimationFrame(requestRef.current);
     }, [gameState, update]);
