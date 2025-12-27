@@ -62,6 +62,11 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
     const update = useCallback((time) => {
         if (gameState !== 'PLAYING') return;
 
+        // Init time check
+        if (!lastItemTimeRef.current) {
+            lastItemTimeRef.current = time;
+        }
+
         // Keyboard Movement logic
         const keySpeed = 1.5;
         if (keysPressed.current['ArrowLeft'] || keysPressed.current['a'] || keysPressed.current['A']) {
@@ -80,12 +85,14 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         const difficultyMultiplier = 1 + (scoreRef.current / 500); // Speed up as score increases
         const spawnDelay = Math.max(800, 2000 - (scoreRef.current * 2));
 
-        // Spawn items
-        if (time - lastItemTimeRef.current > spawnDelay) {
+        // Spawn items check - fallback to force spawn if empty list also
+        const shouldSpawn = (time - lastItemTimeRef.current > spawnDelay) || (fallingItems.length === 0 && (time - lastItemTimeRef.current > 500));
+
+        if (shouldSpawn) {
             const pool = VALIDATION_PHRASES;
             const randomPhrase = pool[Math.floor(Math.random() * pool.length)];
             const newItem = {
-                id: Date.now(),
+                id: Date.now() + Math.random(),
                 ...randomPhrase,
                 x: Math.random() * 80 + 10,
                 y: -10, // Start just above visible area
@@ -104,7 +111,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
 
                 // Collision check (Basket area)
                 // Expanded hitbox slightly for better feel
-                const isColliding = newY > 72 && newY < 88 && Math.abs(item.x - currentXRef.current) < 15;
+                const isColliding = newY > 70 && newY < 90 && Math.abs(item.x - currentXRef.current) < 15;
 
                 if (isColliding) {
                     if (item.type === 'validating') {
@@ -138,7 +145,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         } else {
             requestRef.current = requestAnimationFrame(update);
         }
-    }, [gameState, audioManager]);
+    }, [gameState, audioManager, fallingItems.length]);
 
     // Cleanup Loop on Unmount/State Change
     useEffect(() => {
@@ -157,7 +164,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         currentXRef.current = 50;
         setFallingItems([]);
         setGameState('PLAYING');
-        lastItemTimeRef.current = performance.now();
+        lastItemTimeRef.current = null; // Let the loop initialize this
     };
 
     return (
@@ -201,7 +208,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
             </div>
 
             {/* Game Canvas Overlay */}
-            <div ref={gameContainerRef} className="flex-1 relative overflow-hidden cursor-none">
+            <div ref={gameContainerRef} className="flex-1 relative w-full h-full overflow-hidden cursor-none z-10">
 
                 {gameState === 'INTRO' && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl">
