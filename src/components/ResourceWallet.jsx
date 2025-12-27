@@ -32,12 +32,12 @@ const ResourceWallet = ({ isOpen, resources, onSelectResource, selectedResource 
                         else if (resource.name.includes('Therapist') || resource.name.includes('Counselor')) icon = '🛡️';
                         else if (resource.name.includes('Support')) icon = '🤝';
 
-                        const isSelected = selectedResource === resource.name;
+                        const isSelected = selectedResource === resource.id;
 
                         return (
                             <div
                                 key={resource.id}
-                                onClick={() => onSelectResource(resource.name)}
+                                onClick={() => onSelectResource(resource.id)}
                                 className={`group relative p-4 rounded-xl transition-all duration-200 border-2 cursor-pointer flex items-start gap-4
                                     ${isSelected
                                         ? 'bg-white border-teal-500 shadow-lg translate-x-1'

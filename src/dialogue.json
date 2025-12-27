@@ -217,7 +217,7 @@
             "referral_ready": {
                 "npc_text": "I... I'm a bit scared, but maybe you're right. Tell me what I need to do.",
                 "npc_emotion": "vulnerable",
-                "required_resource": "988 Lifeline",
+                "required_resource": "hotline",
                 "options": [
                     {
                         "text": "We're going to call the Lifeline together. I'll stay right here with you the whole time.",
@@ -393,7 +393,7 @@
             "referral_ready": {
                 "npc_text": "I... I can't think straight. If you know someone who can help... I'll listen. What's the plan?",
                 "npc_emotion": "vulnerable",
-                "required_resource": "988 Lifeline",
+                "required_resource": "hotline",
                 "options": [
                     {
                         "text": "We're going to call the 988 Lifeline. It's confidential and they know how to help in situations just like this.",
@@ -575,7 +575,7 @@
             "referral_ready": {
                 "npc_text": "Everyone always wants something from me. But you... you actually seem to care. Okay. Where do we go?",
                 "npc_emotion": "vulnerable",
-                "required_resource": "School Counselor",
+                "required_resource": "counselor",
                 "options": [
                     {
                         "text": "Let's head to the School Counselor's office together. I'll walk with you all the way.",
@@ -757,7 +757,7 @@
             "referral_ready": {
                 "npc_text": "I... I'm so cold. If there's really a place... I'll listen. What do we do?",
                 "npc_emotion": "vulnerable",
-                "required_resource": "988 Lifeline",
+                "required_resource": "hotline",
                 "options": [
                     {
                         "text": "We're calling the 988 Lifeline. They'll help us find a safe shelter and support for tonight.",
