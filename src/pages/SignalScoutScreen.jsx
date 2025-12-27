@@ -9,19 +9,22 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
     const [people, setPeople] = useState([]);
     const [feedback, setFeedback] = useState(null); // { text, type: 'good' | 'bad' | 'miss' }
     const [foundSignals, setFoundSignals] = useState([]); // Track unique IDs found
+    const [usedScenarioIds, setUsedScenarioIds] = useState(new Set());
     const spawnTimerRef = useRef(null);
 
 
 
-    // --- Asset Mapping based on Category ---
+    // --- Enhanced Asset Mapping ---
     const getStickmanAsset = (category) => {
-        switch (category) {
-            case 'Youth': return '/stickman_assets/thinking_stickman.svg';
-            case 'Elderly': return '/stickman_assets/sad_stickman.svg'; // Reuse sad for elderly base
-            case 'Men': return '/stickman_assets/guy_distressed.svg';
-            case 'Women': return '/stickman_assets/thinking_stickman.svg';
-            default: return '/stickman_assets/thinking_stickman.svg';
-        }
+        const assets = {
+            'Youth': ['/stickman_assets/stickman_laptop.svg', '/stickman_assets/stickman_phone.svg', '/stickman_assets/thinking_stickman.svg', '/stickman_assets/girl_idle.svg'],
+            'Elderly': ['/stickman_assets/sad_stickman.svg', '/stickman_assets/empty_stickman.svg', '/stickman_assets/stickman_group.svg'],
+            'Men': ['/stickman_assets/guy_distressed.svg', '/stickman_assets/guy_idle.svg', '/stickman_assets/guy_walk_right.svg', '/stickman_assets/stickman_phone.svg'],
+            'Women': ['/stickman_assets/girl_walk_right.svg', '/stickman_assets/girl_idle.svg', '/stickman_assets/thinking_stickman.svg', '/stickman_assets/dog_walker.svg']
+        };
+
+        const categoryAssets = assets[category] || assets['Youth'];
+        return categoryAssets[Math.floor(Math.random() * categoryAssets.length)];
     };
 
     // --- Game Logic ---
@@ -32,7 +35,8 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
         setTimeLeft(60);
         setPeople([]);
         setFoundSignals([]);
-        if (audioManager) audioManager.startAmbient('park'); // Reuse park ambient
+        setUsedScenarioIds(new Set()); // Reset used scenarios
+        if (audioManager) audioManager.startAmbient('park');
     };
 
     // Timer
@@ -56,7 +60,21 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
         if (gameState !== 'PLAYING') return;
 
         const spawnPerson = () => {
-            const scenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+            // Filter scenarios that haven't been used yet
+            const availableScenarios = SCENARIOS.filter(s => !usedScenarioIds.has(s.id));
+
+            // If all used, reset or pick random (fail-safe)
+            if (availableScenarios.length === 0) {
+                // Optional: setUsedScenarioIds(new Set()); 
+                // For now, just pick random if exhausted to keep game flowing
+            }
+
+            const pool = availableScenarios.length > 0 ? availableScenarios : SCENARIOS;
+            const scenario = pool[Math.floor(Math.random() * pool.length)];
+
+            // Mark as used
+            setUsedScenarioIds(prev => new Set(prev).add(scenario.id));
+
             const isLeftStart = Math.random() > 0.5;
 
             const newPerson = {
