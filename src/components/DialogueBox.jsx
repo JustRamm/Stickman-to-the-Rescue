@@ -37,7 +37,13 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
                     {requiredResource ? (
                         /* Unified Single Referral Button */
                         <button
-                            onClick={() => isCorrectResource && onSelectOption(options[0])}
+                            onClick={() => {
+                                if (isCorrectResource) {
+                                    // Find the success option that leads to success_end or success_tutorial
+                                    const successOption = options.find(o => o.next_node?.includes('success')) || options[0];
+                                    onSelectOption(successOption);
+                                }
+                            }}
                             className={`group relative w-full text-center p-4 md:p-6 rounded-lg md:rounded-2xl transition-all duration-300 border-2 flex flex-col items-center gap-2
                                 ${isCorrectResource
                                     ? 'bg-teal-500 border-teal-400 text-white shadow-[0_0_20px_rgba(20,184,166,0.4)] hover:scale-[1.02] active:scale-95'
