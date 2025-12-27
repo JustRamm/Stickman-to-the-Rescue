@@ -27,6 +27,15 @@ const SettingsOverlay = ({
 
                 {/* Minimal Training Icons Row */}
                 <div className="flex gap-2.5">
+                    {/* Signal Scout (New) */}
+                    <button
+                        onClick={() => { onResetGame && onResetGame(); onNavigate('SIGNAL_SCOUT'); setIsSettingsOpen(false); }}
+                        className="w-10 h-10 md:w-11 md:h-11 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg p-2.5 group relative"
+                    >
+                        <img src="/stickman_assets/scout_stickman.svg" alt="Signal Scout" className="w-full h-full object-contain" />
+                        <span className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2.5 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl">Signal Scout</span>
+                    </button>
+
                     {/* Quiz Game */}
                     <button
                         onClick={() => { onResetGame && onResetGame(); onNavigate('QUIZ_MODE'); setIsSettingsOpen(false); }}

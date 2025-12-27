@@ -19,6 +19,7 @@ import ResolutionScreen from './pages/ResolutionScreen';
 import HandoffScreen from './pages/HandoffScreen';
 import ResourceRelayScreen from './pages/ResourceRelayScreen';
 import ValidationCatchScreen from './pages/ValidationCatchScreen';
+import SignalScoutScreen from './pages/SignalScoutScreen'; // New Game
 import TutorialOverlay from './pages/TutorialOverlay';
 
 // Data
@@ -453,6 +454,7 @@ const App = () => {
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
   if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
   if (gameState === 'VALIDATION_CATCH') return <ValidationCatchScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
+  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>

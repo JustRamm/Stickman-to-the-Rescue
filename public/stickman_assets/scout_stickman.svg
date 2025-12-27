@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Stickman Body -->
+  <line x1="50" y1="60" x2="50" y2="85" stroke="black" stroke-width="4" stroke-linecap="round"/>
+  <line x1="50" y1="85" x2="35" y2="100" stroke="black" stroke-width="4" stroke-linecap="round"/>
+  <line x1="50" y1="85" x2="65" y2="100" stroke="black" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Arms holding binoculars -->
+  <path d="M50 65 Q 35 60 40 50" stroke="black" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M50 65 Q 65 60 60 50" stroke="black" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Head -->
+  <circle cx="50" cy="45" r="12" fill="white" stroke="black" stroke-width="4"/>
+
+  <!-- Binoculars -->
+  <rect x="38" y="42" width="10" height="8" rx="1" fill="#334155" stroke="black" stroke-width="1"/>
+  <rect x="52" y="42" width="10" height="8" rx="1" fill="#334155" stroke="black" stroke-width="1"/>
+  <line x1="48" y1="46" x2="52" y2="46" stroke="black" stroke-width="2"/>
+  
+  <!-- Lens Glint -->
+  <circle cx="41" cy="44" r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="55" cy="44" r="1.5" fill="white" opacity="0.5"/>
+</svg>
