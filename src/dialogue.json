@@ -890,10 +890,10 @@
             "referral_ready": {
                 "npc_text": "I... I suppose I've got nothing left to lose. If you think it'll help, tell me what to do.",
                 "npc_emotion": "vulnerable",
-                "required_resource": "988 Lifeline",
+                "required_resource": "hotline",
                 "options": [
                     {
-                        "text": "We're going to call the 988 Lifeline. I'll stay right here by your side while we talk to them.",
+                        "text": "We're going to call the KIRAN Helpline. I'll stay right here by your side while we talk to them.",
                         "next": "success_end",
                         "trust_impact": 25,
                         "inner_thought": "The final step: Active referral with accompaniment."
