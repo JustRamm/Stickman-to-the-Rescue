@@ -36,13 +36,15 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
         setSamEmotion(obs.stickman_emotion);
 
         // Deal hand (ensure at least one winning card + random distractors)
-        const winningCardId = obs.weaknesses[Math.floor(Math.random() * obs.weaknesses.length)];
-        const winningCard = PLAYER_CARDS.find(c => c.id === winningCardId);
+        const possibleWinners = obs.weaknesses.map(id => PLAYER_CARDS.find(c => c.id === id)).filter(Boolean);
+        const winningCard = possibleWinners.length > 0
+            ? possibleWinners[Math.floor(Math.random() * possibleWinners.length)]
+            : PLAYER_CARDS[0]; // Fallback
 
         let hand = [winningCard];
         while (hand.length < 4) {
             const randomCard = PLAYER_CARDS[Math.floor(Math.random() * PLAYER_CARDS.length)];
-            if (!hand.find(c => c.id === randomCard.id)) {
+            if (randomCard && !hand.some(c => c?.id === randomCard.id)) {
                 hand.push(randomCard);
             }
         }

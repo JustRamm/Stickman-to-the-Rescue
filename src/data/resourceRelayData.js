@@ -48,14 +48,42 @@ export const PLAYER_CARDS = [
         id: 'hotline',
         title: "988 Lifeline",
         type: "Phone",
-        desc: "Call or text 988. Free, 24/7, Confidential. Available anywhere.",
+        desc: "Call 988. Free, 24/7, Confidential. Available anywhere.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {
         id: 'counselor',
-        title: "School Counselor",
+        title: "Professional Counselor",
         type: "In-Person",
-        desc: "Specialized student support available on campus during hours.",
+        desc: "Specialized, one-on-one professional support for long-term care.",
         icon: "/stickman_assets/scholar_stickman.svg"
+    },
+    {
+        id: 'textline',
+        title: "Crisis Text Line",
+        type: "Message",
+        desc: "Text HOME to 741741. Perfect for when you can't talk aloud.",
+        icon: "/stickman_assets/stickman_phone.svg"
+    },
+    {
+        id: 'support_group',
+        title: "Support Group",
+        type: "Community",
+        desc: "Connect with others who share similar lived experiences.",
+        icon: "/stickman_assets/stickman_hands.svg"
+    },
+    {
+        id: 'forum',
+        title: "Peer Forum",
+        type: "Online",
+        desc: "Safe, moderated online spaces for anonymous peer support.",
+        icon: "/stickman_assets/stickman_phone.svg"
+    },
+    {
+        id: '911',
+        title: "Emergency Services",
+        type: "Emergency",
+        desc: "Call 911 immediately if there is a threat of physical harm.",
+        icon: "/stickman_assets/stickman_phone.svg"
     }
 ];
