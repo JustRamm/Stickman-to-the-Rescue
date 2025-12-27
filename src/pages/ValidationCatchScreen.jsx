@@ -16,12 +16,13 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
     const lastItemTimeRef = useRef(0);
     const scoreRef = useRef(0);
     const healthRef = useRef(3);
-    const targetXRef = useRef(50); // Where the mouse/touch is
+    const targetXRef = useRef(50); // Where the mouse/touch/key wants to be
     const currentXRef = useRef(50); // Where the basket actually is
+    const keysPressed = useRef({}); // Track held keys
 
     const WIN_SCORE = 100;
 
-    // Movement Logic
+    // Input Listeners
     useEffect(() => {
         const handleMouseMove = (e) => {
             if (gameState !== 'PLAYING' || !gameContainerRef.current) return;
@@ -38,11 +39,22 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
             targetXRef.current = Math.max(5, Math.min(95, x));
         };
 
+        const handleKeyDown = (e) => {
+            keysPressed.current[e.key] = true;
+        };
+        const handleKeyUp = (e) => {
+            keysPressed.current[e.key] = false;
+        };
+
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
         };
     }, [gameState]);
 
@@ -50,8 +62,17 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
     const update = useCallback((time) => {
         if (gameState !== 'PLAYING') return;
 
+        // Keyboard Movement logic
+        const keySpeed = 1.2; // Speed of movement via keys
+        if (keysPressed.current['ArrowLeft'] || keysPressed.current['a'] || keysPressed.current['A']) {
+            targetXRef.current = Math.max(5, targetXRef.current - keySpeed);
+        }
+        if (keysPressed.current['ArrowRight'] || keysPressed.current['d'] || keysPressed.current['D']) {
+            targetXRef.current = Math.min(95, targetXRef.current + keySpeed);
+        }
+
         // Smooth Movement (Lerp)
-        const lerpFactor = 0.12; // Smoother, slightly slower response
+        const lerpFactor = 0.12;
         currentXRef.current += (targetXRef.current - currentXRef.current) * lerpFactor;
         setPlayerX(currentXRef.current);
 
@@ -249,7 +270,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
 
                         {/* Visual Instruction Overlay */}
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-black/40 backdrop-blur-xl px-10 py-3 rounded-full border border-white/10 shadow-2xl">
-                            <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.5em] animate-pulse">Catch the Empathy</span>
+                            <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.5em] animate-pulse">Use Keys [← →] or Mouse to Catch</span>
                         </div>
                     </>
                 )}
