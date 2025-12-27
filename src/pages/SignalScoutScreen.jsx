@@ -92,14 +92,15 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             setPeople(prev => [...prev, newPerson]);
         };
 
-        // Initial spawn
+        // Initial spawn - Call twice immediately to populate screen
+        spawnPerson();
         spawnPerson();
 
-        // Slower spawn interval to prevent clutter
-        spawnTimerRef.current = setInterval(spawnPerson, 2500);
+        // Spawn interval
+        spawnTimerRef.current = setInterval(spawnPerson, 2000);
 
         return () => clearInterval(spawnTimerRef.current);
-    }, [gameState]);
+    }, [gameState, usedScenarioIds]);
 
     // Movement Loop using RequestAnimationFrame via Interval for React simplicity
     useEffect(() => {

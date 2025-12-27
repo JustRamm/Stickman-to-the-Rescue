@@ -84,10 +84,10 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
                 id: Date.now(),
                 ...randomPhrase,
                 x: Math.random() * 80 + 10,
-                y: -15,
-                // Significantly slower speed for readability
-                speed: 0.12 + Math.random() * 0.1,
-                scale: 0.9 + Math.random() * 0.3
+                y: -10, // Start just above visible area
+                // Consistent speed for better rhythm
+                speed: 0.2 + Math.random() * 0.15,
+                scale: 0.9 + Math.random() * 0.1
             };
             setFallingItems(prev => [...prev, newItem]);
             lastItemTimeRef.current = time;
