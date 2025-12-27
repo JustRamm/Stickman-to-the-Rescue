@@ -194,43 +194,81 @@ const LevelSelectScreen = ({
                 </div>
             </div>
 
-            {/* Resources Footer */}
-            <div className="relative z-20 flex justify-center mt-6 mb-8 gap-6 px-4 flex-wrap">
-                <button
-                    onClick={() => onNavigate('QUIZ_MODE')}
-                    className="group px-8 py-4 bg-white hover:bg-teal-50 text-teal-700 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-4 backdrop-blur-sm border-2 border-teal-200 shadow-[0_10px_30px_rgba(20,184,166,0.15)] hover:shadow-[0_20px_40px_rgba(20,184,166,0.3)] hover:-translate-y-2 animate-attention-teal btn-shine relative overflow-hidden"
-                >
-                    <div className="absolute -top-1 -right-1 bg-teal-500 text-white text-[8px] px-2 py-0.5 rounded-bl-lg font-black tracking-tighter animate-wiggle">NEW</div>
-                    <div className="w-10 h-10 bg-teal-100 rounded-xl p-2 group-hover:rotate-12 transition-transform">
-                        <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
-                    </div>
-                    <div className="flex flex-col items-start translate-y-0.5">
-                        <span className="text-xs">Myth vs Fact</span>
-                        <span className="text-[7px] text-teal-500/60 font-black tracking-[0.1em]">PRACTICE SKILLS</span>
-                    </div>
-                </button>
+            {/* Enhanced Training Modules Section */}
+            <div className="relative z-20 w-full max-w-5xl mx-auto px-6 mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Rapid Training Modules</span>
+                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-slate-300 to-transparent"></div>
+                </div>
 
-                <button
-                    onClick={() => onNavigate('RESOURCE_RELAY')}
-                    className="group px-8 py-4 bg-white hover:bg-indigo-50 text-indigo-700 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-4 backdrop-blur-sm border-2 border-indigo-200 shadow-[0_10px_30px_rgba(99,102,241,0.15)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:-translate-y-2 animate-attention-indigo btn-shine relative overflow-hidden"
-                >
-                    <div className="absolute -top-1 -right-1 bg-indigo-500 text-white text-[8px] px-2 py-0.5 rounded-bl-lg font-black tracking-tighter animate-wiggle">HOT</div>
-                    <div className="w-10 h-10 bg-indigo-100 rounded-xl p-2 flex items-center justify-center group-hover:-rotate-12 transition-transform">
-                        <span className="text-2xl">🛡️</span>
-                    </div>
-                    <div className="flex flex-col items-start translate-y-0.5">
-                        <span className="text-xs">Referral Battle</span>
-                        <span className="text-[7px] text-indigo-500/60 font-black tracking-[0.1em]">EARN TRUST</span>
-                    </div>
-                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Myth vs Fact Quiz */}
+                    <button
+                        onClick={() => onNavigate('QUIZ_MODE')}
+                        className="group relative overflow-hidden bg-white hover:bg-teal-500 transition-all duration-500 p-1 rounded-[2rem] shadow-xl hover:shadow-teal-500/20 active:scale-95"
+                    >
+                        <div className="bg-white rounded-[1.8rem] p-4 md:p-6 flex items-center gap-5 relative z-10">
+                            <div className="relative h-16 w-16 shrink-0 bg-teal-50 rounded-2xl flex items-center justify-center group-hover:bg-white transition-colors duration-500 shadow-inner">
+                                <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+                                <div className="absolute -top-1 -right-1 flex h-4 w-4">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-4 w-4 bg-teal-500 border-2 border-white"></span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-xl font-black text-slate-800 uppercase tracking-tight group-hover:text-teal-600 transition-colors">Myth vs Fact</h4>
+                                    <span className="text-[8px] font-black bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full uppercase tracking-widest">XP+</span>
+                                </div>
+                                <p className="text-[11px] md:text-sm text-slate-500 font-medium leading-tight">Master the core concepts of QPR through interactive challenges.</p>
+                            </div>
+                            <div className="ml-auto flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-100 group-hover:border-teal-200 group-hover:translate-x-1 transition-all">
+                                <span className="text-xl text-slate-300 group-hover:text-teal-500">→</span>
+                            </div>
+                        </div>
+                        {/* Interactive Sparkle Effect */}
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-teal-100/50 rounded-full blur-3xl group-hover:bg-teal-400/20 transition-all"></div>
+                    </button>
 
-                <button
-                    onClick={() => onNavigate('RESOURCES')}
-                    className="px-6 py-4 bg-slate-900/5 hover:bg-slate-900/10 text-slate-900/60 hover:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 backdrop-blur-sm border border-slate-900/10"
-                >
-                    <span className="text-lg">📚</span>
-                    <span>Resources</span>
-                </button>
+                    {/* Referral Battle */}
+                    <button
+                        onClick={() => onNavigate('RESOURCE_RELAY')}
+                        className="group relative overflow-hidden bg-white hover:bg-indigo-500 transition-all duration-500 p-1 rounded-[2rem] shadow-xl hover:shadow-indigo-500/20 active:scale-95"
+                    >
+                        <div className="bg-white rounded-[1.8rem] p-4 md:p-6 flex items-center gap-5 relative z-10">
+                            <div className="relative h-16 w-16 shrink-0 bg-indigo-50 rounded-2xl flex items-center justify-center group-hover:bg-white transition-colors duration-500 shadow-inner">
+                                <span className="text-4xl group-hover:scale-120 transition-transform">🛡️</span>
+                                <div className="absolute -top-1 -right-1 flex h-4 w-4">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500 border-2 border-white"></span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-xl font-black text-slate-800 uppercase tracking-tight group-hover:text-indigo-600 transition-colors">Referral Battle</h4>
+                                    <span className="text-[8px] font-black bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full uppercase tracking-widest">HOT</span>
+                                </div>
+                                <p className="text-[11px] md:text-sm text-slate-500 font-medium leading-tight">Test your speed and accuracy in matching crises to help.</p>
+                            </div>
+                            <div className="ml-auto flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-100 group-hover:border-indigo-200 group-hover:translate-x-1 transition-all">
+                                <span className="text-xl text-slate-300 group-hover:text-indigo-500">→</span>
+                            </div>
+                        </div>
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-100/50 rounded-full blur-3xl group-hover:bg-indigo-400/20 transition-all"></div>
+                    </button>
+                </div>
+
+                {/* Secondary Resources Link */}
+                <div className="flex justify-center mt-6">
+                    <button
+                        onClick={() => onNavigate('RESOURCES')}
+                        className="px-8 py-3 bg-white/50 hover:bg-white backdrop-blur-sm border border-slate-200 text-slate-500 hover:text-slate-900 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 shadow-sm hover:shadow-md"
+                    >
+                        <span>📚</span>
+                        <span>View Resource Journal</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
