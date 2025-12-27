@@ -193,19 +193,31 @@
             "persuade": {
                 "npc_text": "I don't even know if there's help for someone my age. Who would care?",
                 "npc_emotion": "vulnerable",
+                "options": [
+                    {
+                        "text": "I care, and I know there are people who specialize in helping seniors through exactly this. Will you let me connect you?",
+                        "next": "referral_ready",
+                        "trust_impact": 15,
+                        "inner_thought": "Address the fear of being forgotten or irrelevant."
+                    },
+                    {
+                        "text": "Loneliness is heavy at any age, but you don't have to carry it alone. Can we try calling for some support?",
+                        "next": "referral_ready",
+                        "trust_impact": 10,
+                        "inner_thought": "Validate her loneliness and offer connection."
+                    }
+                ]
+            },
+            "referral_ready": {
+                "npc_text": "I... I'm a bit scared, but maybe you're right. Tell me what I need to do.",
+                "npc_emotion": "vulnerable",
                 "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "I care, and I know the 988 Lifeline cares. They are available 24/7. Shall we call them together?",
+                        "text": "We're going to call the Lifeline together. I'll stay right here with you the whole time.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "Direct referral with accompaniment."
-                    },
-                    {
-                        "text": "There is specializing help for elderly loneliness and crisis. Let's reach out to 988 and see what they suggest.",
-                        "next": "success_end",
-                        "trust_impact": 20,
-                        "inner_thought": "Informational referral."
+                        "inner_thought": "Final referral with accompaniment."
                     }
                 ]
             },
@@ -357,19 +369,31 @@
             "persuade": {
                 "npc_text": "I just don't know where to go. I can't walk back into that lobby and ask for a therapist.",
                 "npc_emotion": "vulnerable",
+                "options": [
+                    {
+                        "text": "You don't have to go back in there. We can find help right here, privately. Would you be willing to talk to someone right now?",
+                        "next": "referral_ready",
+                        "trust_impact": 15,
+                        "inner_thought": "Respect his need for privacy and immediate action."
+                    },
+                    {
+                        "text": "There are resources for both the stress and the financial side of this. Can we start by making one phone call together?",
+                        "next": "referral_ready",
+                        "trust_impact": 10,
+                        "inner_thought": "Address the dual nature of his crisis."
+                    }
+                ]
+            },
+            "referral_ready": {
+                "npc_text": "I... I can't think straight. If you know someone who can help... I'll listen. What's the plan?",
+                "npc_emotion": "vulnerable",
                 "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "You don't have to go back in there. We can call the 988 Lifeline right now, from here. It's confidential.",
+                        "text": "We're going to call the 988 Lifeline. It's confidential and they know how to help in situations just like this.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "Immediate, confidential referral."
-                    },
-                    {
-                        "text": "There are people who can help with both the emotional and financial crisis. Let's start with a call to 988.",
-                        "next": "success_end",
-                        "trust_impact": 20,
-                        "inner_thought": "Holistic support offer."
+                        "inner_thought": "Final referral step."
                     }
                 ]
             },
@@ -527,19 +551,31 @@
             "persuade": {
                 "npc_text": "What if the coach finds out? They'll pull me from the roster.",
                 "npc_emotion": "vulnerable",
+                "options": [
+                    {
+                        "text": "Your safety is more important than any roster. The counselor is confidential—the team doesn't have to know anything. Will you come with me?",
+                        "next": "referral_ready",
+                        "trust_impact": 15,
+                        "inner_thought": "Prioritize health over sports status."
+                    },
+                    {
+                        "text": "Whatever happens on the field, I'm more worried about YOU. Let's go talk to someone who can help carry this load.",
+                        "next": "referral_ready",
+                        "trust_impact": 10,
+                        "inner_thought": "Show care for her as a person."
+                    }
+                ]
+            },
+            "referral_ready": {
+                "npc_text": "Everyone always wants something from me. But you... you actually seem to care. Okay. Where do we go?",
+                "npc_emotion": "vulnerable",
                 "required_resource": "School Counselor",
                 "options": [
                     {
-                        "text": "Your health is more important than the roster. The School Counselor is confidential—let's go see them together.",
+                        "text": "Let's head to the School Counselor's office together. I'll walk with you all the way.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "Confidential, health-first referral."
-                    },
-                    {
-                        "text": "We can figure out the team stuff later. Right now, let's just focus on you getting some support. Shall we walk over?",
-                        "next": "success_end",
-                        "trust_impact": 20,
-                        "inner_thought": "Prioritize immediate safety over long-term fears."
+                        "inner_thought": "Final active referral."
                     }
                 ]
             },
@@ -697,19 +733,31 @@
             "persuade": {
                 "npc_text": "I have no money for a hospital. No one helps the homeless.",
                 "npc_emotion": "vulnerable",
+                "options": [
+                    {
+                        "text": "The help I'm talking about is free, Raj. We can call 988 right now and they can help find you a safe place. Will you let me help you call?",
+                        "next": "referral_ready",
+                        "trust_impact": 15,
+                        "inner_thought": "Remove the barrier of cost."
+                    },
+                    {
+                        "text": "I won't let you face this alone in the dark. There ARE people who care. Let's reach out together and see what we can find.",
+                        "next": "referral_ready",
+                        "trust_impact": 10,
+                        "inner_thought": "Provide hope and presence."
+                    }
+                ]
+            },
+            "referral_ready": {
+                "npc_text": "I... I'm so cold. If there's really a place... I'll listen. What do we do?",
+                "npc_emotion": "vulnerable",
                 "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "The 988 Lifeline is free, and they can connect us to local services that help with housing and mental health. Shall we call?",
+                        "text": "We're calling the 988 Lifeline. They'll help us find a safe shelter and support for tonight.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "Refer to free services."
-                    },
-                    {
-                        "text": "We can find support that doesn't cost anything. Let's start with a call to 988 and see what options they recommend.",
-                        "next": "success_end",
-                        "trust_impact": 20,
-                        "inner_thought": "Reassure about cost and offer a first step."
+                        "inner_thought": "Final referral and action."
                     }
                 ]
             },
@@ -818,13 +866,31 @@
             "persuade": {
                 "npc_text": "I've tried therapy. I've tried meds. Nothing works. Why would a hotline be any different?",
                 "npc_emotion": "vulnerable",
+                "options": [
+                    {
+                        "text": "A hotline isn't like therapy. It's a 'safety bridge'—an immediate way to stop the pain for just one night. Will you try it with me?",
+                        "next": "referral_ready",
+                        "trust_impact": 15,
+                        "inner_thought": "The hotline as a temporary, immediate safety measures."
+                    },
+                    {
+                        "text": "I can't promise it will fix everything, but I can promise they will listen without judging. Shall we give them a chance?",
+                        "next": "referral_ready",
+                        "trust_impact": 10,
+                        "inner_thought": "Offer a non-judgmental space."
+                    }
+                ]
+            },
+            "referral_ready": {
+                "npc_text": "I... I suppose I've got nothing left to lose. If you think it'll help, tell me what to do.",
+                "npc_emotion": "vulnerable",
                 "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "A hotline is a bridge to immediate safety. It gives us a chance to breathe and find a new path for tomorrow. Let's try it together.",
+                        "text": "We're going to call the 988 Lifeline. I'll stay right here by your side while we talk to them.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "The hotline as a 'safety bridge'."
+                        "inner_thought": "The final step: Active referral with accompaniment."
                     }
                 ]
             },
