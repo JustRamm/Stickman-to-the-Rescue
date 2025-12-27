@@ -20,18 +20,11 @@ const LevelSelectScreen = ({
 
     const isMissionLocked = (missionId) => {
         if (missionId === 'tutorial') return false;
-        if (missionId === 'park' || missionId === 'office') {
-            return !completedLevels.includes('tutorial');
-        }
-        if (missionId === 'campus') {
-            return !(completedLevels.includes('park') && completedLevels.includes('office'));
-        }
-        if (missionId === 'rainy_street') {
-            return !completedLevels.includes('campus');
-        }
-        if (missionId === 'bridge') {
-            return !completedLevels.includes('rainy_street');
-        }
+        if (missionId === 'park') return !completedLevels.includes('tutorial');
+        if (missionId === 'office') return !completedLevels.includes('park');
+        if (missionId === 'campus') return !completedLevels.includes('office');
+        if (missionId === 'rainy_street') return !completedLevels.includes('campus');
+        if (missionId === 'bridge') return !completedLevels.includes('rainy_street');
         return true;
     };
 
