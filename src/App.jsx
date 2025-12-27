@@ -58,7 +58,7 @@ const App = () => {
   const [trust, setTrust] = useState(25);
   const [currentNodeId, setCurrentNodeId] = useState('beginning');
   const [history, setHistory] = useState([]);
-  const [playerPos, setPlayerPos] = useState({ x: 10, y: 70 });
+  const [playerPos, setPlayerPos] = useState({ x: 5, y: 70 });
   const [samPos, setSamPos] = useState({ x: 75, y: 70 });
 
   // Interaction State
@@ -308,7 +308,7 @@ const App = () => {
       setCompletedLevels(prev => [...prev, selectedLevel.id]);
     }
     setTrust(25);
-    setPlayerPos({ x: 10, y: 70 });
+    setPlayerPos({ x: 5, y: 70 });
     setHistory([]);
     setResolutionPhase(0);
     if (selectedLevel.id === 'bridge' && currentNode.result === 'success') setGameState('FINAL_SUCCESS');
@@ -372,13 +372,12 @@ const App = () => {
       setCurrentNodeId(dialogueData[mission.id]?.startNode || 'beginning');
       setFoundClues([]);
       setTrust(25);
-      setPlayerPos({ x: 10, y: 70 });
-      setCamera({ scale: 1.2, x: 100, y: 0 });
+      setPlayerPos({ x: 5, y: 70 });
+      setCamera({ scale: 1, x: 0, y: 0 });
       setGameState('APPROACH');
       audioManager.startAmbient(mission.theme);
 
       setTimeout(() => {
-        setCamera({ scale: 1, x: 0, y: 0 });
         setIsTransitioning(false);
       }, 800);
     }, 500);
