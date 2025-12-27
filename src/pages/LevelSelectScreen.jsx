@@ -19,13 +19,11 @@ const LevelSelectScreen = ({
     const sliderRef = useRef(null);
 
     const isMissionLocked = (missionId) => {
-        if (missionId === 'tutorial') return false;
-        if (missionId === 'park') return !completedLevels.includes('tutorial');
-        if (missionId === 'office') return !completedLevels.includes('park');
-        if (missionId === 'campus') return !completedLevels.includes('office');
-        if (missionId === 'rainy_street') return !completedLevels.includes('campus');
-        if (missionId === 'bridge') return !completedLevels.includes('rainy_street');
-        return true;
+        const missionIndex = MISSIONS.findIndex(m => m.id === missionId);
+        if (missionIndex === 0) return false; // First mission (Intro) is always unlocked
+        if (missionIndex === -1) return true; // Secure default
+        const previousMission = MISSIONS[missionIndex - 1];
+        return !completedLevels.includes(previousMission.id);
     };
 
     const handleSliderScroll = () => {

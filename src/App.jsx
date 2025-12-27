@@ -453,7 +453,13 @@ const App = () => {
 
       <SettingsOverlay
         settings={settings} setSettings={setSettings}
-        audioManager={audioManager} onResetGame={() => setGameState('LEVEL_SELECT')}
+        audioManager={audioManager}
+        onResetGame={() => {
+          if (confirm('Are you sure? This will lock all scenarios except the Intro.')) {
+            setCompletedLevels([]);
+            setGameState('LEVEL_SELECT');
+          }
+        }}
         isSettingsOpen={isSettingsOpen} setIsSettingsOpen={setIsSettingsOpen} onNavigate={setGameState}
       />
 
