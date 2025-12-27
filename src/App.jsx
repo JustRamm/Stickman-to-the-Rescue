@@ -38,9 +38,17 @@ const App = () => {
   const [settings, setSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('qpr_settings');
-      return saved ? JSON.parse(saved) : { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50 };
+      // Force devMode to false on logic load to prevent accidental persistent unlocks
+      const parsed = saved ? JSON.parse(saved) : {};
+      return {
+        audioVolume: 0.5,
+        ttsEnabled: true,
+        textSpeed: 50,
+        ...parsed,
+        devMode: false
+      };
     } catch (e) {
-      return { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50 };
+      return { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50, devMode: false };
     }
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
