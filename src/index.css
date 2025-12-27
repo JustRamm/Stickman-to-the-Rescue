@@ -46,19 +46,7 @@ body {
   background: var(--background);
 }
 
-/* FORCE LANDSCAPE on Mobile Portrait - Rotates content 90deg so it fits the screen sideways */
-@media screen and (orientation: portrait) and (max-width: 768px) {
-  #root {
-    transform: rotate(90deg);
-    transform-origin: bottom left;
-    position: absolute;
-    top: -100vw;
-    left: 0;
-    width: 100vh;
-    height: 100vw;
-    overflow: hidden;
-  }
-}
+
 
 .stickman {
   transition: all 0.3s ease-out;
@@ -256,7 +244,10 @@ body {
   }
 
   .naming-card {
-    scale: 0.8;
+    width: 95% !important;
+    max-width: 800px !important;
+    padding: 1rem !important;
+    margin: auto;
   }
 }
 
@@ -591,4 +582,51 @@ input {
   transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center 70%;
   will-change: transform;
+}
+
+/* Additional Quiz Game Animations */
+.animate-float-slow {
+  animation: float 20s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float 15s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float 10s ease-in-out infinite;
+}
+
+@keyframes bounce-subtle {
+
+  0%,
+  100% {
+    transform: translateY(-2%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s infinite;
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .7;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

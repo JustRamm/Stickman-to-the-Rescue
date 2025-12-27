@@ -108,6 +108,26 @@ class SoundEngine {
         osc.stop(this.ctx.currentTime + 0.5);
     }
 
+    // Tick sound for timer
+    playTick() {
+        if (!this.initialized) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1000, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+    }
+
     playHeartbeat() {
         if (!this.initialized) return;
         const t = this.ctx.currentTime;
