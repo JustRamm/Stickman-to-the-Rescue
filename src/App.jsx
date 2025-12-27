@@ -18,6 +18,7 @@ import FinalSuccessScreen from './pages/FinalSuccessScreen';
 import ResolutionScreen from './pages/ResolutionScreen';
 import HandoffScreen from './pages/HandoffScreen';
 import ResourceRelayScreen from './pages/ResourceRelayScreen';
+import ValidationCatchScreen from './pages/ValidationCatchScreen';
 import TutorialOverlay from './pages/TutorialOverlay';
 
 // Data
@@ -30,7 +31,7 @@ import { PLAYER_CARDS } from './data/resourceRelayData';
 
 const App = () => {
   // Game State
-  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES
+  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY
 
   // Settings
   const [settings, setSettings] = useState(() => {
@@ -445,6 +446,7 @@ const App = () => {
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
   if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
+  if (gameState === 'VALIDATION_CATCH') return <ValidationCatchScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>

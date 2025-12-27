@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="25" r="8" fill="none" stroke="currentColor" stroke-width="4"/>
+  <path d="M50 33 L50 60" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <!-- Arms catching upwards -->
+  <path d="M50 40 L30 30 L25 45" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M50 40 L70 30 L75 45" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Legs -->
+  <path d="M50 60 L35 85" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M50 60 L65 85" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <!-- Basket/Bowl -->
+  <path d="M20 45 Q50 65 80 45" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M20 45 L80 45" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="2,2"/>
+</svg>
