@@ -18,7 +18,7 @@ import FinalSuccessScreen from './pages/FinalSuccessScreen';
 import ResolutionScreen from './pages/ResolutionScreen';
 import HandoffScreen from './pages/HandoffScreen';
 import ResourceRelayScreen from './pages/ResourceRelayScreen';
-import ValidationCatchScreen from './pages/ValidationCatchScreen';
+
 import SignalScoutScreen from './pages/SignalScoutScreen'; // New Game
 import TutorialOverlay from './pages/TutorialOverlay';
 
@@ -453,7 +453,7 @@ const App = () => {
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
   if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
-  if (gameState === 'VALIDATION_CATCH') return <ValidationCatchScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
+
   if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
 
   return (

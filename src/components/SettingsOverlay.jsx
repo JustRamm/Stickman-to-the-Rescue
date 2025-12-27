@@ -44,14 +44,7 @@ const SettingsOverlay = ({
                         <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Referral Battle</span>
                     </button>
 
-                    {/* Catch Game */}
-                    <button
-                        onClick={() => { onResetGame && onResetGame(); onNavigate('VALIDATION_CATCH'); setIsSettingsOpen(false); }}
-                        className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
-                    >
-                        <img src="/stickman_assets/catch_stickman.svg" alt="Validation Catch" className="w-full h-full object-contain" />
-                        <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Validation Catch</span>
-                    </button>
+
                 </div>
 
                 {/* Main Settings Button */}
