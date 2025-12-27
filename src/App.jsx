@@ -302,8 +302,9 @@ const App = () => {
       setTimeout(() => setCoachFeedback(null), 5000);
     }
 
-    // Dynamic timeout based on text length to prevent cutoff
-    const readTime = Math.max(2500, selectedOption.text.length * 80);
+    // Dynamic timeout based on text length to prevent awkward pauses but ensure readability
+    // Reduced multiplier because player has already read the text to select it
+    const readTime = Math.max(1000, selectedOption.text.length * 30);
 
     audioManager.speak(selectedOption.text, false, playerGender, null, () => {
       setTimeout(() => {
@@ -364,7 +365,8 @@ const App = () => {
       const timer = setTimeout(() => {
         audioManager.speak(text, true, npcGender, npcVoice, () => {
           // Add a "Read Buffer" after audio ends so text doesn't vanish instantly
-          const bufferTime = Math.max(1500, text.length * 30);
+          // Reduced buffer since listeners often read faster than slow speech
+          const bufferTime = Math.max(1000, text.length * 20);
           setTimeout(() => {
             setIsNpcSpeaking(false);
             if (!isEnd) setNpcLastSaid(null);
@@ -518,7 +520,7 @@ const App = () => {
                 <div className="w-2/3 h-1 bg-teal-200 rounded-full" />
               </div>
               <div className="absolute bottom-1 right-1">
-                <span className="text-xs">�</span>
+                <span className="text-xs"></span>
               </div>
             </div>
 
@@ -552,8 +554,8 @@ const App = () => {
           </div>
         )}
 
-        <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} />
-        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} action={npcAction} currentMessage={npcLastSaid} />
+        <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} textSpeed={settings.textSpeed} />
+        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed} />
       </div>
 
       {selectedLevel.id === 'tutorial' && <TutorialOverlay gameState={gameState} playerPos={playerPos} foundClues={foundClues} />}
