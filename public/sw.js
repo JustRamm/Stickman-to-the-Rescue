@@ -1,9 +1,14 @@
-// Simple Service Worker for PWA
-const CACHE_NAME = 'stickman-qpr-v2';
+// Improved Service Worker for PWA
+const CACHE_NAME = 'stickman-qpr-v3';
 const urlsToCache = [
     '/',
     '/index.html',
     '/logo.svg',
+    '/manifest.json'
+];
+
+// Offline assets (stickman animations etc.)
+const staticAssets = [
     '/stickman_assets/pointing_stickman.svg',
     '/stickman_assets/happy_stickman.svg',
     '/stickman_assets/sad_stickman.svg',
@@ -20,21 +25,36 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
-    // Perform install steps
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('Opened cache');
-                return cache.addAll(urlsToCache);
+                return cache.addAll([...urlsToCache, ...staticAssets]);
             })
     );
 });
 
 self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+
+    // Network-First strategy for index.html and root to prevent stale build hashes
+    if (url.pathname === '/' || url.pathname === '/index.html') {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    const resClone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
+    // Default Cache-First strategy for static assets
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                // Cache hit - return response
                 if (response) {
                     return response;
                 }

@@ -220,6 +220,7 @@ const App = () => {
   useEffect(() => {
     if (gameState !== 'APPROACH') return;
     if (Math.abs(playerPos.x - samPos.x) < 15) {
+      setIsNpcSpeaking(true);
       setGameState('DIALOGUE');
       audioManager.playDing();
     }
@@ -288,6 +289,8 @@ const App = () => {
     audioManager.speak(selectedOption.text, false, playerGender, null, () => {
       setTimeout(() => {
         setPlayerLastSaid(null);
+        // Pre-emptively set speaking state to prevent DialogueBox flicker
+        setIsNpcSpeaking(true);
         setCurrentNodeId(nextNodeId);
       }, 1000);
     });
@@ -371,6 +374,7 @@ const App = () => {
       setSelectedLevel(mission);
       setCurrentNodeId(dialogueData[mission.id]?.startNode || 'beginning');
       setFoundClues([]);
+      setSelectedResource(null);
       setTrust(25);
       setPlayerPos({ x: 5, y: 70 });
       setCamera({ scale: 1, x: 0, y: 0 });
