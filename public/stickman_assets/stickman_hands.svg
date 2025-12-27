@@ -1,0 +1,13 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <circle cx="50" cy="25" r="12" stroke="black" stroke-width="6"/>
+  <path d="M50 37V65" stroke="black" stroke-width="6" stroke-linecap="round"/>
+  <!-- Legs -->
+  <path d="M50 65L35 85" stroke="black" stroke-width="6" stroke-linecap="round"/>
+  <path d="M50 65L65 85" stroke="black" stroke-width="6" stroke-linecap="round"/>
+  <!-- Reaching Hands -->
+  <path d="M50 45Q30 40 20 20" stroke="black" stroke-width="6" stroke-linecap="round"/>
+  <path d="M50 45Q70 40 80 20" stroke="black" stroke-width="6" stroke-linecap="round"/>
+  <!-- Community Circle -->
+  <circle cx="50" cy="50" r="40" stroke="#F59E0B" stroke-width="4" stroke-dasharray="8 8" opacity="0.4"/>
+</svg>
