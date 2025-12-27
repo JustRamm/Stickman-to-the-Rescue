@@ -12,41 +12,54 @@ const SettingsOverlay = ({
 
     return (
         <>
-            {/* Settings Button (Top Right) */}
-            <div className="fixed top-4 md:top-6 right-4 md:right-6 z-[400] pointer-events-auto flex flex-col gap-3 items-end">
+            {/* Top Right Action Bar */}
+            <div className="fixed top-4 md:top-6 right-4 md:right-6 z-[400] pointer-events-auto flex flex-col gap-4 items-end">
+                {/* Main Settings Button */}
                 <button
                     onClick={() => { audioManager.init(); setIsSettingsOpen(true); }}
-                    className="w-8 h-8 md:w-10 md:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-lg transition-all border border-white/50 shadow-sm"
+                    className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-[0_0_20px_rgba(20,184,166,0.3)] transition-all border border-white/50 shadow-xl group"
                 >
-                    <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-90 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </button>
 
-                <button
-                    onClick={() => { onResetGame && onResetGame(); onNavigate('QUIZ_MODE'); setIsSettingsOpen(false); }}
-                    className="w-8 h-8 md:w-10 md:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-lg transition-all border border-white/50 shadow-sm p-1"
-                    title="Play Myth vs Fact"
-                >
-                    <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
-                </button>
+                {/* Training Hub Island */}
+                <div className="bg-slate-900/40 backdrop-blur-xl p-1.5 rounded-[2rem] border border-white/10 flex flex-col md:flex-row gap-2 shadow-2xl items-center animate-slide-in-right">
+                    <div className="hidden md:block px-3 border-r border-white/10 mr-1">
+                        <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.3em] vertical-text">Training</span>
+                    </div>
 
-                <button
-                    onClick={() => { onResetGame && onResetGame(); onNavigate('RESOURCE_RELAY'); setIsSettingsOpen(false); }}
-                    className="w-8 h-8 md:w-10 md:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-indigo-600 hover:shadow-lg transition-all border border-white/50 shadow-sm p-1"
-                    title="Referral Battle"
-                >
-                    <img src="/stickman_assets/shield_stickman.svg" alt="Referral" className="w-full h-full object-contain" />
-                </button>
+                    <div className="flex flex-col md:flex-row gap-2">
+                        {/* Quiz Game */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('QUIZ_MODE'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-11 md:h-11 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg p-2.5 group relative"
+                        >
+                            <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
+                            <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest">Myth vs Fact</span>
+                        </button>
 
-                <button
-                    onClick={() => { onResetGame && onResetGame(); onNavigate('VALIDATION_CATCH'); setIsSettingsOpen(false); }}
-                    className="w-8 h-8 md:w-10 md:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-teal-600 hover:shadow-lg transition-all border border-white/50 shadow-sm p-1.5"
-                    title="Validation Catch"
-                >
-                    <img src="/stickman_assets/catch_stickman.svg" alt="Validation Catch" className="w-full h-full object-contain" />
-                </button>
+                        {/* Referral Battle */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('RESOURCE_RELAY'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-11 md:h-11 bg-white hover:bg-indigo-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg p-2.5 group relative"
+                        >
+                            <img src="/stickman_assets/shield_stickman.svg" alt="Referral" className="w-full h-full object-contain" />
+                            <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest">Referral Battle</span>
+                        </button>
+
+                        {/* Catch Game */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('VALIDATION_CATCH'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-11 md:h-11 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg p-2 group relative"
+                        >
+                            <img src="/stickman_assets/catch_stickman.svg" alt="Validation Catch" className="w-full h-full object-contain" />
+                            <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest">Validation Catch</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Settings Modal */}
