@@ -1,5 +1,5 @@
 // Simple Service Worker for PWA
-const CACHE_NAME = 'stickman-qpr-v1';
+const CACHE_NAME = 'stickman-qpr-v2';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -12,7 +12,11 @@ const urlsToCache = [
     '/stickman_assets/empty_stickman.svg',
     '/stickman_assets/scholar_stickman.svg',
     '/stickman_assets/guy_distressed.svg',
-    '/stickman_assets/cloud.svg'
+    '/stickman_assets/cloud.svg',
+    '/stickman_assets/stickman_phone.svg',
+    '/stickman_assets/stickman_laptop.svg',
+    '/stickman_assets/stickman_group.svg',
+    '/stickman_assets/stickman_medic.svg'
 ];
 
 self.addEventListener('install', (event) => {

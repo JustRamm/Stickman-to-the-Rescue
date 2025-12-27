@@ -100,7 +100,7 @@ const LevelSelectScreen = ({
             snap-x snap-mandatory touch-pan-x
             scrollbar-hide
           ">
-                    {MISSIONS.map((mission) => {
+                    {(MISSIONS || []).map((mission) => {
                         const isLocked = isMissionLocked(mission.id);
                         const isCompleted = completedLevels.includes(mission.id);
 
@@ -192,31 +192,41 @@ const LevelSelectScreen = ({
             </div>
 
             {/* Resources Footer */}
-            <div className="relative z-20 flex justify-center mt-4 mb-8 gap-4 px-4 flex-wrap">
+            <div className="relative z-20 flex justify-center mt-6 mb-8 gap-6 px-4 flex-wrap">
                 <button
                     onClick={() => onNavigate('QUIZ_MODE')}
-                    className="px-6 py-3 bg-white/80 hover:bg-white text-teal-700 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 backdrop-blur-sm border border-teal-100 shadow-md hover:shadow-xl hover:-translate-y-1"
+                    className="group px-8 py-4 bg-white hover:bg-teal-50 text-teal-700 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-4 backdrop-blur-sm border-2 border-teal-200 shadow-[0_10px_30px_rgba(20,184,166,0.15)] hover:shadow-[0_20px_40px_rgba(20,184,166,0.3)] hover:-translate-y-2 animate-attention-teal btn-shine relative overflow-hidden"
                 >
-                    <div className="w-6 h-6">
+                    <div className="absolute -top-1 -right-1 bg-teal-500 text-white text-[8px] px-2 py-0.5 rounded-bl-lg font-black tracking-tighter animate-wiggle">NEW</div>
+                    <div className="w-10 h-10 bg-teal-100 rounded-xl p-2 group-hover:rotate-12 transition-transform">
                         <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
                     </div>
-                    <span>Myth vs Fact</span>
+                    <div className="flex flex-col items-start translate-y-0.5">
+                        <span className="text-xs">Myth vs Fact</span>
+                        <span className="text-[7px] text-teal-500/60 font-black tracking-[0.1em]">PRACTICE SKILLS</span>
+                    </div>
                 </button>
 
                 <button
                     onClick={() => onNavigate('RESOURCE_RELAY')}
-                    className="px-6 py-3 bg-white/80 hover:bg-white text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 backdrop-blur-sm border border-indigo-100 shadow-md hover:shadow-xl hover:-translate-y-1"
+                    className="group px-8 py-4 bg-white hover:bg-indigo-50 text-indigo-700 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-4 backdrop-blur-sm border-2 border-indigo-200 shadow-[0_10px_30px_rgba(99,102,241,0.15)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.3)] hover:-translate-y-2 animate-attention-indigo btn-shine relative overflow-hidden"
                 >
-                    <span className="text-lg">🛡️</span>
-                    <span>Referral Battle</span>
+                    <div className="absolute -top-1 -right-1 bg-indigo-500 text-white text-[8px] px-2 py-0.5 rounded-bl-lg font-black tracking-tighter animate-wiggle">HOT</div>
+                    <div className="w-10 h-10 bg-indigo-100 rounded-xl p-2 flex items-center justify-center group-hover:-rotate-12 transition-transform">
+                        <span className="text-2xl">🛡️</span>
+                    </div>
+                    <div className="flex flex-col items-start translate-y-0.5">
+                        <span className="text-xs">Referral Battle</span>
+                        <span className="text-[7px] text-indigo-500/60 font-black tracking-[0.1em]">EARN TRUST</span>
+                    </div>
                 </button>
 
                 <button
                     onClick={() => onNavigate('RESOURCES')}
-                    className="px-6 py-3 bg-slate-900/10 hover:bg-slate-900/20 text-slate-900/60 hover:text-slate-900 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 backdrop-blur-sm border border-slate-900/5 shadow-inner"
+                    className="px-6 py-4 bg-slate-900/5 hover:bg-slate-900/10 text-slate-900/60 hover:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 backdrop-blur-sm border border-slate-900/10"
                 >
+                    <span className="text-lg">📚</span>
                     <span>Resources</span>
-                    <span className="text-teal-600 font-bold">✚</span>
                 </button>
             </div>
         </div>

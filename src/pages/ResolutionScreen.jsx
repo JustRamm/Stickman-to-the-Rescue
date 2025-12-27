@@ -56,7 +56,9 @@ const ResolutionScreen = ({
                     {/* Speech Bubble */}
                     {resolutionPhase >= 3 && (
                         <div className="absolute -top-32 md:-top-40 right-0 bg-white/90 backdrop-blur border-2 border-teal-500 text-slate-800 p-4 md:p-6 rounded-2xl rounded-br-none shadow-2xl w-48 md:w-64 animate-pop-in z-50">
-                            <p className="text-xs md:text-sm font-bold leading-relaxed">"Thank you for reaching out. We've got it from here."</p>
+                            <p className="text-xs md:text-sm font-bold leading-relaxed">
+                                "Thank you for being the bridge. We'll take care of {selectedLevel.npc.name} now."
+                            </p>
                         </div>
                     )}
                 </div>

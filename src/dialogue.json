@@ -11,6 +11,12 @@
                         "next": "trust_lesson",
                         "trust_impact": 10,
                         "inner_thought": "Build rapport by acknowledging the guide."
+                    },
+                    {
+                        "text": "I'm a bit nervous, but I'm ready to learn.",
+                        "next": "trust_lesson",
+                        "trust_impact": 5,
+                        "inner_thought": "Express honesty and willingness."
                     }
                 ]
             },
@@ -23,6 +29,12 @@
                         "next": "clue_lesson",
                         "trust_impact": 5,
                         "inner_thought": "Learn about the consequences of low trust."
+                    },
+                    {
+                        "text": "So validating someone's feelings is key to keeping them open?",
+                        "next": "clue_lesson",
+                        "trust_impact": 10,
+                        "inner_thought": "Confirm understanding of empathy."
                     }
                 ]
             },
@@ -35,18 +47,25 @@
                         "next": "refer_lesson",
                         "trust_impact": 5,
                         "inner_thought": "Transition to the goal: Referral."
+                    },
+                    {
+                        "text": "Searching for clues helps me understand their world better. What's the next step?",
+                        "next": "refer_lesson",
+                        "trust_impact": 10,
+                        "inner_thought": "Engage with the clue mechanic."
                     }
                 ]
             },
             "refer_lesson": {
-                "npc_text": "When you've built trust and identified the risk, use the 'Refer' action to connect them to a professional helpline.",
+                "npc_text": "When you've built trust and identified the risk, use the 'Refer' action. Open your toolkit and select the 988 Lifeline to finish the tutorial.",
                 "npc_emotion": "neutral",
+                "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "I'm ready to try a real scenario!",
+                        "text": "I'm ready to try a real scenario! Let's save some lives.",
                         "next": "success_tutorial",
                         "trust_impact": 20,
-                        "inner_thought": "Confirm readiness."
+                        "inner_thought": "Confirm readiness by referring."
                     }
                 ]
             },
@@ -95,6 +114,12 @@
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Challenge the 'burden' narrative gently."
+                    },
+                    {
+                        "text": "It sounds like you feel you've become a chore for them lately. Is that what's weighing on you?",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Reflect her feeling of being a burden."
                     }
                 ]
             },
@@ -103,10 +128,16 @@
                 "npc_emotion": "vulnerable",
                 "options": [
                     {
-                        "text": "It sounds like the loneliness has become overwhelming.",
+                        "text": "It sounds like the loneliness has become overwhelming. Is that right?",
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Name the emotion: Loneliness."
+                    },
+                    {
+                        "text": "The silence in your house must feel very loud some days. I'm here to listen.",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Acknowledge the silence and isolation."
                     },
                     {
                         "text": "You still have plenty of time! Enjoy the sunset.",
@@ -127,6 +158,12 @@
                         "inner_thought": "The Direct Question: Essential QPR step."
                     },
                     {
+                        "text": "It sounds like you've been making preparations to leave. Are you thinking of ending your life?",
+                        "next": "direct_question",
+                        "trust_impact": 15,
+                        "inner_thought": "Identify the warning sign: giving away possessions."
+                    },
+                    {
                         "text": "Don't say that. You have so much to live for!",
                         "next": "defensive",
                         "trust_impact": -15,
@@ -144,19 +181,31 @@
                         "next": "persuade",
                         "trust_impact": 20,
                         "inner_thought": "Persuade her to stay safe."
+                    },
+                    {
+                        "text": "Grace, I care about you, and I'm very concerned for your safety. Can we talk about some options for help?",
+                        "next": "persuade",
+                        "trust_impact": 15,
+                        "inner_thought": "Express care and move toward persuasion."
                     }
                 ]
             },
             "persuade": {
                 "npc_text": "I don't even know if there's help for someone my age. Who would care?",
                 "npc_emotion": "vulnerable",
-                "required_resource": "Free Crisis Resource",
+                "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "[REFER: SELECT CRISIS RESOURCE FROM TOOLKIT]",
+                        "text": "I care, and I know the 988 Lifeline cares. They are available 24/7. Shall we call them together?",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "The final Refer step."
+                        "inner_thought": "Direct referral with accompaniment."
+                    },
+                    {
+                        "text": "There is specializing help for elderly loneliness and crisis. Let's reach out to 988 and see what they suggest.",
+                        "next": "success_end",
+                        "trust_impact": 20,
+                        "inner_thought": "Informational referral."
                     }
                 ]
             },
@@ -165,10 +214,16 @@
                 "npc_emotion": "closed_off",
                 "options": [
                     {
-                        "text": "I'm sorry, Grace. I was just trying to help, but I realize I should have listened instead.",
+                        "text": "I'm sorry, Grace. I was just trying to help, but I realize I should have listened instead. Please, tell me more.",
                         "next": "deep_pain",
                         "trust_impact": 10,
                         "inner_thought": "Apologize and pivot back to listening."
+                    },
+                    {
+                        "text": "You're right, I don't fully understand, but I want to. What does that silence feel like?",
+                        "next": "deep_pain",
+                        "trust_impact": 15,
+                        "inner_thought": "Acknowledge error and ask for deeper understanding."
                     }
                 ]
             },
@@ -177,7 +232,7 @@
                 "npc_emotion": "closed_off",
                 "options": [
                     {
-                        "text": "I'll respect your space, but I'm worried about you.",
+                        "text": "I'll respect your space, but I'm worried about you. I'll stay nearby for a bit.",
                         "next": "leave_failure",
                         "trust_impact": -50,
                         "inner_thought": "Leaving someone in immediate crisis is a failure."
@@ -235,6 +290,12 @@
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Challenge the dangerous financial logic."
+                    },
+                    {
+                        "text": "It sounds like you feel you're worth more to your family dead than alive right now. Is that it?",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Reflect the dangerous 'insurance' logic."
                     }
                 ]
             },
@@ -243,10 +304,16 @@
                 "npc_emotion": "sad",
                 "options": [
                     {
-                        "text": "It sounds like you've lost your sense of identity along with the job.",
+                        "text": "It sounds like you've lost your sense of identity along with the job. How are you processing this?",
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Reflect his loss of identity."
+                    },
+                    {
+                        "text": "Fifteen years is a long time to be summed up in ten minutes. I can see why you feel so discarded.",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Validate the pain of being discarded."
                     }
                 ]
             },
@@ -259,6 +326,12 @@
                         "next": "direct_question",
                         "trust_impact": 20,
                         "inner_thought": "Direct Question about suicide."
+                    },
+                    {
+                        "text": "David, that 'math' is terrifying. Are you thinking about ending your life to provide for them?",
+                        "next": "direct_question",
+                        "trust_impact": 15,
+                        "inner_thought": "Direct question with emotional weight."
                     }
                 ]
             },
@@ -272,19 +345,31 @@
                         "next": "persuade",
                         "trust_impact": 20,
                         "inner_thought": "Persuade him to rethink the 'math'."
+                    },
+                    {
+                        "text": "I hear the desperation in your voice, David. But your life has value far beyond any insurance policy. Please, let's talk about help.",
+                        "next": "persuade",
+                        "trust_impact": 15,
+                        "inner_thought": "Validate desperation while offering hope."
                     }
                 ]
             },
             "persuade": {
                 "npc_text": "I just don't know where to go. I can't walk back into that lobby and ask for a therapist.",
                 "npc_emotion": "vulnerable",
-                "required_resource": "Professional Therapist",
+                "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "[REFER: SELECT PROFESSIONAL RESOURCE]",
+                        "text": "You don't have to go back in there. We can call the 988 Lifeline right now, from here. It's confidential.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "Refer to professional counseling."
+                        "inner_thought": "Immediate, confidential referral."
+                    },
+                    {
+                        "text": "There are people who can help with both the emotional and financial crisis. Let's start with a call to 988.",
+                        "next": "success_end",
+                        "trust_impact": 20,
+                        "inner_thought": "Holistic support offer."
                     }
                 ]
             },
@@ -297,6 +382,12 @@
                         "next": "deep_pain",
                         "trust_impact": 10,
                         "inner_thought": "Apologize and ask for understanding."
+                    },
+                    {
+                        "text": "You're right, I don't know what it's like. I spoke without thinking. Can we start over?",
+                        "next": "deep_pain",
+                        "trust_impact": 15,
+                        "inner_thought": "Humble admission of error."
                     }
                 ]
             },
@@ -305,7 +396,7 @@
                 "npc_emotion": "closed_off",
                 "options": [
                     {
-                        "text": "I'll go.",
+                        "text": "I'll go for now, but I'm checking back in later. Please stay safe.",
                         "next": "leave_failure",
                         "trust_impact": -50,
                         "inner_thought": "Failure: Leaving during planning phase."
@@ -363,6 +454,12 @@
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Attempt to decouple identity from performance."
+                    },
+                    {
+                        "text": "The pressure of carrying your family's hopes must be exhausting. Let's talk more about that.",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Reflect the exhaustion of pressure."
                     }
                 ]
             },
@@ -371,10 +468,16 @@
                 "npc_emotion": "vulnerable",
                 "options": [
                     {
-                        "text": "You feel like you've lost your utility. That sounds incredibly lonely.",
+                        "text": "You feel like you've lost your utility and value. That sounds incredibly lonely.",
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Reflect the feeling of being used/discarded."
+                    },
+                    {
+                        "text": "Maya, you're a person, not a machine. It's okay to be 'broken' for a while.",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Rehumanize her."
                     }
                 ]
             },
@@ -387,6 +490,12 @@
                         "next": "direct_question",
                         "trust_impact": 20,
                         "inner_thought": "Direct Suicide Inquiry."
+                    },
+                    {
+                        "text": "It sounds like you just want to escape the constant labels. Are you thinking of ending your life?",
+                        "next": "direct_question",
+                        "trust_impact": 15,
+                        "inner_thought": "Reflect her need for escape while asking directly."
                     },
                     {
                         "text": "You just need a good night's sleep.",
@@ -406,19 +515,31 @@
                         "next": "persuade",
                         "trust_impact": 20,
                         "inner_thought": "Validating and Persuading."
+                    },
+                    {
+                        "text": "Maya, I hear how much you're suffering. You don't have to face the bridge or these expectations alone. Can we talk about help?",
+                        "next": "persuade",
+                        "trust_impact": 15,
+                        "inner_thought": "Express care and move toward persuasion."
                     }
                 ]
             },
             "persuade": {
                 "npc_text": "What if the coach finds out? They'll pull me from the roster.",
                 "npc_emotion": "vulnerable",
-                "required_resource": "Confidential Counselor",
+                "required_resource": "School Counselor",
                 "options": [
                     {
-                        "text": "[REFER: SELECT CONFIDENTIAL COUNSELOR]",
+                        "text": "Your health is more important than the roster. The School Counselor is confidential—let's go see them together.",
                         "next": "success_end",
                         "trust_impact": 25,
-                        "inner_thought": "The Refer step."
+                        "inner_thought": "Confidential, health-first referral."
+                    },
+                    {
+                        "text": "We can figure out the team stuff later. Right now, let's just focus on you getting some support. Shall we walk over?",
+                        "next": "success_end",
+                        "trust_impact": 20,
+                        "inner_thought": "Prioritize immediate safety over long-term fears."
                     }
                 ]
             },
@@ -427,10 +548,16 @@
                 "npc_emotion": "closed_off",
                 "options": [
                     {
-                        "text": "I'm sorry, I was speaking in clichés. I can see you're suffering. I'm here now.",
+                        "text": "I'm sorry, I was speaking in clichés. I can see you're suffering. I'm here now, and I'm listening.",
                         "next": "deep_pain",
                         "trust_impact": 10,
                         "inner_thought": "Admit the mistake and offer presence."
+                    },
+                    {
+                        "text": "You're right, I don't know the pressure you're under. Help me understand what it's like for you.",
+                        "next": "deep_pain",
+                        "trust_impact": 15,
+                        "inner_thought": "Acknowledge lack of understanding and offer presence."
                     }
                 ]
             },
@@ -439,7 +566,7 @@
                 "npc_emotion": "closed_off",
                 "options": [
                     {
-                        "text": "I'll go.",
+                        "text": "I'll leave you for a moment if you wish, but I'm checking back in later. You're not a joke to me.",
                         "next": "leave_failure",
                         "trust_impact": -50,
                         "inner_thought": "Failure."
@@ -497,6 +624,12 @@
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Challenge the self-labeling."
+                    },
+                    {
+                        "text": "It sounds like you feel you've let everyone down. That's a heavy burden to carry alone in this rain.",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Reflect his deep sense of failure and isolation."
                     }
                 ]
             },
@@ -505,10 +638,16 @@
                 "npc_emotion": "sad",
                 "options": [
                     {
-                        "text": "It sounds like you're exhausted from the constant struggle.",
+                        "text": "It sounds like you're exhausted from the constant struggle for survival. Is that right?",
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Label his exhaustion."
+                    },
+                    {
+                        "text": "The noise of all those pressures must be deafening. I'm here now, and I'm listening.",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Acknowledge the overwhelming pressure."
                     }
                 ]
             },
@@ -523,7 +662,13 @@
                         "inner_thought": "Direct Question."
                     },
                     {
-                        "text": "Think of your family!",
+                        "text": "It sounds like you're seeing the street as an escape from the pain. Are you thinking of suicide?",
+                        "next": "direct_question",
+                        "trust_impact": 15,
+                        "inner_thought": "Direct question with reflection."
+                    },
+                    {
+                        "text": "Think of your family! They wouldn't want this.",
                         "next": "defensive",
                         "trust_impact": -20,
                         "inner_thought": "Guilt-tripping can increase risk."
@@ -540,19 +685,31 @@
                         "next": "persuade",
                         "trust_impact": 20,
                         "inner_thought": "Offer immediate presence and safety."
+                    },
+                    {
+                        "text": "Raj, you don't have to face this exhaustion alone. We can reach out for help together. What do you say?",
+                        "next": "persuade",
+                        "trust_impact": 15,
+                        "inner_thought": "Offer connection and hope."
                     }
                 ]
             },
             "persuade": {
                 "npc_text": "I have no money for a hospital. No one helps the homeless.",
                 "npc_emotion": "vulnerable",
-                "required_resource": "Free Crisis Resource",
+                "required_resource": "988 Lifeline",
                 "options": [
                     {
-                        "text": "[REFER: SELECT FREE CRISIS RESOURCE]",
+                        "text": "The 988 Lifeline is free, and they can connect us to local services that help with housing and mental health. Shall we call?",
                         "next": "success_end",
                         "trust_impact": 25,
                         "inner_thought": "Refer to free services."
+                    },
+                    {
+                        "text": "We can find support that doesn't cost anything. Let's start with a call to 988 and see what options they recommend.",
+                        "next": "success_end",
+                        "trust_impact": 20,
+                        "inner_thought": "Reassure about cost and offer a first step."
                     }
                 ]
             },
@@ -561,7 +718,7 @@
                 "npc_emotion": "closed_off",
                 "options": [
                     {
-                        "text": "I'll go.",
+                        "text": "I'll go for now, but I'm checking back in later. Please, just stay safe.",
                         "next": "leave_failure",
                         "trust_impact": -50,
                         "inner_thought": "Failure."
@@ -571,13 +728,128 @@
             "success_end": {
                 "isEnd": true,
                 "result": "success",
-                "message": "Raj agreed to call a crisis worker. Name: Raj. Status: Safe.",
+                "message": "Raj has put down his heavy burden for tonight. Because of your listening, he's agreed to meet a crisis worker at a safe shelter. Status: Safe and Heard.",
                 "npc_emotion": "relief"
             },
             "leave_failure": {
                 "isEnd": true,
                 "result": "failure",
                 "message": "You left Raj on the edge of the street.",
+                "npc_emotion": "sad"
+            }
+        }
+    },
+    "bridge": {
+        "startNode": "beginning",
+        "nodes": {
+            "beginning": {
+                "npc_text": "Don't come any closer. The water looks so much more inviting than the world behind me.",
+                "npc_emotion": "distressed",
+                "options": [
+                    {
+                        "text": "I'm just here to listen. It sounds like you've been through a lot to feel this way.",
+                        "next": "opening_up",
+                        "trust_impact": 10,
+                        "inner_thought": "Offer presence without pressure."
+                    },
+                    {
+                        "text": "It's a long way down. Why are you standing so close to the edge?",
+                        "next": "deep_pain",
+                        "trust_impact": 5,
+                        "inner_thought": "Direct but gentle inquiry."
+                    },
+                    {
+                        "text": "Get down from there! You're making a mistake!",
+                        "next": "defensive",
+                        "trust_impact": -40,
+                        "inner_thought": "Aggressive commands increase danger."
+                    }
+                ]
+            },
+            "opening_up": {
+                "npc_text": "Everyone I ever loved is gone, or I've pushed them away. I'm just a shadow now.",
+                "npc_emotion": "sad",
+                "options": [
+                    {
+                        "text": "The weight of that loneliness must feel like lead. Are you thinking about ending your life tonight?",
+                        "next": "direct_question",
+                        "trust_impact": 20,
+                        "inner_thought": "Bridge to the direct question."
+                    },
+                    {
+                        "text": "It sounds like you feel there's nothing left connecting you to this world. Is that right?",
+                        "next": "deep_pain",
+                        "trust_impact": 10,
+                        "inner_thought": "Reflect his total disconnection."
+                    }
+                ]
+            },
+            "deep_pain": {
+                "npc_text": "I've settled everything. My dog is with a neighbor. My keys are in the mailbox. There’s nothing left to do but this.",
+                "npc_emotion": "vulnerable",
+                "options": [
+                    {
+                        "text": "When you say you've settled everything, are you telling me you're planning to jump and end your life?",
+                        "next": "direct_question",
+                        "trust_impact": 25,
+                        "inner_thought": "Essential Direct Question."
+                    },
+                    {
+                        "text": "What about your neighbor? They'll be devastated when they realize why you left the dog.",
+                        "next": "defensive",
+                        "trust_impact": -20,
+                        "inner_thought": "Guilt-tripping can backfire in high-risk moments."
+                    }
+                ]
+            },
+            "direct_question": {
+                "npc_text": "I was just waiting for the rain to get a little harder. I... I don't want to die, I just can't live like this anymore.",
+                "npc_emotion": "distressed",
+                "text_effect": "shake",
+                "options": [
+                    {
+                        "text": "I hear you. You want the pain to stop, not your life. Let's work together to find a way to stop the pain safely. Will you let me help?",
+                        "next": "persuade",
+                        "trust_impact": 20,
+                        "inner_thought": "Distinguish between wanting to die and wanting the pain to end."
+                    }
+                ]
+            },
+            "persuade": {
+                "npc_text": "I've tried therapy. I've tried meds. Nothing works. Why would a hotline be any different?",
+                "npc_emotion": "vulnerable",
+                "required_resource": "988 Lifeline",
+                "options": [
+                    {
+                        "text": "A hotline is a bridge to immediate safety. It gives us a chance to breathe and find a new path for tomorrow. Let's try it together.",
+                        "next": "success_end",
+                        "trust_impact": 25,
+                        "inner_thought": "The hotline as a 'safety bridge'."
+                    }
+                ]
+            },
+            "defensive": {
+                "npc_text": "You're just wasting your time. Just like I've wasted mine.",
+                "npc_emotion": "closed_off",
+                "options": [
+                    {
+                        "text": "I'm staying right here. You're not a waste of time to me.",
+                        "next": "leave_failure",
+                        "trust_impact": -60,
+                        "inner_thought": "High stake failure: Active planning."
+                    }
+                ]
+            },
+            "success_end": {
+                "isEnd": true,
+                "result": "success",
+                "message": "The stranger agreed to step back from the edge and talk to a professional. Name: Stranger. Status: Connected to Help.",
+                "npc_emotion": "relief"
+            },
+            "leave_failure": {
+                "isEnd": true,
+                "result": "failure",
+                "message": "You were unable to build enough trust to bring the stranger back from the edge.",
                 "npc_emotion": "sad"
             }
         }

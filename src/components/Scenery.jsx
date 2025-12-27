@@ -17,6 +17,15 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
     const rainIntensity = isLowTrust ? '0.2s' : '0.5s'; // Faster rain when low trust
     const windSpeed = isLowTrust ? '1s' : '3s';
 
+    // MEMOIZE BUILDINGS for rainy theme (Always called to preserve hook order)
+    const buildings = useMemo(() => {
+        return [...Array(10)].map(() => ({
+            width: 5 + Math.random() * 10,
+            height: 10 + Math.random() * 40,
+            windows: [...Array(Math.floor(Math.random() * 6))].map(() => Math.random() > 0.7)
+        }));
+    }, []);
+
     // God Rays for High Trust
     const GodRays = () => (
         isHighTrust && (
@@ -36,6 +45,81 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
             }}
         />
     );
+
+    if (theme === 'bridge_night') {
+        return (
+            <div
+                className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[#020617] transition-all duration-1000"
+                style={{ filter: worldFilter }}
+            >
+                {/* Deep Dark Water */}
+                <div className="absolute top-[60%] inset-x-0 bottom-0 bg-gradient-to-b from-[#082f49] to-[#020617]">
+                    <div className="absolute inset-0 opacity-20" style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='water'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23water)' opacity='0.5'/%3E%3C/svg%3E")`
+                    }} />
+                    {/* Water Ripples */}
+                    <div className="absolute inset-0 flex flex-col justify-around">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-px w-full bg-blue-400/10 animate-pulse" style={{ animationDelay: `${i * 0.5}s` }} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Distant City Skyline - Dimmed and Blurred */}
+                <div className="absolute bottom-[40%] inset-x-0 flex justify-around items-end px-20 opacity-20 blur-[2px]">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="flex gap-1 items-end">
+                            <div className="w-12 h-64 bg-slate-950 rounded-t-sm" />
+                            <div className="w-8 h-40 bg-slate-900 rounded-t-sm" />
+                        </div>
+                    ))}
+                </div>
+
+                {/* The Bridge Structure */}
+                <div className="absolute top-0 bottom-[40%] inset-x-0">
+                    {/* Metal Trusses */}
+                    <div className="absolute inset-0 flex justify-around">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="w-2 md:w-4 h-full bg-slate-800 border-x border-slate-700 relative">
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-950" />
+                            </div>
+                        ))}
+                    </div>
+                    {/* Diagonal Ties */}
+                    <svg className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="none">
+                        <path d="M0,0 L100,100 M100,0 L0,100" className="stroke-slate-700 stroke-[5]" vectorEffect="non-scaling-stroke" />
+                    </svg>
+                </div>
+
+                {/* Bridge Deck & Railing (Where characters stand) */}
+                <div className="absolute top-[60%] inset-x-0 h-4 bg-[#0f172a] shadow-2xl z-10" />
+                <div className="absolute top-[52%] inset-x-0 flex justify-around z-20">
+                    {[...Array(20)].map((_, i) => (
+                        <div key={i} className="w-1 md:w-2 h-16 bg-slate-800 border-x border-slate-700 rounded-t-full shadow-lg" />
+                    ))}
+                    <div className="absolute top-0 inset-x-0 h-2 bg-slate-700" />
+                </div>
+
+                {/* Intense Rain */}
+                <div className="absolute inset-0 z-[100] overflow-hidden pointer-events-none">
+                    {[...Array(200)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-[2px] h-32 bg-blue-100/30 animate-rain-drop"
+                            style={{
+                                left: `${Math.random() * 150}%`,
+                                top: `-${Math.random() * 20}%`,
+                                animationDelay: `${Math.random() * 1}s`,
+                                animationDuration: `${0.3 + Math.random() * 0.2}s`,
+                            }}
+                        />
+                    ))}
+                </div>
+
+                <LowTrustVignette />
+            </div>
+        );
+    }
 
     if (theme === 'office') {
         return (
@@ -203,15 +287,6 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
         const skyColorTop = trust < 30 ? '#0f172a' : (trust > 70 ? '#64748b' : '#334155');
         const skyColorBottom = trust < 30 ? '#1e293b' : (trust > 70 ? '#94a3b8' : '#475569');
 
-        // MEMOIZE BUILDINGS to stop them from changing on every re-render (which caused the "fast moving" glitch)
-        const buildings = useMemo(() => {
-            return [...Array(10)].map(() => ({
-                width: 5 + Math.random() * 10,
-                height: 10 + Math.random() * 40,
-                windows: [...Array(Math.floor(Math.random() * 6))].map(() => Math.random() > 0.7)
-            }));
-        }, []);
-
         return (
             <div
                 className="absolute inset-0 pointer-events-none overflow-hidden z-0 transition-all duration-1000"
@@ -245,26 +320,27 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                 </div>
 
                 {/* Wet Pavement Reflection */}
-                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-slate-900 shadow-[inset_0_20px_50px_rgba(0,0,0,0.5)]">
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')]" />
+                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-slate-910 shadow-[inset_0_20px_50px_rgba(0,0,0,0.5)]">
+                    <div className="absolute inset-0 opacity-10" style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+                    }} />
                 </div>
 
                 {/* Horizon Line */}
                 <div className="absolute bottom-[25%] left-0 right-0 h-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
 
-                {/* Rain Particles - Always visible in Rainy theme or low trust */}
-                {(theme === 'rainy_street' || !isHighTrust) && (
-                    <div className="absolute inset-0">
-                        {[...Array(trust < 30 ? 150 : 60)].map((_, i) => (
+                {/* Rain Particles - Strongly visible in Rainy theme */}
+                {theme === 'rainy_street' && (
+                    <div className="absolute inset-0 z-[100] overflow-hidden pointer-events-none">
+                        {[...Array(120)].map((_, i) => (
                             <div
                                 key={i}
-                                className="absolute w-px h-12 bg-gray-400/30 animate-rain-drop"
+                                className="absolute w-[2px] h-20 bg-blue-100/40 animate-rain-drop"
                                 style={{
-                                    left: `${Math.random() * 100}%`,
+                                    left: `${Math.random() * 150}%`,
                                     top: `-${Math.random() * 20}%`,
-                                    animationDelay: `${Math.random() * 2}s`,
-                                    animationDuration: `${(isLowTrust ? 0.3 : 0.6) + Math.random() * 0.4}s`,
-                                    opacity: isLowTrust ? 0.8 : 0.4
+                                    animationDelay: `${Math.random() * 1}s`,
+                                    animationDuration: `${0.4 + Math.random() * 0.2}s`,
                                 }}
                             />
                         ))}

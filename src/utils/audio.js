@@ -508,12 +508,12 @@ class SoundEngine {
         if (voiceParams) {
             this.utterance.pitch = voiceParams.pitch || 1.0;
             this.utterance.rate = voiceParams.rate || 0.9;
+        } else if (gender === 'girl') {
+            this.utterance.pitch = isSam ? 1.1 : 1.4; // Slightly more somber if it's the NPC in crisis
+            this.utterance.rate = isSam ? 0.8 : 0.95;
         } else if (isSam) {
             this.utterance.pitch = 0.7; // Deep, somber
             this.utterance.rate = 0.75; // Slower, weighted
-        } else if (gender === 'girl') {
-            this.utterance.pitch = 1.4;
-            this.utterance.rate = 1.0;
         } else {
             this.utterance.pitch = 1.0;
             this.utterance.rate = 0.95;
@@ -528,13 +528,17 @@ class SoundEngine {
                 const lang = v.lang.toLowerCase();
                 if (!lang.includes('en')) return false;
 
-                if (isSam) {
-                    return name.includes('david') || name.includes('mark') || (name.includes('male') && !name.includes('female'));
-                }
                 if (gender === 'girl') {
                     return name.includes('zira') || name.includes('samantha') || name.includes('female') || name.includes('hazel') || name.includes('susan');
                 }
-                return name.includes('david') || name.includes('google us english') || (name.includes('male') && !name.includes('female'));
+
+                // Differentiate Male Voices
+                if (isSam) {
+                    // NPC Guy: Prioritize Mark or different male tone
+                    return name.includes('mark') || name.includes('james') || (name.includes('male') && !name.includes('david'));
+                }
+                // Player Guy: Prioritize David or Google
+                return name.includes('david') || name.includes('google us english') || (name.includes('male') && name.includes('david'));
             });
 
             if (preferredVoice) {

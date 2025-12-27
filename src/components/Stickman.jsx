@@ -97,11 +97,20 @@ const Stickman = ({
 
             {/* Dialogue Bubble */}
             {currentMessage && (
-                <div className="absolute bottom-[120px] md:bottom-[160px] left-1/2 -translate-x-1/2 w-[75vw] md:w-auto md:min-w-[200px] md:max-w-[300px] bg-white p-2 md:p-4 rounded-lg md:rounded-2xl shadow-xl border border-slate-100 animate-fade-in z-50">
-                    <p className={`text-[10px] md:text-sm font-bold text-slate-800 leading-snug md:leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
+                <div
+                    className={`absolute bottom-[130px] md:bottom-[160px] w-[60vw] md:w-auto md:min-w-[200px] md:max-w-[280px] bg-white p-3 md:p-4 rounded-2xl shadow-xl border-2 border-slate-100 animate-fade-in z-50
+                    ${position.x < 50 ? 'left-0 origin-bottom-left rounded-bl-none' : 'right-0 origin-bottom-right rounded-br-none'}
+                    `}
+                >
+                    <p className={`text-[11px] md:text-sm font-bold text-slate-800 leading-snug md:leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
                         {displayedText}
                     </p>
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 md:w-4 md:h-4 bg-white border-r border-b border-slate-100 rotate-45" />
+                    {/* Tail */}
+                    <div className={`absolute -bottom-2 w-4 h-4 bg-white border-b border-r border-slate-100 
+                        ${position.x < 50 ? 'left-0 border-l border-t-0 border-b-2 border-r-0' : 'right-0 border-r-2 border-b-2'}
+                        `}
+                        style={{ clipPath: position.x < 50 ? 'polygon(0 0, 0% 100%, 100% 100%)' : 'polygon(100% 0, 0 100%, 100% 100%)' }}
+                    />
                 </div>
             )}
 
