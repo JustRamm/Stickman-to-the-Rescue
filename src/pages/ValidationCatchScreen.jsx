@@ -89,22 +89,33 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
         const shouldSpawn = (time - lastItemTimeRef.current > spawnDelay) || (fallingItems.length === 0 && (time - lastItemTimeRef.current > 500));
 
         if (shouldSpawn) {
-            const pool = VALIDATION_PHRASES && VALIDATION_PHRASES.length > 0 ? VALIDATION_PHRASES : [
-                { text: "I hear you", type: 'validating' },
-                { text: "That sounds hard", type: 'validating' },
-                { text: "Stop crying", type: 'toxic' }
-            ];
+            // Ensure valid pool with text
+            let pool = (VALIDATION_PHRASES && VALIDATION_PHRASES.length > 0) ? VALIDATION_PHRASES : [];
+
+            // Fallback if empty or invalid
+            if (pool.length === 0) {
+                pool = [
+                    { text: "I hear you", type: 'validating' },
+                    { text: "That sounds hard", type: 'validating' },
+                    { text: "Stop crying", type: 'toxic' }
+                ];
+            }
+
             const randomPhrase = pool[Math.floor(Math.random() * pool.length)];
-            const newItem = {
-                id: Date.now() + Math.random(),
-                ...randomPhrase,
-                x: Math.random() * 80 + 10,
-                y: 0, // Start fully visible at the top edge of the container
-                speed: (0.2 + Math.random() * 0.1) * difficultyMultiplier, // Slightly faster base speed
-                scale: 0.9 + Math.random() * 0.1
-            };
-            setFallingItems(prev => [...prev, newItem]);
-            lastItemTimeRef.current = time;
+
+            // Double check it has text
+            if (randomPhrase && randomPhrase.text) {
+                const newItem = {
+                    id: Date.now() + Math.random(),
+                    ...randomPhrase,
+                    x: Math.random() * 80 + 10,
+                    y: 0, // Start at very top visible edge
+                    speed: (0.2 + Math.random() * 0.1) * difficultyMultiplier,
+                    scale: 1
+                };
+                setFallingItems(prev => [...prev, newItem]);
+                lastItemTimeRef.current = time;
+            }
         }
 
         // Move items
@@ -115,7 +126,7 @@ const ValidationCatchScreen = ({ audioManager, onComplete, onExit }) => {
 
                 // Collision check (Basket area)
                 // Expanded hitbox slightly for better feel
-                const isColliding = newY > 70 && newY < 90 && Math.abs(item.x - currentXRef.current) < 15;
+                const isColliding = newY > 65 && newY < 95 && Math.abs(item.x - currentXRef.current) < 15;
 
                 if (isColliding) {
                     if (item.type === 'validating') {
