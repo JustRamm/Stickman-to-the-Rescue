@@ -5,7 +5,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
     // Game State
     const [gameState, setGameState] = useState('INTRO'); // INTRO, PLAYING, END
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(45);
+    const [timeLeft, setTimeLeft] = useState(60); // Increased time
     const [people, setPeople] = useState([]);
     const [feedback, setFeedback] = useState(null); // { text, type: 'good' | 'bad' | 'miss' }
     const [foundSignals, setFoundSignals] = useState([]); // Track unique IDs found
@@ -29,7 +29,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
     const startGame = () => {
         setGameState('PLAYING');
         setScore(0);
-        setTimeLeft(45);
+        setTimeLeft(60);
         setPeople([]);
         setFoundSignals([]);
         if (audioManager) audioManager.startAmbient('park'); // Reuse park ambient
@@ -62,10 +62,11 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             const newPerson = {
                 uid: Date.now() + Math.random(), // Unique ID for key
                 data: scenario,
-                x: isLeftStart ? -10 : 110, // Start off-screen
-                y: 15 + Math.random() * 60, // Random vertical lane
+                x: isLeftStart ? -15 : 115, // Start further off-screen
+                y: 20 + Math.random() * 55, // Conserve vertical lanes better
                 direction: isLeftStart ? 1 : -1,
-                speed: 0.1 + Math.random() * 0.15, // Random speed
+                // Reduced speed significantly for readability 
+                speed: 0.02 + Math.random() * 0.03,
                 asset: getStickmanAsset(scenario.category),
                 isClicked: false
             };
@@ -75,10 +76,9 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
         // Initial spawn
         spawnPerson();
-        spawnPerson();
 
-        // Interval spawn
-        spawnTimerRef.current = setInterval(spawnPerson, 1800); // Spawn every 1.8s
+        // Slower spawn interval to prevent clutter
+        spawnTimerRef.current = setInterval(spawnPerson, 2500);
 
         return () => clearInterval(spawnTimerRef.current);
     }, [gameState]);
@@ -119,95 +119,108 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
         }
 
         // Clear feedback after delay
-        setTimeout(() => setFeedback(null), 1500);
+        setTimeout(() => setFeedback(null), 2000);
     };
 
 
     return (
         <div className="fixed inset-0 z-[100] bg-slate-900 flex flex-col overflow-hidden font-sans select-none">
 
+            {/* Binocular Vignette Effect */}
+            <div className="absolute inset-0 z-40 pointer-events-none opacity-40 mix-blend-multiply"
+                style={{ background: 'radial-gradient(circle at center, transparent 40%, #000 90%)' }}>
+            </div>
+
             {/* Header / HUD */}
-            <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-start z-50 pointer-events-none">
-                <div className="flex flex-col gap-1">
+            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-50 pointer-events-none">
+                <div className="flex flex-col gap-2">
                     <button
                         onClick={onExit}
-                        className="pointer-events-auto px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all flex items-center gap-2"
+                        className="pointer-events-auto w-10 h-10 bg-black/40 hover:bg-red-500/80 backdrop-blur-md rounded-full text-white flex items-center justify-center transition-all border border-white/10"
                     >
-                        <span>✕</span> Exit
+                        ✕
                     </button>
-                    <div className="mt-2 bg-slate-900/50 backdrop-blur px-4 py-2 rounded-xl border border-white/5">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Signal Scout</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-black text-white">{score}</span>
-                            <span className="text-[10px] text-teal-400 font-bold uppercase">PTS</span>
-                        </div>
+                    <div className="bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-xl border-l-4 border-teal-500 shadow-lg">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-0.5">Score</span>
+                        <span className="text-2xl font-black text-white leading-none">{score}</span>
                     </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-2">
-                    <div className={`text-4xl font-black ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
-                        {timeLeft}
-                    </div>
-                    <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Seconds Left</span>
+                <div className="flex flex-col items-center bg-black/30 backdrop-blur px-4 py-2 rounded-full border border-white/10">
+                    <span className={`text-2xl font-black tabular-nums ${timeLeft < 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                        00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+                    </span>
+                    <span className="text-[8px] text-white/50 font-bold uppercase tracking-widest">Time Left</span>
                 </div>
             </div>
 
             {/* Game World */}
-            <div className="flex-1 relative bg-gradient-to-b from-slate-800 to-slate-900 overflow-hidden cursor-crosshair">
+            <div className="flex-1 relative bg-gradient-to-b from-slate-700 to-slate-900 overflow-hidden cursor-crosshair">
 
-                {/* Grid / Perspective Lines */}
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                {/* Environment Layers */}
+                <div className="absolute inset-0 opacity-10"
+                    style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+                </div>
 
                 {/* Render People */}
                 {people.map(person => (
                     <div
                         key={person.uid}
-                        className={`absolute w-16 h-28 md:w-24 md:h-36 transition-transform duration-100 ease-linear hover:scale-105 active:scale-95 group`}
+                        className="absolute transition-all duration-300 ease-out group"
                         style={{
                             left: `${person.x}%`,
                             top: `${person.y}%`,
                             zIndex: Math.floor(person.y), // Depth sorting
-                            opacity: person.isClicked ? (person.data.type === 'risk' ? 0 : 0.5) : 1,
-                            transform: `scale(${person.isClicked && person.data.type === 'risk' ? 2 : 1})`,
-                            transition: 'opacity 0.3s, transform 0.3s'
+                            width: 'clamp(80px, 15vw, 120px)', // Responsive width
                         }}
-                        onClick={() => handlePersonClick(person)}
                     >
-                        {/* Stickman Asset */}
-                        <div className={`w-full h-full relative ${person.direction === -1 ? '-scale-x-100' : ''}`}>
-                            <img
-                                src={person.asset}
-                                className="w-full h-full object-contain drop-shadow-2xl filter brightness-90 group-hover:brightness-110"
-                                draggable="false"
-                            />
-                        </div>
-
-                        {/* Speech Bubble Cue */}
+                        {/* Wrapper for Click Handling & Scaling */}
                         <div
-                            className={`absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-900 px-3 py-2 rounded-xl rounded-bl-none shadow-xl border-2 z-20 min-w-[120px] md:min-w-[160px] text-center
-                                ${person.data.type === 'risk' ? 'border-red-100' : 'border-blue-50'}
-                                ${person.direction === -1 ? 'rounded-br-none rounded-bl-xl origin-bottom-right' : 'origin-bottom-left'}
-                                animate-pop-in
-                            `}
+                            className={`relative transition-all duration-300 ${person.isClicked ? 'scale-95 opacity-50 grayscale' : 'hover:scale-105'}`}
+                            onClick={() => handlePersonClick(person)}
                         >
-                            <p className="text-[9px] md:text-[10px] font-bold leading-tight">{person.data.text}</p>
-                            {/* Emoji Cue */}
-                            <div className="absolute -top-3 -right-3 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-xs shadow-md border border-white">
-                                {person.data.emoji}
-                            </div>
-                        </div>
 
+                            {/* Speech Bubble Cue */}
+                            <div
+                                className={`
+                                    relative bg-white text-slate-900 p-3 rounded-2xl shadow-xl border-2 mb-2 cursor-pointer
+                                    ${person.data.type === 'risk' ? 'border-red-100 hover:border-red-300' : 'border-blue-50 hover:border-blue-200'}
+                                    transition-colors duration-200
+                                `}
+                            >
+                                <p className="text-[10px] md:text-xs font-bold leading-snug">{person.data.text}</p>
+
+                                {/* Emoji Tag */}
+                                <div className="absolute -top-3 -right-2 w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-xs shadow-sm border border-white">
+                                    {person.data.emoji}
+                                </div>
+
+                                {/* Tail */}
+                                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-inherit transform rotate-45"></div>
+                            </div>
+
+                            {/* Stickman Asset */}
+                            <div className={`h-24 md:h-32 w-full flex justify-center ${person.direction === -1 ? '-scale-x-100' : ''}`}>
+                                <img
+                                    src={person.asset}
+                                    className="h-full object-contain drop-shadow-2xl filter brightness-90 group-hover:brightness-110"
+                                    draggable="false"
+                                />
+                            </div>
+
+                        </div>
                     </div>
                 ))}
 
                 {/* Feedback Popup */}
                 {feedback && (
                     <div
-                        className={`absolute z-[200] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-widest shadow-xl animate-bounce-subtle pointer-events-none border-2
-                            ${feedback.type === 'good' ? 'bg-teal-500 text-white border-white' : 'bg-red-500 text-white border-red-200'}
+                        className={`absolute z-[200] max-w-[200px] text-center px-4 py-3 rounded-xl font-bold text-xs shadow-2xl animate-bounce-subtle pointer-events-none border-2 backdrop-blur-md
+                            ${feedback.type === 'good' ? 'bg-teal-500/90 text-white border-teal-300' : 'bg-slate-800/90 text-red-300 border-red-500/50'}
                         `}
-                        style={{ left: `${feedback.x}%`, top: `${feedback.y - 10}%`, transform: 'translateX(-50%)' }}
+                        style={{ left: `${feedback.x}%`, top: `${feedback.y - 15}%`, transform: 'translateX(-50%)' }}
                     >
+                        <span className="block text-lg mb-1">{feedback.type === 'good' ? '✅' : '⚠️'}</span>
                         {feedback.text}
                     </div>
                 )}
@@ -215,34 +228,44 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
             {/* Intro Modal */}
             {gameState === 'INTRO' && (
-                <div className="absolute inset-0 z-[300] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-6">
-                    <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-2xl animate-scale-in">
-                        <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner">
+                <div className="absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-6">
+                    <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-400 to-indigo-500"></div>
+
+                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner border-4 border-white">
                             🔭
                         </div>
-                        <h2 className="text-3xl font-black uppercase text-slate-800 mb-2">Signal Scout</h2>
-                        <p className="text-slate-600 font-medium mb-6">
-                            "You can't question if you don't see the signs." <br /><br />
-                            Tap people showing <strong className="text-red-500">Warning Signs</strong> (Crisis, Isolation, Giving away items). <br />
-                            Ignore normal stress distractions.
+
+                        <h2 className="text-3xl font-black uppercase text-slate-800 mb-2 tracking-tight">Signal Scout</h2>
+                        <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed px-4">
+                            Identify people showing <strong className="text-red-500 bg-red-50 px-1 rounded">Suicide Warning Signs</strong>.
+                            <br />Tap their speech bubbles to intervene.
                         </p>
 
-                        <div className="grid grid-cols-2 gap-4 mb-8">
-                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span className="block text-2xl mb-1">💸</span>
-                                <span className="text-[10px] font-bold uppercase text-slate-500">Crisis (Tap)</span>
+                        <div className="space-y-3 mb-8 text-left">
+                            <div className="flex items-center gap-4 bg-teal-50 p-3 rounded-xl border border-teal-100">
+                                <span className="text-2xl">�</span>
+                                <div>
+                                    <p className="text-xs font-bold text-teal-800 uppercase">Warning Sign</p>
+                                    <p className="text-[10px] text-teal-600">"Giving away prized possessions"</p>
+                                </div>
+                                <span className="ml-auto font-black text-teal-400">TAP ✅</span>
                             </div>
-                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span className="block text-2xl mb-1">🧹</span>
-                                <span className="text-[10px] font-bold uppercase text-slate-500">Chores (Ignore)</span>
+                            <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100 opacity-60">
+                                <span className="text-2xl">😤</span>
+                                <div>
+                                    <p className="text-xs font-bold text-slate-500 uppercase">Normal Stress</p>
+                                    <p className="text-[10px] text-slate-400">"Traffic is terrible today"</p>
+                                </div>
+                                <span className="ml-auto font-black text-slate-300">IGNORE ❌</span>
                             </div>
                         </div>
 
                         <button
                             onClick={startGame}
-                            className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all active:scale-95"
+                            className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                         >
-                            Start Patrol
+                            <span>Start Patrol</span> ➔
                         </button>
                     </div>
                 </div>
@@ -250,22 +273,32 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
             {/* End Modal */}
             {gameState === 'END' && (
-                <div className="absolute inset-0 z-[300] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-6">
-                    <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-2xl animate-scale-in border-4 border-teal-500">
-                        <h2 className="text-4xl font-black uppercase text-slate-800 mb-2">Patrol Complete</h2>
-                        <div className="my-6">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Final Score</span>
-                            <div className="text-6xl font-black text-teal-600 drop-shadow-sm">{score}</div>
+                <div className="absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-6">
+                    <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in border-4 border-slate-100">
+                        <h2 className="text-2xl font-black uppercase text-slate-400 mb-6 tracking-widest">Patrol Ended</h2>
+
+                        <div className="relative py-8 mb-8">
+                            <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                                <div className="w-32 h-32 bg-teal-500 rounded-full blur-2xl"></div>
+                            </div>
+                            <span className="text-xs font-bold text-teal-600 uppercase tracking-widest bg-teal-50 px-3 py-1 rounded-full mb-2 inline-block">Final Score</span>
+                            <div className="text-7xl font-black text-slate-800 tracking-tighter">{score}</div>
                         </div>
-                        <p className="text-slate-600 font-medium mb-8">
-                            {score > 500 ? "Excellent scouting! You have a sharp eye for hidden distress." : "Good effort. Remember, signs can be subtle—like giving away prized possessions."}
-                        </p>
-                        <button
-                            onClick={onExit}
-                            className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all active:scale-95"
-                        >
-                            Continue Training
-                        </button>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={startGame}
+                                className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                            >
+                                Play Again ↺
+                            </button>
+                            <button
+                                onClick={onExit}
+                                className="w-full py-4 bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 font-bold uppercase tracking-widest rounded-xl transition-all"
+                            >
+                                Return to Menu
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
