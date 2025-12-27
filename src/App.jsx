@@ -50,7 +50,7 @@ const App = () => {
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
   const [completedLevels, setCompletedLevels] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('qpr_completed_missions_v2')) || [];
+      return JSON.parse(localStorage.getItem('qpr_completed_missions_v3')) || [];
     } catch { return []; }
   });
 
@@ -128,8 +128,14 @@ const App = () => {
 
   // Save Progress
   useEffect(() => {
-    localStorage.setItem('qpr_completed_missions_v2', JSON.stringify(completedLevels));
+    localStorage.setItem('qpr_completed_missions_v3', JSON.stringify(completedLevels));
   }, [completedLevels]);
+
+  // Clean Legacy Data
+  useEffect(() => {
+    localStorage.removeItem('qpr_completed_missions');
+    localStorage.removeItem('qpr_completed_missions_v2');
+  }, []);
 
   // Audio & Settings
   useEffect(() => {

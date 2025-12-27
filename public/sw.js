@@ -1,5 +1,5 @@
 // Enhanced Service Worker for PWA - v5
-const CACHE_NAME = 'stickman-qpr-v5';
+const CACHE_NAME = 'stickman-qpr-v6';
 const urlsToCache = [
     '/',
     '/index.html',
