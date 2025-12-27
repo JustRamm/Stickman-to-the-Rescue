@@ -9,7 +9,7 @@ export const OBSTACLES = [
     {
         id: 'reputation',
         text: "If people in our colony find out I'm seeing a doctor for 'nerves', our family's name is ruined.",
-        weaknesses: ['textline', 'forum', 'hotline'],
+        weaknesses: ['textline', 'hotline', 'counselor'],
         sfx: 'shy',
         stickman_emotion: 'scared'
     },
@@ -33,6 +33,48 @@ export const OBSTACLES = [
         weaknesses: ['kudumbashree', 'hotline', 'disha_kerala'],
         sfx: 'tired',
         stickman_emotion: 'sad'
+    },
+    {
+        id: 'debt',
+        text: "My small business failed and the debt is piling up. I'm afraid of what the lenders might do.",
+        weaknesses: ['hotline', 'textline', 'disha_kerala'],
+        sfx: 'scared',
+        stickman_emotion: 'distressed'
+    },
+    {
+        id: 'addiction',
+        text: "I’ve started using substances to numb the pain. I feel like I'm losing control of my life.",
+        weaknesses: ['disha_kerala', 'hotline'],
+        sfx: 'tired',
+        stickman_emotion: 'sad'
+    },
+    {
+        id: 'workplace',
+        text: "My supervisor makes me feel unsafe at work. I'm terrified of losing my job if I speak up.",
+        weaknesses: ['kudumbashree', 'hotline', 'textline'],
+        sfx: 'anxious',
+        stickman_emotion: 'scared'
+    },
+    {
+        id: 'aimless',
+        text: "I’m a fresh graduate with no job. I feel like a weight on my family while everyone else is succeeding.",
+        weaknesses: ['counselor', 'hotline', 'textline'],
+        sfx: 'sad',
+        stickman_emotion: 'vulnerable'
+    },
+    {
+        id: 'domestic',
+        text: "Things are getting violent at home. I have nowhere to go and no one to turn to.",
+        weaknesses: ['kudumbashree', 'disha_kerala', 'hotline'],
+        sfx: 'panic',
+        stickman_emotion: 'scared'
+    },
+    {
+        id: 'identity',
+        text: "I’m hiding my true identity from my community. The fear of being disowned is breaking me.",
+        weaknesses: ['textline', 'hotline', 'kudumbashree'],
+        sfx: 'shy',
+        stickman_emotion: 'vulnerable'
     }
 ];
 

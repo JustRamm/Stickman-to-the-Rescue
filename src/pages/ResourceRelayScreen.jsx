@@ -17,7 +17,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
     const [isSamAttacking, setIsSamAttacking] = useState(false);
 
     // Refs
-    const resistanceMax = 3;
+    const resistanceMax = 5;
 
     useEffect(() => {
         // Init Game
