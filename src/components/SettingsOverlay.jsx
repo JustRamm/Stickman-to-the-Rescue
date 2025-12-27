@@ -118,6 +118,33 @@ const SettingsOverlay = ({
                             </div>
                         </div>
 
+                        {/* Developer Mode */}
+                        <div className="flex justify-between items-center group pt-2 border-t border-slate-100">
+                            <div>
+                                <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 block group-hover:text-indigo-600 transition-colors">Developer Mode</label>
+                                <p className="text-[9px] md:text-[10px] text-slate-500 font-medium">Unlock all scenarios</p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    if (settings.devMode) {
+                                        setSettings(s => ({ ...s, devMode: false }));
+                                    } else {
+                                        const password = prompt("Enter Developer Credentials:");
+                                        if (password === "lillyasdaisy") {
+                                            setSettings(s => ({ ...s, devMode: true }));
+                                            if (audioManager) audioManager.playDing();
+                                        } else if (password !== null) {
+                                            if (audioManager) audioManager.playSad();
+                                            alert("Access Denied");
+                                        }
+                                    }
+                                }}
+                                className={`w-10 md:w-12 h-5 md:h-6 rounded-full transition-all relative ${settings.devMode ? 'bg-indigo-500 shadow-lg shadow-indigo-500/30' : 'bg-slate-200'}`}
+                            >
+                                <div className={`absolute top-0.5 md:top-1 left-0.5 md:left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${settings.devMode ? 'translate-x-5 md:translate-x-6' : ''}`} />
+                            </button>
+                        </div>
+
                         <div className="px-6 pb-2 md:px-8">
                             <button
                                 onClick={() => { onResetGame && onResetGame(); setIsSettingsOpen(false); }}

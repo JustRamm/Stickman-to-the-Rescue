@@ -19,6 +19,7 @@ const LevelSelectScreen = ({
     const sliderRef = useRef(null);
 
     const isMissionLocked = (missionId) => {
+        if (settings?.devMode) return false; // Developer Mode Override
         const missionIndex = MISSIONS.findIndex(m => m.id === missionId);
         if (missionIndex === 0) return false; // First mission (Intro) is always unlocked
         if (missionIndex === -1) return true; // Secure default
