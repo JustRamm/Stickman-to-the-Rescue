@@ -101,6 +101,7 @@ const App = () => {
 
   // Derived
   const currentScenario = dialogueData[selectedLevel.id] || dialogueData[selectedLevel.theme] || dialogueData['park'];
+  const currentClue = CLUE_POSITIONS[selectedLevel.id] || CLUE_POSITIONS[selectedLevel.theme];
   const resetCardGame = () => setGameState('LEVEL_SELECT'); // Used in some callbacks
 
   const walletResources = [
@@ -235,12 +236,16 @@ const App = () => {
   // Proximity Check
   useEffect(() => {
     if (gameState !== 'APPROACH') return;
+
     if (Math.abs(playerPos.x - samPos.x) < 15) {
+      // Enforce clue collection
+      if (currentClue && !foundClues.includes(currentClue.id)) return;
+
       setIsNpcSpeaking(true);
       setGameState('DIALOGUE');
       audioManager.playDing();
     }
-  }, [gameState, playerPos.x, samPos.x]);
+  }, [gameState, playerPos.x, samPos.x, currentClue, foundClues]);
 
   // Inner Thoughts generation removed as requested
 
@@ -317,9 +322,8 @@ const App = () => {
   };
 
   const handleInvestigate = () => {
-    const clue = CLUE_POSITIONS[selectedLevel.theme];
-    if (clue && !foundClues.includes(clue.id)) {
-      setViewedClue(clue);
+    if (currentClue && !foundClues.includes(currentClue.id)) {
+      setViewedClue(currentClue);
       audioManager.playInvestigate();
     }
   };
@@ -500,18 +504,18 @@ const App = () => {
           <Scenery theme={selectedLevel.theme} trust={trust} />
         </div>
 
-        {CLUE_POSITIONS[selectedLevel.theme] && !foundClues.includes(CLUE_POSITIONS[selectedLevel.theme].id) && (
+        {currentClue && !foundClues.includes(currentClue.id) && (
           <div
             className={`absolute bottom-[20%] z-20 cursor-pointer group transition-all duration-500 ease-out`}
             style={{
-              left: `${CLUE_POSITIONS[selectedLevel.theme].x}%`,
-              transform: `scale(${Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 15 ? 1.2 : 0.9})`,
-              filter: `drop-shadow(0 0 ${Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 15 ? '15px' : '5px'} rgba(45, 212, 191, 0.6))`
+              left: `${currentClue.x}%`,
+              transform: `scale(${Math.abs(playerPos.x - currentClue.x) < 15 ? 1.2 : 0.9})`,
+              filter: `drop-shadow(0 0 ${Math.abs(playerPos.x - currentClue.x) < 15 ? '15px' : '5px'} rgba(45, 212, 191, 0.6))`
             }}
             onClick={handleInvestigate}
           >
             {/* Folded Paper Visual */}
-            <div className={`relative w-10 h-12 md:w-14 md:h-16 bg-white rounded-sm shadow-xl border border-teal-500/30 overflow-hidden ${Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 20 ? 'animate-bounce' : 'animate-pulse'}`}>
+            <div className={`relative w-10 h-12 md:w-14 md:h-16 bg-white rounded-sm shadow-xl border border-teal-500/30 overflow-hidden ${Math.abs(playerPos.x - currentClue.x) < 20 ? 'animate-bounce' : 'animate-pulse'}`}>
               <div className="absolute top-0 right-0 w-4 h-4 bg-teal-100 border-l border-b border-teal-500/20 rounded-bl-lg" />
               <div className="p-2 md:p-3 space-y-1">
                 <div className="w-full h-1 bg-slate-200 rounded-full" />
@@ -525,7 +529,7 @@ const App = () => {
             </div>
 
             {/* Proximity Prompt */}
-            {Math.abs(playerPos.x - CLUE_POSITIONS[selectedLevel.theme].x) < 15 && (
+            {Math.abs(playerPos.x - currentClue.x) < 15 && (
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-teal-600/90 text-white text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-xl border border-white/20 animate-slide-up">
                 Examine [Z]
               </div>
@@ -550,7 +554,9 @@ const App = () => {
 
         {gameState === 'APPROACH' && Math.abs(playerPos.x - samPos.x) < 20 && (
           <div className="absolute top-[20%] left-1/2 -translate-x-1/2 bg-white/90 px-4 py-2 rounded-full shadow-xl animate-bounce z-40">
-            <p className="text-xs font-bold text-slate-900">Approach & Listen</p>
+            <p className="text-xs font-bold text-slate-900">
+              {currentClue && !foundClues.includes(currentClue.id) ? "Find Clue First 🔍" : "Approach & Listen"}
+            </p>
           </div>
         )}
 

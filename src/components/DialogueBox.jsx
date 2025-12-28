@@ -39,8 +39,8 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
                         <button
                             onClick={() => {
                                 if (isCorrectResource) {
-                                    // Find the success option that leads to success_end or success_tutorial
-                                    const successOption = options.find(o => o.next_node?.includes('success')) || options[0];
+                                    {/* Find the success option that leads to success_end or success_tutorial */ }
+                                    const successOption = options.find(o => o.next?.includes('success')) || options[0];
                                     onSelectOption(successOption);
                                 }
                             }}
@@ -69,14 +69,15 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
                                 onMouseEnter={() => setHoveredOption(index)}
                                 onMouseLeave={() => setHoveredOption(null)}
                                 onClick={() => onSelectOption(option)}
-                                className="group relative w-full text-left p-2 md:p-4 bg-white/50 border border-slate-100 rounded-lg md:rounded-2xl hover:border-teal-400 hover:bg-teal-50 transition-all duration-300"
+                                className={`group relative w-full text-left p-2 md:p-4 bg-white/50 border border-slate-100 rounded-lg md:rounded-2xl hover:border-teal-400 hover:bg-teal-50 transition-all duration-300 ${option.required_clue ? 'border-teal-200 bg-teal-50/50' : ''}`}
                             >
                                 <div className="flex items-center gap-2 md:gap-4">
                                     <span className="text-[9px] md:text-[10px] font-black text-slate-300 group-hover:text-teal-500">
                                         {index + 1}
                                     </span>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] md:text-sm font-bold leading-tight text-slate-600 group-hover:text-slate-900">
+                                        <span className="text-[10px] md:text-sm font-bold leading-tight text-slate-600 group-hover:text-slate-900 flex items-center gap-2">
+                                            {option.required_clue && <span title="Key Insight Found">🔍</span>}
                                             {option.text}
                                         </span>
                                     </div>

@@ -18,11 +18,11 @@ export const CLUE_POSITIONS = {
 };
 
 export const CLUE_DETAILS = {
-    tutorial_note: { title: "Training Manual", description: "A guide on how to help others. Focus on Listen, Ask, and Refer." },
-    family_photo: { title: "A Crumpled Photograph", description: "A slightly water-damaged photo of Sam smiling with two children at a birthday party. 'Happy 40th Dad!' is written on the back." },
-    termination_letter: { title: "Official Letterhead", description: "TERMINATION OF EMPLOYMENT. 'Effective Immediately due to restructuring.' The paper has been folded and unfolded many times." },
-    failing_grade: { title: "Academic Notice", description: "Academic Probation Warning. 'Grade: F'. Red ink circles the phrase 'Loss of Scholarship Eligibility'." },
-    wet_envelope: { title: "Eviction Notice", description: "FINAL NOTICE TO VACATE. 'Failure to pay rent will result in immediate legal action.' It's stained with mud." }
+    tutorial_note: { title: "About Clues", description: "This is a clue. Clues provide context about the person's situation. Finding them unlocks special 'Key Insight' dialogue options marked with a 🔍 icon." },
+    family_photo: { title: "A Crumpled Photograph", description: "A slightly water-damaged photo of Grace smiling with two children at a birthday party. 'We love you Mom!' is written on the back." },
+    termination_letter: { title: "Official Letterhead", description: "TERMINATION OF EMPLOYMENT. 'Dear David, Effective Immediately due to restructuring.' The paper has been folded and unfolded many times." },
+    failing_grade: { title: "Academic Notice", description: "Academic Probation Warning. 'Student: Maya'. Grade: F. Red ink circles the phrase 'Loss of Scholarship Eligibility'." },
+    wet_envelope: { title: "Eviction Notice", description: "FINAL NOTICE TO VACATE. 'Dear Raj, Failure to pay rent will result in immediate legal action.' It's stained with mud." }
 };
 
 export const BACKGROUND_NPCS = [
