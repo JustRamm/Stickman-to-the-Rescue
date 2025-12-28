@@ -9,11 +9,6 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
     const [people, setPeople] = useState([]);
     const [feedback, setFeedback] = useState(null); // { text, type: 'good' | 'bad' | 'miss' }
     const [foundSignals, setFoundSignals] = useState([]); // Track unique IDs found
-    const [usedScenarioIds, setUsedScenarioIds] = useState(new Set());
-    const spawnTimerRef = useRef(null);
-
-
-
     // --- Enhanced Asset Mapping ---
     const getStickmanAsset = (category) => {
         const assets = {
@@ -35,7 +30,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
         setTimeLeft(60);
         setPeople([]);
         setFoundSignals([]);
-        setUsedScenarioIds(new Set()); // Reset used scenarios
+        usedScenarioIdsRef.current = new Set(); // Reset used scenarios
         if (audioManager) audioManager.startAmbient('park');
     };
 
@@ -64,27 +59,24 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             setPeople(currentPeople => {
                 if (currentPeople.length >= 8) return currentPeople;
 
-                // Filter scenarios that haven't been used yet
-                // Note: We need to access the LATEST usedScenarioIds, but since this is inside a Set state update,
-                // we should rely on the ref or the state passed in dependency. 
-                // However, to keep it simple and safe, we can do the filtering here.
-
                 // CRITICAL: We need to know what IDs are currently on screen + what have been used previously
-                // actually, usedScenarioIds tracks ALL spawned IDs.
-                const availableScenarios = SCENARIOS.filter(s => !usedScenarioIds.has(s.id));
+                const availableScenarios = SCENARIOS.filter(s => !usedScenarioIdsRef.current.has(s.id));
 
                 if (availableScenarios.length === 0) {
-                    return currentPeople; // No more unique sentences
+                    // Optional: Reset if all used? Or just stop spawning?
+                    // For now, let's reset to keep game going if needed, or just stop
+                    if (usedScenarioIdsRef.current.size >= SCENARIOS.length) {
+                        // Reset if we ran out, to allow infinite play until time is up
+                        usedScenarioIdsRef.current = new Set();
+                        return currentPeople;
+                    }
+                    return currentPeople;
                 }
 
                 const scenario = availableScenarios[Math.floor(Math.random() * availableScenarios.length)];
 
                 // Mark as used
-                setUsedScenarioIds(prev => {
-                    const next = new Set(prev);
-                    next.add(scenario.id);
-                    return next;
-                });
+                usedScenarioIdsRef.current.add(scenario.id);
 
                 const isLeftStart = Math.random() > 0.5;
 
@@ -94,7 +86,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                     x: isLeftStart ? -15 : 115, // Start further off-screen
                     y: 15 + Math.random() * 60, // Conserve vertical lanes better
                     direction: isLeftStart ? 1 : -1,
-                    speed: 0.03 + Math.random() * 0.04, // Varied speeds for "different phase"
+                    speed: 0.15 + Math.random() * 0.1, // FASTER MOVEMENT SPEEDS (was 0.03)
                     asset: getStickmanAsset(scenario.category),
                     isClicked: false
                 };
@@ -103,11 +95,14 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             });
         };
 
-        // Spawn interval - slightly slower to prevent chaos
-        spawnTimerRef.current = setInterval(spawnPerson, 2500);
+        // Spawn immediately on start
+        spawnPerson();
+
+        // Spawn interval
+        spawnTimerRef.current = setInterval(spawnPerson, 2000);
 
         return () => clearInterval(spawnTimerRef.current);
-    }, [gameState, usedScenarioIds]);
+    }, [gameState]);
 
     // Movement Loop using RequestAnimationFrame via Interval for React simplicity
     useEffect(() => {

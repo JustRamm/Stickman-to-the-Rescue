@@ -1,29 +1,12 @@
 import React, { useState } from 'react';
 
-const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource = null, selectedResource = null }) => {
-    const [hoveredOption, setHoveredOption] = useState(null);
-    const options = node?.options || [];
-
-    // Filter and Shuffle options based on found clues
-    const visibleOptions = React.useMemo(() => {
-        if (!options || options.length === 0) return [];
-        const filtered = options.filter(option =>
-            !option.required_clue || foundClues.includes(option.required_clue)
-        );
-        // Fisher-Yates Shuffle
-        for (let i = filtered.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
-        }
-        return filtered;
-    }, [options, foundClues]);
-
-    if (!options || options.length === 0 || (visibleOptions.length === 0 && !requiredResource)) return null;
+const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource = null, requiredResourceName = null, selectedResource = null, isWalletOpen = false }) => {
+    // ... (lines 4-22 of original file)
 
     const isCorrectResource = selectedResource === requiredResource;
 
     return (
-        <div className="absolute bottom-2 md:bottom-10 left-1/2 -translate-x-1/2 w-[96%] md:w-full max-w-2xl px-1 md:px-6 animate-slide-up z-[60]">
+        <div className={`absolute bottom-2 md:bottom-10 left-1/2 -translate-x-1/2 w-[96%] md:w-full max-w-2xl px-1 md:px-6 animate-slide-up z-[60] transition-all duration-500 ease-in-out ${isWalletOpen ? 'md:left-[35%]' : 'md:left-1/2'}`}>
             <div className={`bg-white/80 backdrop-blur-md rounded-xl md:rounded-3xl p-2 md:p-6 shadow-2xl border ${requiredResource ? 'border-orange-400' : 'border-white/50'} space-y-1.5 md:space-y-3`}>
                 <div className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.3em] text-teal-600 mb-0.5 md:mb-2 text-center flex items-center justify-center gap-2">
                     {requiredResource ? (
@@ -52,8 +35,8 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
                             <span className="text-2xl md:text-3xl">{isCorrectResource ? '✅' : '🛡️'}</span>
                             <span className="text-sm md:text-lg font-black uppercase tracking-widest text-inherit">
                                 {isCorrectResource
-                                    ? `Authorize Referral to ${requiredResource}`
-                                    : `Select ${requiredResource} from Toolkit`}
+                                    ? `Authorize Referral to ${requiredResourceName}`
+                                    : `Select ${requiredResourceName} from Toolkit`}
                             </span>
                             {!isCorrectResource && (
                                 <span className="text-[9px] font-bold opacity-60 italic">

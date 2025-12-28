@@ -49,12 +49,12 @@ const ResourceWallet = ({ isOpen, resources, onSelectResource, selectedResource 
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start">
-                                        <h4 className={`text-sm font-black uppercase tracking-wide truncate pr-2 ${isSelected ? 'text-teal-900' : 'text-slate-800'}`}>
+                                        <h4 className={`text-sm font-black uppercase tracking-wide pr-2 ${isSelected ? 'text-teal-900' : 'text-slate-800'}`}>
                                             {resource.name}
                                         </h4>
                                         {badge && <span className="text-[9px] font-bold px-1.5 py-0.5 bg-red-100 text-red-600 rounded uppercase tracking-wider">{badge}</span>}
                                     </div>
-                                    <p className={`text-[11px] leading-snug font-medium mt-1 ${isSelected ? 'text-teal-700' : 'text-slate-400'}`}>
+                                    <p className={`text-xs leading-normal font-medium mt-1 ${isSelected ? 'text-teal-700' : 'text-slate-400'}`}>
                                         {resource.description}
                                     </p>
                                 </div>

@@ -179,9 +179,10 @@ const App = () => {
 
   // Camera Logic
   useEffect(() => {
-    if (gameState === 'DIALOGUE') setCamera({ scale: 1.15, x: -10, y: -5 });
+    if (isWalletOpen) setCamera({ scale: 1.15, x: -25, y: -5 });
+    else if (gameState === 'DIALOGUE') setCamera({ scale: 1.15, x: -10, y: -5 });
     else if (gameState === 'APPROACH') setCamera({ scale: 1, x: 0, y: 0 });
-  }, [gameState]);
+  }, [gameState, isWalletOpen]);
 
   // --- Game Loop Logic (Approach/Movement) ---
 
@@ -307,17 +308,14 @@ const App = () => {
       setTimeout(() => setCoachFeedback(null), 5000);
     }
 
-    // Dynamic timeout based on text length to prevent awkward pauses but ensure readability
-    // Reduced multiplier because player has already read the text to select it
-    const readTime = Math.max(1000, selectedOption.text.length * 30);
-
     audioManager.speak(selectedOption.text, false, playerGender, null, () => {
+      // Short pause after player speaks before NPC starts (Snappy response)
       setTimeout(() => {
         setPlayerLastSaid(null);
         // Pre-emptively set speaking state to prevent DialogueBox flicker
         setIsNpcSpeaking(true);
         setCurrentNodeId(nextNodeId);
-      }, readTime);
+      }, 300);
     });
   };
 
@@ -368,9 +366,8 @@ const App = () => {
 
       const timer = setTimeout(() => {
         audioManager.speak(text, true, npcGender, npcVoice, () => {
-          // Add a "Read Buffer" after audio ends so text doesn't vanish instantly
-          // Reduced buffer since listeners often read faster than slow speech
-          const bufferTime = Math.max(1000, text.length * 20);
+          // Reduced buffer time for snappier responses
+          const bufferTime = Math.max(500, text.length * 5);
           setTimeout(() => {
             setIsNpcSpeaking(false);
             if (!isEnd) setNpcLastSaid(null);
@@ -561,7 +558,7 @@ const App = () => {
         )}
 
         <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} textSpeed={settings.textSpeed} />
-        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed} />
+        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed / (selectedLevel.npc.voice?.rate || 1)} />
       </div>
 
       {selectedLevel.id === 'tutorial' && <TutorialOverlay gameState={gameState} playerPos={playerPos} foundClues={foundClues} />}
@@ -681,7 +678,9 @@ const App = () => {
           onSelectOption={handleSelectOption}
           foundClues={foundClues}
           requiredResource={currentNode?.required_resource}
+          requiredResourceName={walletResources.find(r => r.id === currentNode?.required_resource)?.name || currentNode?.required_resource}
           selectedResource={selectedResource}
+          isWalletOpen={isWalletOpen}
         />
       )}
 

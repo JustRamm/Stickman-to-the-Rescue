@@ -524,8 +524,8 @@ input {
 .resource-wallet {
   position: absolute;
   top: 0;
-  right: -400px;
-  width: 320px;
+  right: -450px;
+  width: 420px;
   height: 100%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
