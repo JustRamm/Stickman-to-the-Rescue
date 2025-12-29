@@ -20,6 +20,7 @@ import HandoffScreen from './pages/HandoffScreen';
 import ResourceRelayScreen from './pages/ResourceRelayScreen';
 
 import SignalScoutScreen from './pages/SignalScoutScreen'; // New Game
+import WordsOfHopeScreen from './pages/WordsOfHopeScreen'; // New Game
 import TutorialOverlay from './pages/TutorialOverlay';
 
 // Data
@@ -32,7 +33,7 @@ import { PLAYER_CARDS } from './data/resourceRelayData';
 
 const App = () => {
   // Game State
-  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY
+  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY, WORDS_OF_HOPE
 
   // Settings
   const [settings, setSettings] = useState(() => {
@@ -168,14 +169,21 @@ const App = () => {
   // Music Management
   useEffect(() => {
     const isMenu = ['START', 'NAMING', 'GENDER_SELECT', 'LEVEL_SELECT', 'SPLASH'].includes(gameState);
-    if (isMenu) audioManager.playMenuMusic();
-    else if (['APPROACH', 'DIALOGUE'].includes(gameState)) {
+    const sceneNodes = dialogueData[selectedLevel?.id]?.nodes;
+    const isAtEnd = sceneNodes && sceneNodes[currentNodeId]?.isEnd;
+
+    if (isMenu) {
+      audioManager.playMenuMusic();
+    } else if (['APPROACH', 'DIALOGUE'].includes(gameState) && !isAtEnd) {
       audioManager.init();
       audioManager.startAmbient(trust, selectedLevel.theme);
-    } else if (gameState !== 'HANDOFF' && gameState !== 'RESOLUTION' && gameState !== 'FINAL_SUCCESS') {
+    } else if (gameState === 'RESOLUTION' && resolutionPhase >= 2) {
+      // Specifically stop at the "hug" screen as requested
+      audioManager.stopMusic();
+    } else if (gameState !== 'APPROACH' && gameState !== 'DIALOGUE' && gameState !== 'RESOLUTION') {
       audioManager.stopMusic();
     }
-  }, [gameState, selectedLevel, trust]);
+  }, [gameState, selectedLevel, trust, currentNodeId, resolutionPhase]);
 
   // Camera Logic
   useEffect(() => {
@@ -253,7 +261,6 @@ const App = () => {
   // Resolution Cutscene
   useEffect(() => {
     if (gameState !== 'RESOLUTION') return;
-    audioManager.stopMusic();
     const t1 = setTimeout(() => setResolutionPhase(1), 2000);
     const t2 = setTimeout(() => { setResolutionPhase(2); audioManager.playPop(); }, 4500);
     const t3 = setTimeout(() => {
@@ -266,8 +273,14 @@ const App = () => {
     const t4 = setTimeout(() => {
       setCurrentNodeId(selectedLevel.id === 'tutorial' ? 'success_tutorial' : 'success_end');
       setGameState('DIALOGUE');
-    }, 12000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); audioManager.stopSpeaking(); };
+    }, 15000); // Increased from 12s to 15s to allow speech to finish
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      // Removed audioManager.stopSpeaking() to prevent cutting off the closing line
+    };
   }, [gameState]);
 
   // Dialogue & Trust Logic
@@ -377,7 +390,7 @@ const App = () => {
 
       return () => {
         clearTimeout(timer);
-        audioManager.stopSpeaking();
+        // Removed audioManager.stopSpeaking() to prevent cutting off transitions
       };
     }
   }, [currentNodeId, gameState]);
@@ -475,6 +488,7 @@ const App = () => {
   if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
 
   if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
+  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>

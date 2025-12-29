@@ -71,7 +71,7 @@ export const SCENARIOS = [
         text: "I've stopped taking my heart medicines. What's the use?",
         type: 'risk',
         category: 'Elderly',
-        clue: "Passive Suicide / Neglect",
+        clue: "Passive Ideation / Self-Neglect",
         emoji: "💊"
     },
     {

@@ -107,8 +107,8 @@ export const PLAYER_CARDS = [
         id: 'textline',
         title: "AASRA Support",
         type: "Confidential",
-        desc: "Expert crisis support for those feeling alone or suicidal.",
-        learn_info: "AASRA is a non-profit organization that provides voluntary, professional, and confidential support to people who are suicidal or in deep emotional distress. They are pioneers in suicide prevention in India.",
+        desc: "Expert crisis support for those feeling alone or experiencing suicidal thoughts.",
+        learn_info: "AASRA is a non-profit organization that provides voluntary, professional, and confidential support to people who are experiencing suicidal thoughts or deep emotional distress. They are pioneers in suicide prevention in India.",
         icon: "/stickman_assets/stickman_phone.svg"
     },
     {

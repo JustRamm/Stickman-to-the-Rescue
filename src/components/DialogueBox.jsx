@@ -1,7 +1,24 @@
 import React, { useState } from 'react';
 
 const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource = null, requiredResourceName = null, selectedResource = null, isWalletOpen = false }) => {
-    // ... (lines 4-22 of original file)
+    const [hoveredOption, setHoveredOption] = useState(null);
+    const options = node?.options || [];
+
+    // Filter and Shuffle options based on found clues
+    const visibleOptions = React.useMemo(() => {
+        if (!options || options.length === 0) return [];
+        const filtered = options.filter(option =>
+            !option.required_clue || foundClues.includes(option.required_clue)
+        );
+        // Fisher-Yates Shuffle
+        for (let i = filtered.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+        }
+        return filtered;
+    }, [options, foundClues]);
+
+    if (!options || options.length === 0 || (visibleOptions.length === 0 && !requiredResource)) return null;
 
     const isCorrectResource = selectedResource === requiredResource;
 

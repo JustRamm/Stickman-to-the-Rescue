@@ -1,7 +1,7 @@
 export const REAL_RESOURCES = {
     helplines: [
         { name: "Maithri Kochi", phone: "0484 2540530", hours: "10 AM - 7 PM", desc: "Confidential emotional support for those in distress." },
-        { name: "Sneha Chennai", phone: "044 2464 0050", hours: "24/7", desc: "Available for anyone feeling depressed or suicidal." },
+        { name: "Sneha Chennai", phone: "044 2464 0050", hours: "24/7", desc: "Available for anyone experiencing a crisis or suicidal thoughts." },
         { name: "iCall Helpline", phone: "022 2552 1111", hours: "Mon-Sat, 8-10", desc: "Psychosocial helpline by TISS." },
         { name: "Vandrevala Fdn", phone: "1860 266 2345", hours: "24/7", desc: "Mental health support helpline." }
     ],

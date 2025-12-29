@@ -9,6 +9,8 @@ class SoundEngine {
         this.owlInterval = null; // Interval for owl hooting
         this.ttsEnabled = true; // User preference
         this.currentTrack = null; // To avoid restarting same track
+        this.musicGeneration = 0; // Prevent race conditions on async loads
+        this.owlTimeout = null; // Store timeout for cleanup
     }
 
     init() {
@@ -269,16 +271,16 @@ class SoundEngine {
                 gain.connect(this.masterGain);
                 source.start();
 
-                // Cross-fade logic
+                // Cross-fade logic: Faster fade for menu entry
                 if (this.musicNodes) {
                     this.musicNodes.forEach(n => {
-                        if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 2);
-                        if (n.source) n.source.stop(this.ctx.currentTime + 2.1);
-                        if (n.osc) n.osc.stop(this.ctx.currentTime + 2.1);
+                        if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.8);
+                        if (n.source) n.source.stop(this.ctx.currentTime + 0.9);
+                        if (n.osc) n.osc.stop(this.ctx.currentTime + 0.9);
                     });
                 }
 
-                gain.gain.exponentialRampToValueAtTime(0.3, this.ctx.currentTime + 2);
+                gain.gain.exponentialRampToValueAtTime(0.3, this.ctx.currentTime + 1.5);
                 this.musicNodes = [{ source, gain }];
                 this.currentTrack = 'menu';
             }
@@ -290,16 +292,6 @@ class SoundEngine {
     // Adaptive Ambient Pad
     async startAmbient(arg1, arg2 = 50) {
         if (!this.initialized) return;
-
-        // Cross-fade: Start fading out existing music immediately
-        if (this.musicNodes) {
-            this.musicNodes.forEach(n => {
-                if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 2);
-                if (n.source) n.source.stop(this.ctx.currentTime + 2.1);
-                if (n.osc) n.osc.stop(this.ctx.currentTime + 2.1);
-            });
-        }
-
         // Handle flexible arguments: startAmbient(theme) or startAmbient(trust, theme)
         let theme = 'park';
         let trust = 50;
@@ -311,6 +303,30 @@ class SoundEngine {
             trust = arg1; // Called as startAmbient(50, 'park')
             if (typeof arg2 === 'string') theme = arg2;
         }
+
+        // Avoid re-starting if the same theme is already playing, just update trust variations
+        if (this.currentTrack === theme) {
+            this.updateMusic(trust);
+            return;
+        }
+
+        // Increment generation to invalidate any previous async loads
+        const gen = ++this.musicGeneration;
+
+        // Cross-fade: Start fading out existing music immediately
+        if (this.musicNodes) {
+            this.musicNodes.forEach(n => {
+                if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.0);
+                if (n.source) n.source.stop(this.ctx.currentTime + 1.1);
+                if (n.osc) n.osc.stop(this.ctx.currentTime + 1.1);
+            });
+            this.musicNodes = null;
+        }
+
+        if (this.owlInterval) { clearInterval(this.owlInterval); this.owlInterval = null; }
+        if (this.owlTimeout) { clearTimeout(this.owlTimeout); this.owlTimeout = null; }
+
+        this.currentTrack = theme;
 
         const nodes = [];
 
@@ -326,6 +342,11 @@ class SoundEngine {
                 // Softer volume for background with fade-in
                 gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.3, this.ctx.currentTime + 2);
+
+                if (this.musicGeneration !== gen) {
+                    source.stop();
+                    return;
+                }
 
                 source.connect(gain);
                 gain.connect(this.masterGain);
@@ -348,6 +369,11 @@ class SoundEngine {
                 // Reduced volume as requested with fade-in
                 gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.1, this.ctx.currentTime + 2);
+
+                if (this.musicGeneration !== gen) {
+                    source.stop();
+                    return;
+                }
 
                 source.connect(gain);
                 gain.connect(this.masterGain);
@@ -383,7 +409,7 @@ class SoundEngine {
             };
 
             // Initial delay then interval
-            setTimeout(playOwl, 5000 + Math.random() * 5000);
+            this.owlTimeout = setTimeout(playOwl, 5000 + Math.random() * 5000);
             this.owlInterval = setInterval(playOwl, 25000); // Every 25 seconds
         } else if (theme === 'campus') {
             type = 'triangle';
@@ -446,11 +472,12 @@ class SoundEngine {
     }
 
     stopMusic() {
+        this.musicGeneration++; // Invalidate any pending loads
         if (this.musicNodes) {
             this.musicNodes.forEach(n => {
-                if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1);
-                if (n.osc) n.osc.stop(this.ctx.currentTime + 1.1);
-                if (n.source) n.source.stop(this.ctx.currentTime + 1.1);
+                if (n.gain) n.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+                if (n.osc) n.osc.stop(this.ctx.currentTime + 0.6);
+                if (n.source) n.source.stop(this.ctx.currentTime + 0.6);
             });
             this.musicNodes = null;
             this.currentTrack = null;
@@ -459,6 +486,10 @@ class SoundEngine {
         if (this.owlInterval) {
             clearInterval(this.owlInterval);
             this.owlInterval = null;
+        }
+        if (this.owlTimeout) {
+            clearTimeout(this.owlTimeout);
+            this.owlTimeout = null;
         }
     }
 

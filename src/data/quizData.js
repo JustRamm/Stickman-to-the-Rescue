@@ -22,7 +22,7 @@ export const QUIZ_QUESTIONS = [
     },
     {
         id: 4,
-        question: "You need to be a doctor to help someone who is suicidal.",
+        question: "You need to be a doctor to help someone who is experiencing a suicidal crisis.",
         type: "myth_fact",
         answer: "Myth",
         explanation: "Anyone can learn QPR. You are a bridge to help, not the doctor."
