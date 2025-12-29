@@ -103,6 +103,7 @@ const App = () => {
 
   // Derived
   const currentScenario = dialogueData[selectedLevel.id] || dialogueData[selectedLevel.theme] || dialogueData['park'];
+  const currentNode = (currentScenario?.nodes && currentScenario.nodes[currentNodeId]) || {};
   const currentClue = CLUE_POSITIONS[selectedLevel.id] || CLUE_POSITIONS[selectedLevel.theme];
   const resetCardGame = () => setGameState('LEVEL_SELECT'); // Used in some callbacks
 
@@ -414,7 +415,7 @@ const App = () => {
         // Removed audioManager.stopSpeaking() to prevent cutting off transitions
       };
     }
-  }, [currentNodeId, gameState]);
+  }, [currentNode, gameState, selectedLevel]);
 
   // Wallet Toggle (Only pop up when it's the player's turn to respond)
   useEffect(() => {
