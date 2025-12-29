@@ -14,11 +14,15 @@ const Stickman = ({
     gender = 'guy',
     moveDir = 0,
     theme = 'park',
+    trust = 50,
+    action = 'idle',
     textSpeed = 50,
     scale = 1,
     noWrapper = false
 }) => {
-    const isIdle = !isWalking && !isJumping && !isCrouching && !isSitting && !isPhoneChecking;
+    const isNPC = ['Alex', 'Grace', 'David', 'Jessica', 'Raj', 'Stranger'].includes(speaker);
+    const isIdle = !isWalking && !isJumping && !isCrouching && !isSitting && !isPhoneChecking && (action === 'idle' || action === 'phone' || action === 'sitting');
+    const isLowTrust = trust < 30;
     const [displayedText, setDisplayedText] = React.useState('');
 
     // Typewriter effect
@@ -46,10 +50,6 @@ const Stickman = ({
 
     // Determine which SVG to use
     const getAssetUrl = () => {
-        // Check if this is a specific NPC character
-        const npcNames = ['Alex', 'Grace', 'David', 'Maya', 'Raj'];
-        const isNPC = npcNames.includes(speaker);
-
         if (isNPC) {
             // Use NPC-specific SVG from /npc folder
             return `/npc/${speaker.toLowerCase()}.svg`;
@@ -74,9 +74,21 @@ const Stickman = ({
     const assetUrl = getAssetUrl();
 
     // Visual classes for different states
-    const animationClass = isWalking ? 'animate-stickman-walk' :
+    const animationClass = (isWalking || action === 'pacing') ? 'animate-stickman-walk' :
         (isJumping ? 'animate-stickman-jump' :
             ((emotion === 'distressed' || emotion === 'sad' || emotion === 'vulnerable') ? 'animate-stickman-shiver' : ''));
+
+    // Determine if we should use light or dark theme for the stickman silhouette
+    const isDarkTheme = ['office', 'rainy_street', 'bridge_night'].includes(theme) ||
+        (theme === 'park' && isLowTrust);
+
+    // Special case for campus: it's light daytime, but has dark buildings. 
+    // We'll use a strong shadow to ensure visibility against both sky and brick.
+    const stickmanFilter = isDarkTheme
+        ? 'brightness(0) invert(1) drop-shadow(0 0 5px rgba(255,255,255,0.8))'
+        : (theme === 'campus'
+            ? 'drop-shadow(0 0 1px white) drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+            : 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))');
 
     return (
         <div
@@ -86,16 +98,17 @@ const Stickman = ({
                 top: noWrapper ? undefined : `${position.y}%`,
                 zIndex: isJumping ? 100 : 20,
                 transform: `scale(${scale})`,
-                transformOrigin: 'bottom center'
+                transformOrigin: 'bottom center',
+                transition: isWalking || action === 'pacing' ? 'none' : 'left 0.3s ease-out, top 0.3s ease-out'
             }}
         >
             {/* Distress Visual Cues (Pulse) */}
-            {(emotion === 'sad' || emotion === 'distressed' || emotion === 'vulnerable') && isIdle && !isJumping && speaker === "Sam" && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-orange-400/10 rounded-full animate-ping z-0 pointer-events-none" />
+            {(emotion === 'sad' || emotion === 'distressed' || emotion === 'vulnerable') && isIdle && !isJumping && (
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full animate-ping z-0 pointer-events-none ${isDarkTheme ? 'bg-white/10' : 'bg-orange-400/10'}`} />
             )}
 
             {/* Phone Glow Effect */}
-            {isPhoneChecking && (
+            {(isPhoneChecking || action === 'phone') && (
                 <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-8 h-8 bg-blue-400/30 blur-md rounded-full animate-pulse z-0 pointer-events-none" />
             )}
 
@@ -110,7 +123,7 @@ const Stickman = ({
                         {displayedText}
                     </p>
                     {/* Tail */}
-                    <div className={`absolute -bottom-2 w-4 h-4 bg-white border-b border-r border-slate-100 
+                    <div className={`absolute -bottom-2 w-4 h-4 bg-white border-b border-r border-slate-100
                         ${position.x < 50 ? 'left-0 border-l border-t-0 border-b-2 border-r-0' : 'right-0 border-r-2 border-b-2'}
                         `}
                         style={{ clipPath: position.x < 50 ? 'polygon(0 0, 0% 100%, 100% 100%)' : 'polygon(100% 0, 0 100%, 100% 100%)' }}
@@ -119,10 +132,8 @@ const Stickman = ({
             )}
 
             {/* The Character Rendered as SVG Image */}
-            <div className={`stickman-asset-container ${animationClass} ${isIdle && !animationClass ? 'animate-idle-sway' : ''}`}
-                style={{
-                    filter: (theme === 'office' || theme === 'rainy_street' || theme === 'campus') ? 'brightness(0) invert(1) drop-shadow(0 0 2px rgba(255,255,255,0.5))' : 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))'
-                }}
+            <div className={`stickman-asset-container transition-transform duration-1000 ${animationClass} ${isIdle && !animationClass ? 'animate-breathing scale-[1.02]' : ''}`}
+                style={{ filter: stickmanFilter }}
             >
                 <img
                     src={assetUrl}

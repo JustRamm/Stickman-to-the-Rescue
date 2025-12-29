@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Shirt -->
+  <path d="M42,33 L58,33 L62,60 L38,60 Z" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="0.5" stroke-opacity="0.2" />
   <circle cx="50" cy="25" r="8" fill="none" stroke="currentColor" stroke-width="4"/>
   <path d="M50 33 L50 60" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
   <!-- Arms catching upwards -->

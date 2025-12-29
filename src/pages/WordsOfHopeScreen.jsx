@@ -451,7 +451,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
                     </div>
 
                     {/* Player */}
-                    <div className="absolute z-[100] transition-all duration-75 ease-out" style={{ left: `${playerX}%`, bottom: '10%', transform: 'translateX(-50%)' }}>
+                    <div className="absolute z-[100]" style={{ left: `${playerX}%`, bottom: '10%', transform: 'translateX(-50%)' }}>
                         <div className="relative">
                             <div className={`absolute inset-0 bg-teal-400/20 blur-3xl rounded-full transition-all duration-500 ${harmony > 60 ? 'scale-150' : 'scale-75'}`} />
                             <img src={harmony > 30 ? "/stickman_assets/hope_stickman.svg" : "/stickman_assets/guy_distressed.svg"} alt="Player" className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl" />
@@ -462,10 +462,10 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
             {gameState === 'GAME_OVER' && (
                 <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center">
-                    <div className="w-32 h-32 bg-red-400 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl shadow-2xl border-4 border-white">🥀</div>
-                    <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Level Failed</h2>
-                    <p className="text-red-300 text-xl font-bold mb-4 uppercase tracking-widest">Stigma was too heavy to carry.</p>
-                    <p className="text-white/50 text-xs font-black uppercase tracking-widest mb-12">Final Score: {score}/4 (Target Not Met)</p>
+                    <div className="w-32 h-32 bg-teal-500 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl shadow-2xl border-4 border-white">🌱</div>
+                    <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Don't Give Up!</h2>
+                    <p className="text-teal-200 text-lg md:text-xl font-bold mb-4 uppercase tracking-widest text-balance">Mistakes are part of learning. Try again to master the language of hope.</p>
+                    <p className="text-white/50 text-xs font-black uppercase tracking-widest mb-12">Progress: {score}/4 Seeds Collected</p>
                     <div className="flex flex-col gap-4 w-full">
                         <button onClick={startGame} className="w-full py-5 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl hover:bg-slate-100 transition-all">Try Again</button>
                         <button onClick={onExit} className="w-full py-5 bg-white/10 text-white border border-white/20 rounded-2xl font-black uppercase tracking-widest text-xs transition-all opacity-50">Return</button>

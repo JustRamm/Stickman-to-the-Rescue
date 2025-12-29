@@ -791,6 +791,24 @@ input {
   animation: bounce-subtle 2s ease-in-out infinite;
 }
 
+@keyframes breathing {
+
+  0%,
+  100% {
+    transform: scaleY(1);
+    transform-origin: bottom center;
+  }
+
+  50% {
+    transform: scaleY(1.03) scaleX(1.01);
+    transform-origin: bottom center;
+  }
+}
+
+.animate-breathing {
+  animation: breathing 4s ease-in-out infinite;
+}
+
 @keyframes ping {
 
   75%,

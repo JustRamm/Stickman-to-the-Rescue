@@ -5,6 +5,7 @@ import ResourceWallet from './components/ResourceWallet';
 import Scenery from './components/Scenery';
 import HeartbeatMonitor from './components/HeartbeatMonitor';
 import SettingsOverlay from './components/SettingsOverlay';
+import ClueOverlay from './components/ClueOverlay';
 
 // Pages
 import SplashScreen from './pages/SplashScreen';
@@ -242,11 +243,42 @@ const App = () => {
     return () => clearInterval(interval);
   }, [gameState, moveDir]);
 
+  // NPC Movement Engine (Pacing)
+  useEffect(() => {
+    if (gameState !== 'APPROACH' || npcAction !== 'pacing') return;
+
+    // NPC Pacing Range around initial spot
+    const baseStopX = 75;
+    const paceWidth = 10;
+
+    const interval = setInterval(() => {
+      setSamPos(p => {
+        // Move towards target or pace around
+        const distToPlayer = Math.abs(playerPos.x - p.x);
+        if (distToPlayer < 20) return p; // Stop if player is close
+
+        // Pacing logic
+        let direction = Math.sin(Date.now() / 2000) > 0 ? 1 : -1;
+        let newX = p.x + (direction * 0.3);
+
+        // Boundaries
+        if (newX < baseStopX - paceWidth) newX = baseStopX - paceWidth;
+        if (newX > baseStopX + paceWidth) newX = baseStopX + paceWidth;
+
+        return { ...p, x: newX };
+      });
+    }, 30);
+    return () => clearInterval(interval);
+  }, [gameState, npcAction, playerPos.x]);
+
   // Proximity Check
   useEffect(() => {
     if (gameState !== 'APPROACH') return;
 
     if (Math.abs(playerPos.x - samPos.x) < 15) {
+      // Force NPC to stop movement when triggered
+      setNpcAction('idle');
+
       // Enforce clue collection
       if (currentClue && !foundClues.includes(currentClue.id)) return;
 
@@ -571,8 +603,8 @@ const App = () => {
           </div>
         )}
 
-        <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} textSpeed={settings.textSpeed} />
-        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed / (selectedLevel.npc.voice?.rate || 1)} />
+        <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} trust={trust} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} textSpeed={settings.textSpeed} />
+        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} trust={trust} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed / (selectedLevel.npc.voice?.rate || 1)} />
       </div>
 
       {selectedLevel.id === 'tutorial' && <TutorialOverlay gameState={gameState} playerPos={playerPos} foundClues={foundClues} />}
@@ -619,71 +651,15 @@ const App = () => {
       )}
 
       {viewedClue && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in"
-          onClick={() => { setViewedClue(null); setFoundClues(p => [...p, viewedClue.id]); setShowDiscoveryPopup(true); setTimeout(() => setShowDiscoveryPopup(false), 2000); }}>
-
-          <div className="relative max-w-sm w-full transform rotate-1 transition-transform hover:rotate-0 duration-300" onClick={e => e.stopPropagation()}>
-
-            {/* Layered Paper Effect */}
-            <div className="absolute inset-0 bg-white/20 translate-x-2 translate-y-2 rounded shadow-lg -rotate-1 pointer-events-none"></div>
-            <div className="absolute inset-0 bg-white/40 translate-x-1 translate-y-1 rounded shadow-md rotate-1 pointer-events-none"></div>
-
-            {/* Duct Tape Visual */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-32 h-10 bg-gray-300/80 shadow-inner transform -rotate-2 z-20 backdrop-blur-sm border-l border-r border-white/20 flex items-center justify-center">
-              <div className="w-full h-px bg-white/20"></div>
-            </div>
-
-            {/* Paper Note */}
-            <div className="bg-[#fffdf0] p-6 md:p-10 shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-[#e8e6d1] relative overflow-hidden group">
-
-              {/* Lined Paper Pattern */}
-              <div className="absolute inset-0 pointer-events-none opacity-10" style={{
-                backgroundImage: 'linear-gradient(#000 1px, transparent 1px)',
-                backgroundSize: '100% 2.5rem'
-              }}></div>
-
-              {/* Left Margin Line */}
-              <div className="absolute left-10 top-0 bottom-0 w-0.5 bg-red-400/20 pointer-events-none"></div>
-
-              <div className="relative mb-8 border-b-2 border-slate-900 pb-2">
-                <div className="flex justify-between items-end mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400">File Reference: 004-X</span>
-                  <span className="text-[9px] font-bold text-teal-600">CONFIDENTIAL</span>
-                </div>
-                <h3 className="text-3xl md:text-4xl font-extrabold text-slate-900 font-serif leading-none italic">
-                  {CLUE_DETAILS[viewedClue.id]?.title}
-                </h3>
-              </div>
-
-              <div className="space-y-6 mb-10 min-h-[120px]">
-                <p className="text-slate-800 font-serif text-xl md:text-2xl leading-relaxed italic relative z-10 p-4">
-                  <span className="text-4xl text-teal-500/30 absolute -top-4 -left-2 font-serif opacity-50">"</span>
-                  {CLUE_DETAILS[viewedClue.id]?.description}
-                  <span className="text-4xl text-teal-500/30 absolute bottom-0 right-0 font-serif opacity-50">"</span>
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => { setViewedClue(null); setFoundClues(p => [...p, viewedClue.id]); setShowDiscoveryPopup(true); setTimeout(() => setShowDiscoveryPopup(false), 2000); }}
-                  className="w-full group/btn relative py-4 bg-slate-900 overflow-hidden rounded-sm transition-all active:scale-95"
-                >
-                  <div className="absolute inset-0 w-full h-full bg-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out"></div>
-                  <span className="relative text-white font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3">
-                    <span className="text-xl group-hover/btn:rotate-12 transition-transform">�</span> Add to Case File
-                  </span>
-                </button>
-                <p className="text-center text-slate-400 text-[8px] font-black uppercase tracking-widest">Tap anywhere to discard</p>
-              </div>
-
-              {/* High-end Decoration */}
-              <div className="absolute -bottom-16 -right-16 w-48 h-48 border-[20px] border-[#e0ddc0] rounded-full opacity-40 pointer-events-none blur-sm"></div>
-              <div className="absolute top-1/2 right-4 -translate-y-1/2 w-16 h-16 border-2 border-red-500/10 rounded-full flex items-center justify-center rotate-12 pointer-events-none">
-                <span className="text-[10px] text-red-500/10 font-black uppercase text-center leading-none">PROCESSED<br />BY QPR</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ClueOverlay
+          viewedClue={viewedClue}
+          onClose={() => {
+            setFoundClues(p => [...p, viewedClue.id]);
+            setViewedClue(null);
+            setShowDiscoveryPopup(true);
+            setTimeout(() => setShowDiscoveryPopup(false), 2000);
+          }}
+        />
       )}
 
       {gameState === 'DIALOGUE' && currentNode && !isNpcSpeaking && !playerLastSaid && (

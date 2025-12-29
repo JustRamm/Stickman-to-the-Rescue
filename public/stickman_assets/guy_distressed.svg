@@ -1,6 +1,11 @@
 <svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="45" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M50,65 L50,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M35,105 L50,85 L65,105" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M42,140 L50,110 L58,140" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <!-- Shirt (Disheveled) -->
+  <path d="M38,62 L62,58 L68,100 L32,95 Z" fill="#3b82f6" fill-opacity="0.2" stroke="#3b82f6" stroke-width="1" stroke-opacity="0.4" />
+  <!-- Pants -->
+  <path d="M35,105 L65,105 L70,140 L50,110 L30,140 Z" fill="#64748b" fill-opacity="0.3" stroke="#64748b" stroke-width="1" stroke-opacity="0.5" />
+  <circle cx="45" cy="40" r="15" stroke="#1e293b" stroke-width="3" />
+  <path d="M50,60 Q55,85 50,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <path d="M35,85 L25,70" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <path d="M60,80 L75,90" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <path d="M30,140 L50,110 L70,140" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
 </svg>

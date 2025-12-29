@@ -1,6 +1,10 @@
 <svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="70" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M50,90 L50,120" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M30,105 L50,100 L70,105" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M20,140 L50,120 L80,140" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <!-- Shirt -->
+  <path d="M40,60 L60,60 L65,100 L35,100 Z" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6" stroke-width="1" stroke-opacity="0.5" />
+  <!-- Pants -->
+  <path d="M35,105 L65,105 L70,120 L50,110 L30,120 Z" fill="#64748b" fill-opacity="0.3" stroke="#64748b" stroke-width="1" stroke-opacity="0.5" />
+  <circle cx="50" cy="60" r="15" stroke="#1e293b" stroke-width="3" />
+  <path d="M50,75 L50,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <path d="M30,90 L50,80 L70,90" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+  <path d="M30,120 L50,110 L70,120" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
 </svg>

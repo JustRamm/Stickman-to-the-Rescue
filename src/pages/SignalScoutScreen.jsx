@@ -191,7 +191,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                 {people.map(person => (
                     <div
                         key={person.uid}
-                        className="absolute transition-all duration-300 ease-out group"
+                        className="absolute group"
                         style={{
                             left: `${person.x}%`,
                             top: `${person.y}%`,
@@ -221,8 +221,9 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                             {/* Stickman Asset */}
                             <div className={`h-24 md:h-32 w-full flex justify-center ${person.direction === -1 ? '-scale-x-100' : ''}`}>
                                 <img
-                                    src={person.asset}
-                                    className="h-full object-contain drop-shadow-2xl filter brightness-90 group-hover:brightness-110"
+                                    src={`/stickman_assets/${person.gender}_idle.svg`}
+                                    alt="Person"
+                                    className="w-full h-full drop-shadow-md brightness-0 invert opacity-30 group-hover:opacity-100 transition-opacity"
                                     draggable="false"
                                 />
                             </div>
@@ -263,7 +264,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
                         <div className="space-y-3 mb-8 text-left">
                             <div className="flex items-center gap-4 bg-teal-50 p-3 rounded-xl border border-teal-100">
-                                <span className="text-2xl">�</span>
+                                <span className="text-2xl">🎁</span>
                                 <div>
                                     <p className="text-xs font-bold text-teal-800 uppercase">Warning Sign</p>
                                     <p className="text-[10px] text-teal-600">"Giving away prized possessions"</p>

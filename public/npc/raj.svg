@@ -1,13 +1,13 @@
 <svg width="100" height="125" viewBox="0 0 100 125" xmlns="http://www.w3.org/2000/svg">
   <!-- Raj: Rainy Street Resident -->
   <circle cx="50" cy="25" r="10" stroke="#f43f5e" stroke-width="3" fill="white"/>
+  <!-- Yellow Raincoat -->
+  <path d="M35 35 L65 35 L70 85 L30 85 Z" fill="#fbbf24" opacity="0.4"/>
   <line x1="50" y1="35" x2="50" y2="75" stroke="#f43f5e" stroke-width="3"/>
-  <line x1="50" y1="45" x2="30" y2="65" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
-  <line x1="50" y1="45" x2="70" y2="65" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="45" x2="25" y2="70" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="45" x2="75" y2="70" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
   <line x1="50" y1="75" x2="35" y2="110" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
   <line x1="50" y1="75" x2="65" y2="110" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
   <!-- Hoodie hood effect -->
   <path d="M40 25 Q40 10 50 10 Q60 10 60 25" fill="none" stroke="#f43f5e" stroke-width="2" opacity="0.6"/>
-  <!-- Rain drop on head -->
-  <circle cx="45" cy="15" r="1.5" fill="#38bdf8" opacity="0.8"/>
 </svg>
