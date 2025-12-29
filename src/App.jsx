@@ -385,18 +385,7 @@ const App = () => {
     else setGameState('LEVEL_SELECT');
   };
 
-  // Node Logic
-  let currentNode = currentScenario.nodes[currentNodeId];
-  if (!currentNode) {
-    if (currentNodeId === 'success_end') {
-      currentNode = { isEnd: true, result: 'success', message: `Mission Complete. ${selectedLevel.npc.name} is now connected to professional support.`, npc_emotion: 'relief' };
-    }
-    else if (currentNodeId === 'success_tutorial') {
-      currentNode = { isEnd: true, result: 'success', message: "Training Complete! You've learned how to Listen, Persuade, and Refer. Alex is proud of your progress.", npc_emotion: 'relief' };
-    }
-    else if (currentNodeId === 'leave_failure') currentNode = { isEnd: true, result: 'failure', message: `You walked away. ${selectedLevel.npc.name} remains alone and in crisis.`, npc_emotion: 'distressed' };
-    else currentNode = currentScenario.nodes['beginning'] || { text: "Error...", options: [] };
-  }
+
 
   // NPC Speech Effect
   useEffect(() => {
@@ -691,13 +680,13 @@ const App = () => {
       )}
 
       {currentNode?.isEnd && (
-        <div className="absolute inset-0 z-[100] bg-slate-900/90 backdrop-blur flex items-center justify-center p-6 animate-fade-in">
-          <div className="max-w-xl w-full bg-white rounded-3xl p-8 md:p-12 text-center shadow-2xl border-4 border-teal-500 relative overflow-hidden">
-            <div className={`w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center text-5xl shadow-xl ${currentNode.result === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{currentNode.result === 'success' ? '🌟' : '💔'}</div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase text-slate-800 mb-4">{selectedLevel.id === 'tutorial' && currentNode.result === 'success' ? 'Training Complete' : currentNode.result === 'success' ? 'Mission Complete' : 'Mission Failed'}</h2>
-            <p className="text-slate-600 text-lg md:text-xl font-medium leading-relaxed mb-8">{currentNode.message}</p>
-            {currentNode.result === 'failure' && <p className="text-xs text-orange-500 font-bold uppercase tracking-widest bg-orange-50 p-3 rounded-lg border border-orange-100 mb-8">Tip: Try Validation First. Listen more.</p>}
-            <button onClick={() => { if (isFeedbackFocused) return; handleEndGameContinue(); }} className="w-full py-4 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">Continue</button>
+        <div className="absolute inset-0 z-[100] bg-slate-900/90 backdrop-blur flex items-center justify-center p-4 md:p-6 animate-fade-in overflow-hidden">
+          <div className="max-w-xl w-full bg-white rounded-3xl p-6 md:p-10 text-center shadow-2xl border-4 border-teal-500 relative flex flex-col items-center">
+            <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 md:mb-6 rounded-full flex items-center justify-center text-3xl md:text-5xl shadow-xl shrink-0 ${currentNode.result === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{currentNode.result === 'success' ? '🌟' : '💔'}</div>
+            <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-800 mb-2 md:mb-4 tracking-tight leading-tight">{selectedLevel.id === 'tutorial' && currentNode.result === 'success' ? 'Training Complete' : currentNode.result === 'success' ? 'Mission Complete' : 'Mission Failed'}</h2>
+            <p className="text-slate-600 text-sm md:text-xl font-medium leading-relaxed mb-6 md:mb-8">{currentNode.message}</p>
+            {currentNode.result === 'failure' && <p className="text-[10px] md:text-xs text-orange-500 font-bold uppercase tracking-widest bg-orange-50 p-2 md:p-3 rounded-xl border border-orange-100 mb-6 md:mb-8">Tip: Try Validation First. Listen more.</p>}
+            <button onClick={() => { if (isFeedbackFocused) return; handleEndGameContinue(); }} className="w-full py-4 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 active:scale-95 shrink-0">Continue</button>
           </div>
         </div>
       )}

@@ -14,8 +14,10 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
     const lastHapticTarget = useRef(null);
 
     useEffect(() => {
+        // Shuffle the deck on mount to avoid repetition
+        const shuffledDeck = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5);
         setQuizCards({
-            deck: [...QUIZ_QUESTIONS],
+            deck: shuffledDeck,
             myth: [],
             fact: []
         });

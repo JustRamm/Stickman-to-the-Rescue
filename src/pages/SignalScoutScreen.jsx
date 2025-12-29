@@ -90,7 +90,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                     x: isLeftStart ? -15 : 115, // Start further off-screen
                     y: 15 + Math.random() * 60, // Conserve vertical lanes better
                     direction: isLeftStart ? 1 : -1,
-                    speed: 0.15 + Math.random() * 0.1, // FASTER MOVEMENT SPEEDS (was 0.03)
+                    speed: 0.04 + Math.random() * 0.02, // SLOWER MOVEMENT SPEEDS
                     asset: getStickmanAsset(scenario.category),
                     isClicked: false
                 };
@@ -221,7 +221,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                             {/* Stickman Asset */}
                             <div className={`h-24 md:h-32 w-full flex justify-center ${person.direction === -1 ? '-scale-x-100' : ''}`}>
                                 <img
-                                    src={`/stickman_assets/${person.gender}_idle.svg`}
+                                    src={person.asset}
                                     alt="Person"
                                     className="w-full h-full drop-shadow-md brightness-0 invert opacity-30 group-hover:opacity-100 transition-opacity"
                                     draggable="false"

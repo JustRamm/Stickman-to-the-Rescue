@@ -32,7 +32,19 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
     // --- Core Game Logic ---
 
+    // Local copy of shuffled questions
+    const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+    useEffect(() => {
+        // Initial shuffle
+        setShuffledQuestions([...TERMINOLOGY_DATA.questions].sort(() => Math.random() - 0.5));
+    }, []);
+
     const startGame = () => {
+        // Shuffle again for a fresh start each time
+        const reshuffled = [...TERMINOLOGY_DATA.questions].sort(() => Math.random() - 0.5);
+        setShuffledQuestions(reshuffled);
+
         setGameState('PLAYING');
         setHarmony(50);
         setScore(0);
@@ -148,9 +160,9 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
     const spawnSet = () => {
         const qIndex = currentIndexRef.current;
-        if (qIndex >= TERMINOLOGY_DATA.questions.length) return;
+        if (qIndex >= shuffledQuestions.length) return;
 
-        const q = TERMINOLOGY_DATA.questions[qIndex];
+        const q = shuffledQuestions[qIndex];
         isProcessingSetRef.current = true;
         hasInteractionRef.current = false;
 
@@ -171,7 +183,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         if (hasInteractionRef.current) return;
         hasInteractionRef.current = true;
 
-        const q = TERMINOLOGY_DATA.questions[currentIndexRef.current];
+        const q = shuffledQuestions[currentIndexRef.current];
         if (!q) return;
 
         if (item.isCorrect) {
@@ -235,7 +247,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         isProcessingSetRef.current = false;
         currentIndexRef.current += 1;
 
-        if (currentIndexRef.current >= TERMINOLOGY_DATA.questions.length) {
+        if (currentIndexRef.current >= shuffledQuestions.length) {
             setGameState('TRANSITIONING');
             setTimeout(() => {
                 if (scoreRef.current >= 4) {

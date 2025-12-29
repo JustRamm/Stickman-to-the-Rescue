@@ -18,38 +18,54 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
 
     // Refs
     const resistanceMax = 5;
+    const shuffledObstaclesRef = useRef([]);
 
     useEffect(() => {
-        // Init Game
-        startLevel(0);
+        // Init Game: Shuffle obstacles once per session
+        const shuffled = [...OBSTACLES].sort(() => Math.random() - 0.5);
+        shuffledObstaclesRef.current = shuffled;
+
+        startLevel(0, shuffled);
     }, []);
 
-    const startLevel = (lvlIdx) => {
+    const startLevel = (lvlIdx, obstaclesPool = shuffledObstaclesRef.current) => {
         if (lvlIdx >= resistanceMax) {
             setGameState('WIN');
             if (audioManager) audioManager.playVictory();
             return;
         }
 
-        // Pick random obstacle
-        const obs = OBSTACLES[Math.floor(Math.random() * OBSTACLES.length)];
+        // Use the shuffled pool to avoid repetition
+        const obs = obstaclesPool[lvlIdx % obstaclesPool.length];
         setCurrentObstacle(obs);
         setSamEmotion(obs.stickman_emotion);
 
-        // Deal hand (ensure at least one winning card + random distractors)
+        // Deal hand (ensure valid winning cards + random distractors)
         const possibleWinners = obs.weaknesses.map(id => PLAYER_CARDS.find(c => c.id === id)).filter(Boolean);
-        const winningCard = possibleWinners.length > 0
-            ? possibleWinners[Math.floor(Math.random() * possibleWinners.length)]
-            : PLAYER_CARDS[0]; // Fallback
 
-        let hand = [winningCard];
-        while (hand.length < 4) {
-            const randomCard = PLAYER_CARDS[Math.floor(Math.random() * PLAYER_CARDS.length)];
-            if (randomCard && !hand.some(c => c?.id === randomCard.id)) {
-                hand.push(randomCard);
-            }
+        if (possibleWinners.length === 0) {
+            console.error(`Obstacle ${obs.id} has no valid winners in PLAYER_CARDS!`);
         }
-        // Shuffle hand
+
+        // To fix the "missing card" feel, let's include as many winners as fit in a variety of slots
+        // but prioritize at least one.
+        let hand = [];
+        const shuffledWinners = [...possibleWinners].sort(() => Math.random() - 0.5);
+
+        // Add up to 2 winners to make it fair but not too obvious
+        const winnersToAdd = shuffledWinners.slice(0, 2);
+        hand.push(...winnersToAdd);
+
+        // Fill remaining slots with distractors
+        const winnerIds = hand.map(w => w.id);
+        const distractors = PLAYER_CARDS.filter(c => !winnerIds.includes(c.id));
+        const shuffledDistractors = [...distractors].sort(() => Math.random() - 0.5);
+
+        while (hand.length < 4 && shuffledDistractors.length > 0) {
+            hand.push(shuffledDistractors.shift());
+        }
+
+        // Final shuffle of the 4-card hand
         hand = hand.sort(() => Math.random() - 0.5);
         setPlayerHand(hand);
 
@@ -76,8 +92,9 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
             setTimeout(() => {
                 setScore(s => s + 1);
                 setFeedback(null);
-                setLevel(l => l + 1);
-                startLevel(level + 1);
+                const nextLevel = level + 1;
+                setLevel(nextLevel);
+                startLevel(nextLevel);
             }, 1500);
         } else {
             // Failure
@@ -124,7 +141,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                             <div
                                 key={i}
                                 className={`h-1.5 rounded-full transition-all duration-500 ${i < level ? 'w-6 bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.5)]' :
-                                        i === level ? 'w-8 bg-white border border-teal-400 animate-pulse' : 'w-4 bg-slate-700'
+                                    i === level ? 'w-8 bg-white border border-teal-400 animate-pulse' : 'w-4 bg-slate-700'
                                     }`}
                             ></div>
                         ))}
