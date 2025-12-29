@@ -9,6 +9,10 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
     const [people, setPeople] = useState([]);
     const [feedback, setFeedback] = useState(null); // { text, type: 'good' | 'bad' | 'miss' }
     const [foundSignals, setFoundSignals] = useState([]); // Track unique IDs found
+
+    // Refs
+    const usedScenarioIdsRef = useRef(new Set());
+    const spawnTimerRef = useRef(null);
     // --- Enhanced Asset Mapping ---
     const getStickmanAsset = (category) => {
         const assets = {
