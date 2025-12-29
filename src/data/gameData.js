@@ -26,6 +26,7 @@ export const CLUE_DETAILS = {
     family_photo: {
         title: "A Crumpled Photograph",
         visualType: 'photo',
+        image: '/clues/family_photo.svg',
         description: "A slightly water-damaged photo of Grace smiling with two children at a birthday party. 'We love you Mom!' is written on the back."
     },
     termination_letter: {

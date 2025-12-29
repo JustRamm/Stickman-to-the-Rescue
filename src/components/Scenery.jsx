@@ -304,10 +304,23 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
                                 marginRight: '2px'
                             }}
                         >
-                            {/* Lit Windows */}
-                            {building.windows.map((isLit, j) => (
-                                <div key={j} className={`w-1 h-2 ${isLit ? 'bg-yellow-200 shadow-[0_0_5px_yellow]' : 'bg-slate-900'} opacity-70`} />
-                            ))}
+                            {/* Lit Windows - Now with more defined grid and periodic flickering */}
+                            {[...Array(Math.floor(building.height * 2))].map((_, j) => {
+                                const isLit = building.windows[j % building.windows.length];
+                                const shouldFlicker = Math.random() > 0.8;
+                                return (
+                                    <div
+                                        key={j}
+                                        className={`w-1.5 h-2.5 m-[1px] rounded-[1px] ${isLit
+                                            ? (shouldFlicker ? 'bg-yellow-100 animate-pulse' : 'bg-yellow-200/80')
+                                            : 'bg-slate-900'
+                                            } ${isLit ? 'shadow-[0_0_2px_rgba(253,224,71,0.5)]' : ''}`}
+                                        style={{
+                                            animationDuration: shouldFlicker ? `${Math.random() * 3 + 2}s` : undefined
+                                        }}
+                                    />
+                                );
+                            })}
                         </div>
                     ))}
                 </div>

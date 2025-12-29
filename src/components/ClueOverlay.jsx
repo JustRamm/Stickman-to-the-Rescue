@@ -15,13 +15,22 @@ const ClueOverlay = ({ viewedClue, onClose }) => {
                         <div className="bg-white p-4 pb-12 shadow-2xl transform rotate-1 transition-transform hover:rotate-0 border-8 border-white rounded-sm w-[300px] md:w-[400px]">
                             <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden rounded-sm mb-4">
                                 {/* Stylized Photo Image */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-amber-500/20 opacity-60" />
-                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-end gap-2">
-                                    <div className="w-12 h-20 bg-slate-400/40 rounded-t-full" /> {/* Grace */}
-                                    <div className="w-8 h-12 bg-slate-400/30 rounded-t-full" />  {/* Child 1 */}
-                                    <div className="w-8 h-12 bg-slate-400/30 rounded-t-full" />  {/* Child 2 */}
-                                </div>
-                                <div className="absolute inset-0 border-4 border-white/30" />
+                                {data.image ? (
+                                    <>
+                                        <img src={data.image} alt="Family Photo" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-amber-500/10 mix-blend-overlay pointer-events-none" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-amber-500/20 opacity-60" />
+                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-end gap-2">
+                                            <div className="w-12 h-20 bg-slate-400/40 rounded-t-full" /> {/* Grace */}
+                                            <div className="w-8 h-12 bg-slate-400/30 rounded-t-full" />  {/* Child 1 */}
+                                            <div className="w-8 h-12 bg-slate-400/30 rounded-t-full" />  {/* Child 2 */}
+                                        </div>
+                                    </>
+                                )}
+                                <div className="absolute inset-0 border-4 border-white/30 pointer-events-none" />
                             </div>
                             <p className="font-handwriting text-slate-700 text-lg md:text-xl text-center rotate-[-1deg]">
                                 "We love you Mom!"

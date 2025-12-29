@@ -1,0 +1,58 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Faded Photo Paper Look -->
+  <rect width="400" height="300" fill="#fdf4ff"/>
+  
+  <!-- Subtle Birthday Banner -->
+  <path d="M50 40 Q100 60 150 40 T250 40 T350 40" fill="none" stroke="#e879f9" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="100" cy="50" r="5" fill="#fcd34d"/>
+  <circle cx="200" cy="55" r="5" fill="#f472b6"/>
+  <circle cx="300" cy="50" r="5" fill="#60a5fa"/>
+
+  <!-- Grace (Mom) - Younger -->
+  <g transform="translate(200, 200)">
+    <!-- Body -->
+    <path d="M0 -60 L-15 80 L15 80 Z" fill="#c084fc" stroke="#9333ea" stroke-width="3"/> <!-- Dress -->
+    <!-- Head -->
+    <circle cx="0" cy="-80" r="25" fill="white" stroke="#000" stroke-width="3"/>
+    <!-- Smile -->
+    <path d="M-10 -75 Q0 -65 10 -75" fill="none" stroke="#000" stroke-width="2"/>
+    <!-- Arms hugging kids -->
+    <path d="M-10 -50 Q-40 -40 -60 10" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M10 -50 Q40 -40 60 10" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Child 1 (Left) -->
+  <g transform="translate(130, 220) scale(0.7)">
+    <!-- Body -->
+    <line x1="0" y1="0" x2="0" y2="80" stroke="#000" stroke-width="4"/>
+    <line x1="0" y1="80" x2="-20" y2="120" stroke="#000" stroke-width="4"/>
+    <line x1="0" y1="80" x2="20" y2="120" stroke="#000" stroke-width="4"/>
+    <!-- Head -->
+    <circle cx="0" cy="-25" r="30" fill="white" stroke="#000" stroke-width="4"/>
+    <!-- Smile -->
+    <path d="M-10 -20 Q0 -10 10 -20" fill="none" stroke="#000" stroke-width="3"/>
+    <!-- Party Hat -->
+    <path d="M-25 -45 L0 -90 L25 -45 Z" fill="#60a5fa" stroke="#2563eb" stroke-width="2"/>
+  </g>
+
+  <!-- Child 2 (Right) -->
+  <g transform="translate(270, 220) scale(0.7)">
+    <!-- Body -->
+    <path d="M0 0 L-20 100 L20 100 Z" fill="#f472b6" stroke="#db2777" stroke-width="3"/> <!-- Dress -->
+    <!-- Head -->
+    <circle cx="0" cy="-25" r="30" fill="white" stroke="#000" stroke-width="4"/>
+    <!-- Smile -->
+    <path d="M-10 -20 Q0 -10 10 -20" fill="none" stroke="#000" stroke-width="3"/>
+    <!-- Party Hat -->
+    <path d="M-25 -45 L0 -90 L25 -45 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+  </g>
+
+  <!-- Water Damage Effect (Overlay) -->
+  <path d="M300 200 Q350 250 400 220 L400 300 L280 300 Z" fill="#e2e8f0" opacity="0.4"/>
+  <circle cx="350" cy="250" r="40" fill="#cbd5e1" opacity="0.3" filter="url(#blur)"/>
+  <defs>
+    <filter id="blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
+    </filter>
+  </defs>
+</svg>
