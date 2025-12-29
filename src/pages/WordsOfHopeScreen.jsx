@@ -10,12 +10,15 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [explanation, setExplanation] = useState(null); // Side panel data
     const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+    const [stigmaAlert, setStigmaAlert] = useState(null); // Left side alert data
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
 
     // Refs for Game Loop (Prevents stale closures)
     const scoreRef = useRef(0);
     const currentIndexRef = useRef(0);
     const mistakesRef = useRef(0);
     const sidebarTimerRef = useRef(null);
+    const alertTimerRef = useRef(null);
     const spawnCooldownRef = useRef(0);
     const isProcessingSetRef = useRef(false);
     const hasInteractionRef = useRef(false); // Track if current set has been interacted with
@@ -41,6 +44,8 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         setFallingItems([]);
         setExplanation(null);
         setIsSidebarVisible(false);
+        setStigmaAlert(null);
+        setIsAlertVisible(false);
         isProcessingSetRef.current = false;
         hasInteractionRef.current = false;
         spawnCooldownRef.current = 1000; // Initial delay
@@ -59,6 +64,18 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         }
         return () => { if (sidebarTimerRef.current) clearTimeout(sidebarTimerRef.current); };
     }, [explanation]);
+
+    // Stigma Alert auto-hide logic
+    useEffect(() => {
+        if (stigmaAlert) {
+            setIsAlertVisible(true);
+            if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+            alertTimerRef.current = setTimeout(() => {
+                setIsAlertVisible(false);
+            }, 5000);
+        }
+        return () => { if (alertTimerRef.current) clearTimeout(alertTimerRef.current); };
+    }, [stigmaAlert]);
 
     // Handle Mouse/Touch Movement
     const handlePointerMove = (e) => {
@@ -170,11 +187,35 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         } else {
             setHarmony(h => Math.max(0, h - 25));
             audioManager.playSad();
+            setStigmaAlert({
+                stigma: q.stigma,
+                correct: q.correct,
+                why: q.why
+            });
             applyMistake();
         }
 
         setFallingItems([]); // Clear visuals immediately
-        advanceToNextQuestion(); // Move to next challenge
+
+        // Immediate End Case: Win at 4
+        if (scoreRef.current >= 4) {
+            triggerEndGame('RESULTS');
+            return;
+        }
+
+        // Advance only if game is still active
+        advanceToNextQuestion();
+    };
+
+    const triggerEndGame = (finalState) => {
+        setGameState('TRANSITIONING');
+        setFallingItems([]);
+        isProcessingSetRef.current = false;
+
+        setTimeout(() => {
+            setGameState(finalState);
+            audioManager.stopMusic();
+        }, 1500);
     };
 
     const applyMistake = () => {
@@ -182,8 +223,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             const newM = m + 1;
             mistakesRef.current = newM;
             if (newM >= 3) {
-                setGameState('GAME_OVER');
-                audioManager.stopMusic();
+                triggerEndGame('GAME_OVER');
             }
             return newM;
         });
@@ -371,6 +411,36 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
                         </div>
                     </div>
 
+                    {/* Stigma Alert (Left Side) */}
+                    <div className={`absolute left-4 top-40 z-40 transition-all duration-700 ${isAlertVisible ? 'translate-x-0 opacity-100' : 'translate-x-[-120%] opacity-0'}`}>
+                        <div className="max-w-[240px] md:max-w-[280px] bg-slate-900/95 backdrop-blur-2xl rounded-2xl border border-red-500/30 p-4 md:p-5 shadow-[0_0_30px_rgba(239,68,68,0.2)] flex flex-col h-fit">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center text-lg shadow-[inset_0_0_10px_rgba(239,68,68,0.3)]">⚠️</div>
+                                <span className="text-red-400 font-black uppercase text-[9px] tracking-[0.2em]">Stigma Alert</span>
+                            </div>
+
+                            {stigmaAlert && (
+                                <div className="space-y-4 animate-shake" key={stigmaAlert.stigma}>
+                                    <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                                        <span className="text-[7px] font-black text-red-400 uppercase tracking-widest block mb-2">Harmful Language</span>
+                                        <p className="text-white font-bold text-[10px] leading-tight italic">"{stigmaAlert.stigma}"</p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">The Impact</span>
+                                        <p className="text-slate-300 text-[9px] md:text-xs font-medium leading-relaxed">
+                                            This terminology increases isolation. It's better to use people-first language like <span className="text-teal-400 font-bold">"{stigmaAlert.correct}"</span>.
+                                        </p>
+                                    </div>
+
+                                    <div className="h-0.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                        <div className="h-full bg-red-500 animate-shrink-timer" style={{ animationDuration: '5s' }} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Hearts Count */}
                     <div className="absolute top-28 left-8 flex gap-2 z-50">
                         {[...Array(3)].map((_, i) => (
@@ -405,7 +475,9 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
             {gameState === 'RESULTS' && (
                 <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center">
-                    <div className="w-32 h-32 bg-teal-400 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl shadow-2xl border-4 border-white">✨</div>
+                    <div className="w-32 h-32 bg-teal-400 rounded-[2.5rem] mb-8 flex items-center justify-center shadow-2xl border-4 border-white overflow-hidden">
+                        <img src="/stickman_assets/hope_stickman.svg" alt="Success" className="w-20 h-20 drop-shadow-lg" />
+                    </div>
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Wisdom Path</h2>
                     <p className="text-teal-200 text-xl font-bold mb-4 uppercase tracking-widest">Final Score: {score}/4</p>
                     <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-12 italic">Seeds of Wisdom Rooted</p>
