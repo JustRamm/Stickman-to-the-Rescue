@@ -1,0 +1,82 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Warm Vintage Photo -->
+  <rect width="400" height="300" fill="#fff1f2"/>
+  
+  <!-- Subtle Bokeh/Lighting -->
+  <circle cx="50" cy="50" r="80" fill="#fecdd3" opacity="0.3"/>
+  <circle cx="350" cy="250" r="100" fill="#fee2e2" opacity="0.4"/>
+
+  <!-- Birthday Banner Background -->
+  <path d="M20 30 Q100 60 200 30 T380 30" fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="100" cy="45" r="5" fill="#fcd34d"/>
+  <circle cx="200" cy="30" r="5" fill="#60a5fa"/>
+  <circle cx="300" cy="45" r="5" fill="#4ade80"/>
+
+  <!-- Grace (Mom) - Center -->
+  <g transform="translate(200, 180)">
+    <!-- Hair (Bun) -->
+    <circle cx="0" cy="-85" r="15" fill="#e5e5e5" stroke="#a3a3a3" stroke-width="2"/>
+    <!-- Body -->
+    <path d="M0 -60 L-20 100 L20 100 Z" fill="#d8b4fe" stroke="#9333ea" stroke-width="3"/>
+    <!-- Head -->
+    <circle cx="0" cy="-80" r="25" fill="white" stroke="#000" stroke-width="3"/>
+    <!-- Smile -->
+    <path d="M-10 -75 Q0 -65 10 -75" fill="none" stroke="#000" stroke-width="2"/>
+    <!-- Eyes -->
+    <circle cx="-8" cy="-85" r="2" fill="black"/>
+    <circle cx="8" cy="-85" r="2" fill="black"/>
+    <!-- Arms hugging -->
+    <path d="M-15 -50 Q-40 -40 -70 20" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M15 -50 Q40 -40 70 20" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Child 1 (Left - Boy) -->
+  <g transform="translate(120, 200) scale(0.8)">
+    <!-- Body -->
+    <line x1="0" y1="0" x2="0" y2="80" stroke="#000" stroke-width="5"/>
+    <line x1="0" y1="80" x2="-25" y2="120" stroke="#000" stroke-width="5"/>
+    <line x1="0" y1="80" x2="25" y2="120" stroke="#000" stroke-width="5"/>
+    <line x1="0" y1="20" x2="-30" y2="50" stroke="#000" stroke-width="5"/> <!-- Arm waving -->
+    <!-- Head -->
+    <circle cx="0" cy="-25" r="30" fill="white" stroke="#000" stroke-width="4"/>
+    <!-- Smile -->
+    <path d="M-10 -20 Q0 -10 10 -20" fill="none" stroke="#000" stroke-width="3"/>
+    <!-- Eyes -->
+    <circle cx="-10" cy="-30" r="2" fill="black"/>
+    <circle cx="10" cy="-30" r="2" fill="black"/>
+    <!-- Hat -->
+    <path d="M-25 -50 L0 -100 L25 -50 Z" fill="#60a5fa" stroke="#2563eb" stroke-width="2"/>
+  </g>
+
+  <!-- Child 2 (Right - Girl) -->
+  <g transform="translate(280, 200) scale(0.8)">
+    <!-- Body -->
+    <path d="M0 0 L-25 100 L25 100 Z" fill="#fbcfe8" stroke="#db2777" stroke-width="3"/>
+    <!-- Head -->
+    <circle cx="0" cy="-25" r="30" fill="white" stroke="#000" stroke-width="4"/>
+    <!-- Smile -->
+    <path d="M-10 -20 Q0 -10 10 -20" fill="none" stroke="#000" stroke-width="3"/>
+    <!-- Eyes -->
+    <circle cx="-10" cy="-30" r="2" fill="black"/>
+    <circle cx="10" cy="-30" r="2" fill="black"/>
+    <!-- Hat -->
+    <path d="M-25 -50 L0 -100 L25 -50 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+    <!-- Pigtails -->
+    <path d="M-25 -30 Q-40 -20 -45 -40" fill="none" stroke="#000" stroke-width="2"/>
+    <path d="M25 -30 Q40 -20 45 -40" fill="none" stroke="#000" stroke-width="2"/>
+  </g>
+
+  <!-- Vintage Texture Overlay -->
+  <rect width="400" height="300" fill="url(#grain)" opacity="0.1"/>
+  <defs>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+    </filter>
+    <pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse">
+      <rect width="100" height="100" filter="url(#noise)" opacity="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Water Damage Stain -->
+  <path d="M400 200 Q350 250 350 300 L400 300 Z" fill="#9ca3af" opacity="0.2"/>
+</svg>
