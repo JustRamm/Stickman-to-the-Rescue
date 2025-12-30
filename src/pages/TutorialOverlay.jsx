@@ -22,7 +22,7 @@ const TutorialOverlay = ({ gameState, playerPos, foundClues }) => {
     if (!isVisible || gameState !== 'APPROACH') return null;
 
     return (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-lg px-4">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-lg px-4 tutorial-overlay-container">
             <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border-2 border-teal-400 animate-bounce-subtle tutorial-overlay-card">
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-xl shrink-0 text-white font-bold tutorial-overlay-icon">

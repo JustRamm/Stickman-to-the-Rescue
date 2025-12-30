@@ -155,7 +155,7 @@ const ClueOverlay = ({ viewedClue, onClose }) => {
             className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in"
             onClick={onClose}
         >
-            <div className="relative animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="clue-card-container relative animate-scale-in" onClick={e => e.stopPropagation()}>
                 {renderClueContent()}
 
                 {/* Shared "Collect" Action */}

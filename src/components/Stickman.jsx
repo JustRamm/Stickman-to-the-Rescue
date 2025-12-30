@@ -145,7 +145,7 @@ const Stickman = ({
 
             {!isJumping && !isCrouching && (
                 <div className="text-center mt-2">
-                    <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">{speaker}</span>
+                    <span className="stickman-name-label text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">{speaker}</span>
                 </div>
             )}
         </div>

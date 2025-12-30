@@ -645,7 +645,7 @@ const App = () => {
 
         {/* Silent Coach Tip (Left Side) */}
         {coachFeedback && (
-          <div className="pointer-events-none mt-4 w-64 animate-slide-in-left">
+          <div className="pointer-events-none mt-4 w-64 animate-slide-in-left coach-feedback-popup">
             <div className={`p-4 rounded-2xl border-l-4 backdrop-blur-md shadow-2xl ${coachFeedback.type === 'positive' ? 'bg-teal-500/20 border-teal-400' :
               coachFeedback.type === 'negative' ? 'bg-red-500/20 border-red-400' : 'bg-slate-500/20 border-slate-400'
               }`}>

@@ -987,11 +987,10 @@ input {
   /* Exit Mission Button - Position between settings and empathy bar */
   .exit-mission-btn-container {
     position: fixed !important;
-    top: 1rem !important;
-    right: 5rem !important;
-    /* Positioned to the left of the settings cog (which is typically right: 1-1.5rem) */
-    left: auto !important;
-    /* Override default left positioning */
+    top: 13.5rem !important;
+    /* Moved down significantly */
+    left: 1rem !important;
+    right: auto !important;
     margin-top: 0 !important;
     z-index: 50 !important;
   }
@@ -1019,11 +1018,19 @@ input {
   }
 
   /* Tutorial Popup Optimization */
+  .tutorial-overlay-container {
+    top: 1rem !important;
+    left: 65% !important;
+    /* Shifted right */
+    transform: translateX(-50%) !important;
+    width: auto !important;
+  }
+
   .tutorial-overlay-card {
-    max-width: 300px !important;
+    max-width: 350px !important;
+    /* Slightly wider to fit text on one line if possible */
     padding: 0.5rem 0.75rem !important;
-    top: 4rem !important;
-    /* Move down slightly to clear top elements */
+    margin: 0 auto !important;
   }
 
   .tutorial-overlay-icon {
@@ -1040,5 +1047,235 @@ input {
   .tutorial-overlay-text {
     font-size: 10px !important;
     line-height: 1.1 !important;
+  }
+
+  /* Clue Overlay Optimization */
+  /* Clue Overlay Optimization */
+  .clue-card-container {
+    transform: scale(0.65) !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Stickman visibility adjustment for mobile landscape */
+  .stickman-anchor {
+    transform: translateY(-20px) scale(0.9) !important;
+    /* Move character up slightly */
+    transform-origin: bottom center !important;
+  }
+
+  .stickman-name-label {
+    position: relative !important;
+    top: -5px !important;
+    /* Pull text up a bit more */
+    color: #94a3b8 !important;
+    /* Ensure good contrast (slate-400) */
+  }
+
+  /* Compact Dialogue Box for Mobile Landscape */
+  .dialogue-box-container {
+    bottom: 0.25rem !important;
+    width: 340px !important;
+    /* Narrower to fit between trees */
+    max-width: 340px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    left: 30% !important;
+    /* Move further right */
+  }
+
+  .dialogue-box-container>div {
+    padding: 0.5rem !important;
+    /* Reduce internal padding */
+    border-radius: 0.75rem !important;
+    /* Smaller border radius */
+  }
+
+  /* Scrollable Options Area */
+  .dialogue-box-container .grid {
+    max-height: 120px !important;
+    /* Limit height */
+    overflow-y: auto !important;
+    /* Vertical scroll */
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+    padding-right: 4px !important;
+    pointer-events: auto !important;
+    /* Ensure clicks pass through */
+  }
+
+  /* Target the buttons inside */
+  .dialogue-box-container button {
+    padding: 0.5rem 0.75rem !important;
+    /* Increased touch target */
+    min-height: 30px !important;
+    /* Ensure minimum tappable height */
+    pointer-events: auto !important;
+  }
+
+  .dialogue-box-container span {
+    font-size: 10px !important;
+    /* Smaller text */
+    line-height: 1.1 !important;
+  }
+
+  /* Scrollable Options Area */
+  .dialogue-box-container .grid {
+    max-height: 120px !important;
+    /* Limit height */
+    overflow-y: auto !important;
+    /* Vertical scroll */
+    overflow-x: auto !important;
+    /* Horizontal scroll if text breaks layout (though unlikely with grid) */
+    scrollbar-width: thin;
+    padding-right: 4px !important;
+  }
+
+  /* Move Coach Feedback Popup to Right Side */
+  .coach-feedback-popup {
+    position: fixed !important;
+    top: 5rem !important;
+    /* Moved down slightly more to ensure clearance */
+    right: 1rem !important;
+    left: auto !important;
+    /* bottom: auto !important; */
+    margin: 0 !important;
+    max-width: 250px !important;
+    transform: none !important;
+    animation: none !important;
+    /* Kill existing animations */
+    z-index: 1000 !important;
+    background-color: rgba(20, 184, 166, 0.9) !important;
+    /* Force teal background to ensure visibility */
+    border: 2px solid white !important;
+  }
+
+  /* --- Handoff Screen (SOS Phone) Mobile Landscape --- */
+  .handoff-container {
+    padding: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .handoff-phone-frame {
+    height: 90vh !important;
+    /* Maximize height usage */
+    width: auto !important;
+    aspect-ratio: 9/19 !important;
+    /* Keep phone ratio roughly */
+    max-width: none !important;
+    transform: scale(1.4) !important;
+    /* Scale it up significantly */
+    border-width: 4px !important;
+    /* Thinner border */
+  }
+
+  .handoff-top-bar {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    font-size: 6px !important;
+  }
+
+  .handoff-screen-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: block !important;
+    /* Switch to block to allowing scrolling flow if flex causes issues, or keep flex with min-height */
+    /* Actually, to keep centering, flex might be better but verify overflow. */
+    /* Let's try explicit scroll behavior */
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 2rem !important;
+    /* Space for scrolling */
+  }
+
+  .handoff-content-area {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    justify-content: flex-start !important;
+    /* Stack from top instead of spacing around */
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    /* Allow growing */
+    min-height: auto !important;
+    /* Remove min-height constraint to condense */
+    gap: 0 !important;
+    /* Eliminate gap completely */
+    margin-bottom: 0.1rem !important;
+    /* Reduce space after content area */
+  }
+
+  .handoff-content-area h2 {
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
+    /* Tighten line height */
+  }
+
+  .handoff-input-display {
+    height: 1.2rem !important;
+    /* Minimal height */
+    margin-bottom: 0 !important;
+    /* No margin */
+    margin-top: 0 !important;
+    border-bottom-width: 1px !important;
+  }
+
+  .handoff-input-display span {
+    font-size: 0.8rem !important;
+    /* Restore some readability vs user's 0.5rem */
+    line-height: 1 !important;
+  }
+
+  .handoff-keypad {
+    gap: 0.05rem !important;
+    /* Extremely tight gap */
+    max-width: 100px !important;
+    /* More compact container */
+    margin-bottom: 0 !important;
+  }
+
+  .handoff-keypad button {
+    width: 1.5rem !important;
+    /* Smaller buttons vertically and horizontally */
+    height: 1.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .handoff-call-btn {
+    width: 2rem !important;
+    height: 2rem !important;
+    margin-top: 0 !important;
+  }
+
+  .handoff-autodial-btn {
+    font-size: 5px !important;
+    margin-top: 0.1rem !important;
+  }
+
+  .handoff-helpline {
+    font-size: 0.5rem !important;
+    padding: 0.25rem 0.5rem !important;
+    white-space: nowrap !important;
+  }
+
+  /* Hide non-essential decor to save space */
+  .handoff-phone-frame .bg-slate-900 {
+    padding: 0.25rem !important;
+  }
+
+  /* Resolution Screen Popup */
+  .resolution-popup {
+    width: 200px !important;
+    padding: 0.75rem !important;
+    top: -8rem !important;
+    /* Move it closer to character */
+  }
+
+  .resolution-popup p {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
   }
 }
