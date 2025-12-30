@@ -59,6 +59,7 @@ const LevelSelectScreen = ({
                 settings={settings} setSettings={setSettings}
                 audioManager={audioManager}
                 isSettingsOpen={isSettingsOpen} setIsSettingsOpen={setIsSettingsOpen} onNavigate={onNavigate}
+                showMiniGames={true}
             />
 
             {/* Back to Title */}
@@ -112,6 +113,7 @@ const LevelSelectScreen = ({
                                     bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all duration-300
                                     text-left flex flex-col justify-between h-[55vh] md:h-56
                                     overflow-hidden
+                                    level-select-card
                                     ${isLocked
                                         ? 'opacity-60 grayscale cursor-not-allowed border-slate-200'
                                         : selectedLevel.id === mission.id

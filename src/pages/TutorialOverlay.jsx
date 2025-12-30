@@ -23,17 +23,17 @@ const TutorialOverlay = ({ gameState, playerPos, foundClues }) => {
 
     return (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-lg px-4">
-            <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border-2 border-teal-400 animate-bounce-subtle">
+            <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border-2 border-teal-400 animate-bounce-subtle tutorial-overlay-card">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-xl shrink-0 text-white font-bold">
+                    <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-xl shrink-0 text-white font-bold tutorial-overlay-icon">
                         {step === 0 && '👉'}
                         {step === 1 && '👈'}
                         {step === 2 && '🧐'}
                         {step === 3 && '💬'}
                     </div>
                     <div>
-                        <h4 className="font-black text-slate-800 uppercase tracking-wider text-xs mb-1">Training Mission</h4>
-                        <p className="text-slate-600 font-medium text-sm leading-tight">
+                        <h4 className="font-black text-slate-800 uppercase tracking-wider text-xs mb-1 tutorial-overlay-title">Training Mission</h4>
+                        <p className="text-slate-600 font-medium text-sm leading-tight tutorial-overlay-text">
                             {step === 0 && "Use D or RIGHT ARROW to move towards the person."}
                             {step === 1 && "Use A or LEFT ARROW to step back. Give them space."}
                             {step === 2 && "Press 'Z' (or tap paper) near the floating note to inspect clues."}

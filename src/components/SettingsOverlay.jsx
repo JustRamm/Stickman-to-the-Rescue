@@ -7,7 +7,8 @@ const SettingsOverlay = ({
     onResetGame,
     isSettingsOpen,
     setIsSettingsOpen,
-    onNavigate
+    onNavigate,
+    showMiniGames = false
 }) => {
 
     return (
@@ -16,45 +17,47 @@ const SettingsOverlay = ({
             <div className="fixed top-4 md:top-6 right-4 md:right-6 z-[400] pointer-events-auto flex gap-3 items-center">
 
                 {/* Minimal Training Icons Row */}
-                <div className="flex gap-2.5">
-                    {/* Signal Scout (New) */}
-                    <button
-                        onClick={() => { onResetGame && onResetGame(); onNavigate('SIGNAL_SCOUT'); setIsSettingsOpen(false); }}
-                        className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
-                    >
-                        <img src="/stickman_assets/scout_stickman.svg" alt="Signal Scout" className="w-full h-full object-contain" />
-                        <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Signal Scout</span>
-                    </button>
+                {showMiniGames && (
+                    <div className="flex gap-2.5">
+                        {/* Signal Scout (New) */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('SIGNAL_SCOUT'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
+                        >
+                            <img src="/stickman_assets/scout_stickman.svg" alt="Signal Scout" className="w-full h-full object-contain" />
+                            <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Signal Scout</span>
+                        </button>
 
-                    {/* Quiz Game */}
-                    <button
-                        onClick={() => { onResetGame && onResetGame(); onNavigate('QUIZ_MODE'); setIsSettingsOpen(false); }}
-                        className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
-                    >
-                        <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
-                        <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Myth vs Fact</span>
-                    </button>
+                        {/* Quiz Game */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('QUIZ_MODE'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
+                        >
+                            <img src="/stickman_assets/scholar_stickman.svg" alt="Quiz" className="w-full h-full object-contain" />
+                            <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Myth vs Fact</span>
+                        </button>
 
-                    {/* Referral Battle */}
-                    <button
-                        onClick={() => { onResetGame && onResetGame(); onNavigate('RESOURCE_RELAY'); setIsSettingsOpen(false); }}
-                        className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-indigo-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
-                    >
-                        <img src="/stickman_assets/shield_stickman.svg" alt="Referral" className="w-full h-full object-contain" />
-                        <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Referral Battle</span>
-                    </button>
+                        {/* Referral Battle */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('RESOURCE_RELAY'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-indigo-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
+                        >
+                            <img src="/stickman_assets/shield_stickman.svg" alt="Referral" className="w-full h-full object-contain" />
+                            <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Referral Battle</span>
+                        </button>
 
-                    {/* Words of Hope */}
-                    <button
-                        onClick={() => { onResetGame && onResetGame(); onNavigate('WORDS_OF_HOPE'); setIsSettingsOpen(false); }}
-                        className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
-                    >
-                        <img src="/stickman_assets/hope_stickman.svg" alt="Hope" className="w-full h-full object-contain filter brightness-0" />
-                        <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Words of Hope</span>
-                    </button>
+                        {/* Words of Hope */}
+                        <button
+                            onClick={() => { onResetGame && onResetGame(); onNavigate('WORDS_OF_HOPE'); setIsSettingsOpen(false); }}
+                            className="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-teal-50 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-xl border border-white/50 p-2 group relative"
+                        >
+                            <img src="/stickman_assets/hope_stickman.svg" alt="Hope" className="w-full h-full object-contain filter brightness-0" />
+                            <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none uppercase tracking-widest shadow-xl z-50">Words of Hope</span>
+                        </button>
 
 
-                </div>
+                    </div>
+                )}
 
                 {/* Main Settings Button */}
                 <button

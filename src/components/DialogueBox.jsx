@@ -23,7 +23,7 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
     const isCorrectResource = selectedResource === requiredResource;
 
     return (
-        <div className={`absolute bottom-2 md:bottom-10 left-1/2 -translate-x-1/2 w-[96%] md:w-full max-w-2xl px-1 md:px-6 animate-slide-up z-[60] transition-all duration-500 ease-in-out ${isWalletOpen ? 'md:left-[35%]' : 'md:left-1/2'}`}>
+        <div className={`absolute bottom-2 md:bottom-10 left-1/2 -translate-x-1/2 w-[96%] md:w-full max-w-2xl px-1 md:px-6 animate-slide-up z-[60] transition-all duration-500 ease-in-out dialogue-box-container ${isWalletOpen ? 'md:left-[35%]' : 'md:left-1/2'}`}>
             <div className={`bg-white/80 backdrop-blur-md rounded-xl md:rounded-3xl p-2 md:p-6 shadow-2xl border ${requiredResource ? 'border-orange-400' : 'border-white/50'} space-y-1.5 md:space-y-3`}>
                 <div className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.3em] text-teal-600 mb-0.5 md:mb-2 text-center flex items-center justify-center gap-2">
                     {requiredResource ? (

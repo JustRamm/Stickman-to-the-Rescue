@@ -10,7 +10,7 @@ const SplashScreen = ({ loadingProgress }) => {
             </div>
 
             <div className="relative z-20 flex flex-col items-center text-center max-w-sm w-full animate-fade-in p-4">
-                <div className="mb-8 md:mb-12 relative">
+                <div className="mb-8 md:mb-12 relative splash-header-group">
                     <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center shadow-2xl relative z-10 animate-float">
                         <img src="/logo.svg" alt="Stickman Logo" className="w-16 h-16 md:w-20 md:h-20" />
                     </div>
@@ -35,7 +35,7 @@ const SplashScreen = ({ loadingProgress }) => {
                     </div>
                 </div>
 
-                <p className="mt-8 md:mt-12 text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-slate-600 animate-pulse">
+                <p className="mt-4 md:mt-12 text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-slate-600 animate-pulse">
                     Connecting to Empathy...
                 </p>
             </div>

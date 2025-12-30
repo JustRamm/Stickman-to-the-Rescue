@@ -61,7 +61,7 @@ const App = () => {
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
   const [completedLevels, setCompletedLevels] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('qpr_completed_missions_v4')) || [];
+      return JSON.parse(localStorage.getItem('qpr_completed_missions_v5')) || [];
     } catch { return []; }
   });
 
@@ -141,13 +141,15 @@ const App = () => {
 
   // Save Progress
   useEffect(() => {
-    localStorage.setItem('qpr_completed_missions_v4', JSON.stringify(completedLevels));
+    localStorage.setItem('qpr_completed_missions_v5', JSON.stringify(completedLevels));
   }, [completedLevels]);
 
   // Clean Legacy Data
   useEffect(() => {
     localStorage.removeItem('qpr_completed_missions');
     localStorage.removeItem('qpr_completed_missions_v2');
+    localStorage.removeItem('qpr_completed_missions_v3');
+    localStorage.removeItem('qpr_completed_missions_v4');
   }, []);
 
   // Audio & Settings
@@ -453,32 +455,64 @@ const App = () => {
   // --- RENDER ---
 
   if (isPortrait) return (
-    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 to-indigo-950 flex flex-col items-center justify-center text-center p-8 text-white overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-10 right-10 w-40 h-40 bg-teal-500 rounded-full blur-[100px]"></div>
+    <div className="fixed inset-0 z-[9999] bg-slate-900 flex flex-col items-center justify-center text-center p-8 text-white overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-[20%] left-[10%] w-64 h-64 bg-teal-500 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[20%] right-[10%] w-72 h-72 bg-indigo-600 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
       </div>
-      <div className="relative z-10 flex flex-col items-center">
-        <div className="w-24 h-24 mb-8 relative">
-          <div className="absolute inset-0 bg-white/10 rounded-full animate-ping"></div>
-          <div className="relative w-full h-full bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl">
-            <svg className="w-10 h-10 text-white animate-spin-slow-pause" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </div>
-          <div className="absolute -right-2 -bottom-2">
-            <img src="/stickman_assets/pointing_stickman.svg" className="w-12 h-12 filter invert drop-shadow-md animate-bounce" alt="" />
+
+      <div className="relative z-10 flex flex-col items-center animate-fade-in">
+        {/* Animated Icon Circle */}
+        <div className="w-40 h-40 mb-10 relative flex items-center justify-center">
+          <div className="absolute inset-0 border-4 border-teal-500/30 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute inset-4 border-2 border-white/10 rounded-full animate-spin-slow"></div>
+
+          <div className="relative w-32 h-32 bg-slate-800/50 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/20 shadow-[0_0_40px_rgba(13,148,136,0.3)] overflow-hidden">
+            {/* Device Rotation Animation */}
+            <div className="relative w-12 h-20 border-2 border-white rounded-lg flex items-center justify-center animate-wiggle origin-center">
+              <div className="w-1 h-1 bg-white rounded-full absolute bottom-1"></div>
+              <div className="absolute inset-0 bg-teal-500/20 animate-pulse"></div>
+            </div>
+            {/* Tiny Stickman pointing at it */}
+            <img
+              src="/stickman_assets/pointing_stickman.svg"
+              className="absolute -bottom-2 -right-2 w-16 h-16 filter invert drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] animate-bounce-subtle"
+              alt="Stickman Assistant"
+            />
           </div>
         </div>
-        <h2 className="text-2xl font-black uppercase tracking-[0.2em] mb-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-indigo-200">Mobile View</h2>
-        <p className="text-slate-300 font-medium text-sm max-w-[260px] leading-relaxed">
-          For the best experience, please rotate your device to <span className="text-white font-bold">Landscape Mode</span>.
-        </p>
-        <div className="mt-12 flex items-center gap-4 opacity-50">
-          <div className="w-12 h-8 border-2 border-white/30 rounded flex items-center justify-center"><span className="text-[10px] font-bold">Portrait</span></div>
-          <span className="text-xl">→</span>
-          <div className="w-16 h-8 border-2 border-white rounded bg-white/10 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]"><span className="text-[10px] font-bold text-teal-200">Landscape</span></div>
+
+        <h2 className="text-4xl font-black uppercase tracking-widest mb-4 bg-gradient-to-r from-teal-200 via-white to-teal-200 bg-clip-text text-transparent drop-shadow-sm">
+          Mobile View
+        </h2>
+
+        <div className="max-w-[280px] space-y-4">
+          <p className="text-slate-300 font-medium text-lg leading-relaxed">
+            This experience is designed for <span className="text-teal-300 font-bold border-b border-teal-500/50">Landscape Mode</span>.
+          </p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+            Please rotate your device
+          </p>
         </div>
+
+        {/* Visual Rotation Guide */}
+        <div className="mt-16 flex items-center gap-6 opacity-80 bg-white/5 px-6 py-3 rounded-2xl border border-white/10 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-12 border-2 border-slate-500 rounded flex items-center justify-center bg-slate-800"></div>
+            <span className="text-[9px] font-bold text-slate-500 uppercase">Portrait</span>
+          </div>
+
+          <div className="text-2xl text-teal-500 animate-pulse">➜</div>
+
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-8 border-2 border-white rounded border-teal-400 shadow-[0_0_15px_rgba(45,212,191,0.4)] flex items-center justify-center bg-teal-900/20">
+              <div className="w-10 h-1 bg-teal-500/30 rounded-full"></div>
+            </div>
+            <span className="text-[9px] font-bold text-teal-300 uppercase tracking-wide">Landscape</span>
+          </div>
+        </div>
+
       </div>
     </div>
   );
@@ -572,9 +606,9 @@ const App = () => {
 
         {gameState === 'APPROACH' && (
           <div className="absolute inset-0 z-50 pointer-events-none">
-            <div className="absolute bottom-8 left-8 w-36 h-36 pointer-events-auto touch-none select-none">
+            <div className="absolute bottom-8 left-8 w-36 h-36 pointer-events-auto touch-none select-none joystick-area">
               <div className="w-full h-full bg-white/10 backdrop-blur-sm rounded-full border-2 border-white/20 relative flex items-center justify-center shadow-lg">
-                <div className="w-12 h-12 bg-teal-500/80 rounded-full shadow-2xl transition-transform duration-75 border border-white/30" style={{ transform: `translateX(${moveDir * 35}px) translateY(${isJumping ? -35 : isCrouching ? 35 : 0}px)` }} />
+                <div className="w-12 h-12 bg-teal-500/80 rounded-full shadow-2xl transition-transform duration-75 border border-white/30 joystick-handle" style={{ transform: `translateX(${moveDir * 35}px) translateY(${isJumping ? -35 : isCrouching ? 35 : 0}px)` }} />
                 <div className="absolute inset-y-8 left-0 w-1/3 cursor-pointer active:bg-white/5 rounded-l-full z-10" onMouseDown={() => setMoveDir(-1)} onMouseUp={() => setMoveDir(0)} onMouseLeave={() => setMoveDir(0)} onTouchStart={(e) => { e.preventDefault(); setMoveDir(-1); }} onTouchEnd={(e) => { e.preventDefault(); setMoveDir(0); }} />
                 <div className="absolute inset-y-8 right-0 w-1/3 cursor-pointer active:bg-white/5 rounded-r-full z-10" onMouseDown={() => setMoveDir(1)} onMouseUp={() => setMoveDir(0)} onMouseLeave={() => setMoveDir(0)} onTouchStart={(e) => { e.preventDefault(); setMoveDir(1); }} onTouchEnd={(e) => { e.preventDefault(); setMoveDir(0); }} />
                 <div className="absolute inset-x-8 top-0 h-1/3 cursor-pointer active:bg-white/5 rounded-t-full z-10" onMouseDown={() => { setIsJumping(true); setTimeout(() => setIsJumping(false), 500); }} onTouchStart={(e) => { e.preventDefault(); setIsJumping(true); setTimeout(() => setIsJumping(false), 500); }} />
@@ -605,8 +639,8 @@ const App = () => {
           <span className="text-xs font-black uppercase text-white drop-shadow-md tracking-widest">{selectedLevel.name}</span>
           <span className="text-[10px] font-bold text-teal-300 uppercase tracking-wider">{gameState === 'APPROACH' ? 'Explore Mode' : 'Conversation Mode'}</span>
         </div>
-        <div className="pointer-events-auto mt-2">
-          <button onClick={() => { audioManager.stopMusic(); audioManager.stopSpeaking(); setGameState('LEVEL_SELECT'); }} className="px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all border border-red-400/50 backdrop-blur-sm">Exit Mission</button>
+        <div className="pointer-events-auto mt-2 exit-mission-btn-container">
+          <button onClick={() => { audioManager.stopMusic(); audioManager.stopSpeaking(); setGameState('LEVEL_SELECT'); }} className="px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all border border-red-400/50 backdrop-blur-sm exit-mission-btn">Exit Mission</button>
         </div>
 
         {/* Silent Coach Tip (Left Side) */}

@@ -817,3 +817,228 @@ input {
     opacity: 0;
   }
 }
+
+/* --- MOBILE LANDSCAPE OPTIMIZATION --- */
+@media (orientation: landscape) and (max-height: 500px) {
+
+  /* Zoom out the entire game world slightly to fit cramped mobile browser height */
+  .game-container {
+    transform: scale(0.9);
+    transform-origin: center center;
+    width: 111.11vw !important;
+    /* Compensate 0.9 scale to fill width */
+    height: 111.11vh !important;
+    /* Compensate 0.9 scale to fill height */
+    position: absolute;
+    left: -5.55vw;
+    /* Center the scaled element */
+    top: -5.55vh;
+  }
+
+  /* Adjust Text Sizes to be readable but compact */
+  p,
+  span,
+  button {
+    font-size: 0.9em !important;
+  }
+
+  /* Stickman Sizing - Make them slightly smaller to give more "headroom" */
+  .stickman-asset-container img {
+    width: 80px !important;
+    height: 100px !important;
+  }
+
+  /* Dialogue Box - maximize vertical space */
+  .dialogue-box-container {
+    bottom: 0 !important;
+  }
+
+  /* Make the dialogue box more compact */
+  .dialogue-box-container>div>div {
+    padding: 0.5rem 1rem !important;
+    max-height: 45vh !important;
+  }
+
+  /* Reduce dialogue button padding */
+  .dialogue-box-container button {
+    padding: 0.5rem !important;
+    min-height: 36px !important;
+  }
+
+  /* Move Mobile Controls (Arrows/Jump) out of the way */
+  .mobile-controls {
+    bottom: 1rem !important;
+    left: 1rem !important;
+    transform: scale(0.8);
+    transform-origin: bottom left;
+  }
+
+  .action-buttons {
+    bottom: 1rem !important;
+    right: 1rem !important;
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+
+  /* Settings / Heartbeat / Top UI - Scale down and pin tight to top */
+  .absolute.top-4.left-4 {
+    top: 0.5rem !important;
+    left: 1rem !important;
+    /* Avoid notch */
+    transform: scale(0.8);
+    transform-origin: top left;
+  }
+
+  .absolute.top-4.right-4 {
+    top: 0.5rem !important;
+    right: 1rem !important;
+    /* Avoid dynamic island/notch */
+    transform: scale(0.8);
+    transform-origin: top right;
+  }
+
+  /* Hide non-essential "Inner Thought" tooltips if they obstruct view */
+  .inner-thought-tooltip {
+    display: none !important;
+  }
+
+  /* Ensure the background covers everything despite the scale */
+  .scenery-layer {
+    background-size: cover;
+  }
+
+  /* Specific tweak for the hugging stickman to move it further left (away from center) */
+  .hug-stickman {
+    left: -20% !important;
+  }
+
+  /* Optimize Naming/Identification Card */
+  .naming-card {
+    max-width: 600px !important;
+    padding: 1rem 1.5rem !important;
+    border-radius: 1.5rem !important;
+  }
+
+  .naming-card .w-12 {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .naming-card h2 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .naming-card p {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .naming-card input {
+    padding: 0.5rem 1rem !important;
+    font-size: 1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .naming-card .h-4 {
+    height: 1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .naming-card button {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  /* Optimize Level/Mission Selection Cards */
+  .level-select-card {
+    width: 60vw !important;
+    /* Reduce specific width */
+    height: 60vh !important;
+    /* Reduce height */
+    max-height: 250px !important;
+    padding: 1rem !important;
+  }
+
+  /* Splash Screen Adjustments */
+  .splash-header-group {
+    margin-top: 3rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Start Screen Logo: Move to Left Side Only in Mobile Landscape */
+  .start-screen-logo {
+    position: fixed !important;
+    top: 50% !important;
+    left: -6rem !important;
+    transform: translateY(-50%) scale(1.4) !important;
+    margin-bottom: 0 !important;
+    z-index: 50 !important;
+    align-items: center !important;
+  }
+
+  /* Reduces gap for the resources button in tight landscape mode */
+  .resource-btn {
+    margin-top: 0.25rem !important;
+  }
+
+  /* --- Game Interface Optimizations for Mobile Landscape --- */
+
+  /* Exit Mission Button - Position between settings and empathy bar */
+  .exit-mission-btn-container {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 5rem !important;
+    /* Positioned to the left of the settings cog (which is typically right: 1-1.5rem) */
+    left: auto !important;
+    /* Override default left positioning */
+    margin-top: 0 !important;
+    z-index: 50 !important;
+  }
+
+  .exit-mission-btn {
+    font-size: 8px !important;
+    padding: 4px 8px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  /* Joystick Size Reduction */
+  .joystick-area {
+    width: 100px !important;
+    height: 100px !important;
+    bottom: 1rem !important;
+    left: 1rem !important;
+  }
+
+  .joystick-handle {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  /* Tutorial Popup Optimization */
+  .tutorial-overlay-card {
+    max-width: 300px !important;
+    padding: 0.5rem 0.75rem !important;
+    top: 4rem !important;
+    /* Move down slightly to clear top elements */
+  }
+
+  .tutorial-overlay-icon {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 12px !important;
+  }
+
+  .tutorial-overlay-title {
+    font-size: 8px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .tutorial-overlay-text {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+}

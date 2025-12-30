@@ -16,19 +16,18 @@ const StartScreen = ({ trust, onStart, onResources }) => {
             <div className="relative z-20 flex flex-col items-center text-center max-w-4xl animate-slide-up px-4">
 
                 {/* Top Badge: Mind Empowered Logo */}
-                <div className="mb-6 md:mb-8 flex flex-col items-center gap-2 md:gap-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-                    <div className="relative group w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden shadow-2xl border-2 md:border-4 border-slate-800 ring-4 ring-teal-500/50 transition-transform duration-500 hover:scale-110 hover:rotate-3">
+                <div className="start-screen-logo mb-6 md:mb-8 flex flex-col items-center gap-2 opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+                    <div className="relative group w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-2xl border-4 border-slate-700 ring-4 ring-teal-500/30 transition-transform duration-500 hover:scale-110">
                         <img src="/ME.jpeg" alt="Mind Empowered" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                        <div className="absolute inset-0 bg-teal-500/0 group-hover:bg-teal-500/10 transition-colors" />
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] text-teal-400/80 text-shadow-sm">Presented By Mind Empowered</span>
+                    <span className="hidden md:block text-[10px] font-black uppercase tracking-[0.2em] text-teal-400/60 drop-shadow-md bg-black/30 px-3 py-1 rounded backdrop-blur-sm">Mind Empowered</span>
                 </div>
 
                 {/* Main Title Group */}
-                <div className="mb-8 md:mb-12 relative">
+                <div className="mb-4 md:mb-10 relative">
                     <div className="absolute -inset-10 bg-teal-500/20 blur-3xl rounded-full animate-pulse-slow pointer-events-none" />
 
-                    <h1 className="relative text-5xl md:text-8xl font-black tracking-tighter text-white drop-shadow-2xl mb-2 leading-none">
+                    <h1 className="relative text-5xl md:text-8xl font-black tracking-tighter text-white drop-shadow-2xl mb-1 leading-none">
                         STICKMAN
                     </h1>
                     <h2 className="text-xl md:text-3xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-white to-teal-300 animate-shimmer">
@@ -39,7 +38,7 @@ const StartScreen = ({ trust, onStart, onResources }) => {
                     <div className="absolute -right-8 md:-right-16 -top-8 md:-top-12 animate-float delay-700 opacity-90 rotate-12 pointer-events-none">
                         <img src="/stickman_assets/guy_idle.svg" alt="Stickman" className="w-16 h-16 md:w-24 md:h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
                     </div>
-                    <div className="absolute -left-8 md:-left-16 -bottom-6 md:-bottom-8 animate-float delay-1000 opacity-90 -rotate-12 pointer-events-none">
+                    <div className="absolute -left-8 md:-left-16 -bottom-6 md:-bottom-8 animate-float delay-1000 opacity-90 -rotate-12 pointer-events-none hug-stickman">
                         <img src="/stickman_assets/group_hug.svg" alt="Support" className="w-20 h-16 md:w-32 md:h-24 drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]" />
                     </div>
                 </div>
@@ -58,15 +57,15 @@ const StartScreen = ({ trust, onStart, onResources }) => {
 
                 <button
                     onClick={onResources}
-                    className="mt-4 md:mt-8 text-teal-400 hover:text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
+                    className="mt-3 md:mt-6 resource-btn text-teal-400 hover:text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 transition-all hover:scale-105"
                 >
                     <span>Mental Health Resources</span>
                     <span className="w-3 md:w-4 h-px bg-teal-500/50" />
                     <span className="text-xs md:text-sm">✚</span>
                 </button>
 
-                <p className="mt-6 md:mt-8 text-slate-400 text-[10px] md:text-xs font-medium uppercase tracking-widest max-w-sm opacity-60">
-                    A QPR Suicide Prevention Training Module
+                <p className="mt-2 md:mt-4 text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-widest max-w-sm opacity-60">
+                    A QPR Suicide Prevention Training
                 </p>
 
             </div>
