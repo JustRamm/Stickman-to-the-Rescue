@@ -20,6 +20,13 @@ const LevelSelectScreen = ({
 
     const isMissionLocked = (missionId) => {
         if (settings?.devMode) return false; // Developer Mode Override
+
+        // Strict: Nothing unlocks until tutorial is done (except the tutorial itself)
+        const isTutorialComplete = completedLevels.includes('tutorial');
+        if (missionId !== 'tutorial' && !isTutorialComplete) {
+            return true;
+        }
+
         const missionIndex = MISSIONS.findIndex(m => m.id === missionId);
         if (missionIndex === 0) return false; // First mission (Intro) is always unlocked
         if (missionIndex === -1) return true; // Secure default
