@@ -21,8 +21,11 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
     const alertTimerRef = useRef(null);
     const spawnCooldownRef = useRef(0);
     const isProcessingSetRef = useRef(false);
-    const hasInteractionRef = useRef(false); // Track if current set has been interacted with
+    const hasInteractionRef = useRef(false);
     const requestRef = useRef();
+
+    // Physics State in Ref for synchronous updates
+    const fallingItemsRef = useRef([]);
 
     // Player Position Ref
     const playerRef = useRef(50);
@@ -92,12 +95,21 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
     // Handle Mouse/Touch Movement
     const handlePointerMove = (e) => {
         if (gameState !== 'PLAYING' || !gameContainerRef.current) return;
-        const rect = gameContainerRef.current.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        if (clientX === undefined) return;
 
+        // Robust coordinate extraction for both Pointer and Touch events
+        let clientX;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+
+        if (clientX === undefined || clientX === null) return;
+
+        const rect = gameContainerRef.current.getBoundingClientRect();
         const x = ((clientX - rect.left) / rect.width) * 100;
         const clampedX = Math.max(5, Math.min(95, x));
+
         setPlayerX(clampedX);
         playerRef.current = clampedX;
     };
@@ -109,41 +121,54 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             return;
         }
 
-        setFallingItems(currentItems => {
-            const nextItems = currentItems.map(item => ({ ...item, y: item.y + item.speed }));
-            const remainingItems = [];
-            let collisionOccurredInFile = false;
+        // 1. Move Items
+        const currentItems = fallingItemsRef.current;
+        const nextItems = [];
+        let collisionOccurred = false;
 
-            for (const item of nextItems) {
-                const distanceX = Math.abs(item.x - playerRef.current);
-                const distanceY = Math.abs(item.y - 85);
+        for (const item of currentItems) {
+            // Apply gravity/speed
+            const newItem = { ...item, y: item.y + item.speed };
 
-                // Collision Detection
-                if (distanceY < 8 && distanceX < 10 && !collisionOccurredInFile && !hasInteractionRef.current) {
-                    processCollision(item);
-                    collisionOccurredInFile = true;
-                    continue;
-                }
+            // Calculate Distance
+            const distanceX = Math.abs(newItem.x - playerRef.current);
+            const distanceY = Math.abs(newItem.y - 85);
 
-                if (item.y < 110) {
-                    remainingItems.push(item);
-                }
+            // Collision Check
+            // Expanded Y-range (75-95) for better feel on mobile landscape
+            // Expanded X-range (15) for easier catching
+            const isYAligned = newItem.y > 75 && newItem.y < 95;
+
+            if (isYAligned && distanceX < 15 && !collisionOccurred && !hasInteractionRef.current) {
+                collisionOccurred = true;
+                processCollision(newItem);
+                break;
             }
 
-            // Logic to move to next set if nothing is on screen
-            if (isProcessingSetRef.current && currentItems.length > 0 && remainingItems.length === 0) {
-                // If set fell off without interaction (missed), count as mistake and advance
+            // Keep item if it hasn't fallen off screen
+            if (newItem.y < 110) {
+                nextItems.push(newItem);
+            }
+        }
+
+        // If no collision, update refs properly
+        if (!collisionOccurred) {
+            fallingItemsRef.current = nextItems;
+
+            // Check for Missed Set
+            if (isProcessingSetRef.current && currentItems.length > 0 && nextItems.length === 0) {
                 if (!hasInteractionRef.current) {
                     applyMistake();
                     advanceToNextQuestion();
                 }
             }
+        }
 
-            return remainingItems;
-        });
+        // Sync to React State for Render
+        setFallingItems([...fallingItemsRef.current]);
 
-        // Spawning Logic
-        if (!isProcessingSetRef.current && gameState === 'PLAYING') {
+        // 2. Spawning Logic
+        if (!isProcessingSetRef.current && gameState === 'PLAYING' && !hasInteractionRef.current) {
             spawnCooldownRef.current -= 16;
             if (spawnCooldownRef.current <= 0) {
                 spawnSet();
@@ -176,6 +201,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             items[1].x = 35;
         }
 
+        fallingItemsRef.current = items;
         setFallingItems(items);
     };
 
@@ -185,6 +211,9 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
         const q = shuffledQuestions[currentIndexRef.current];
         if (!q) return;
+
+        fallingItemsRef.current = []; // Clear loop state
+        setFallingItems([]);        // Clear visual state
 
         if (item.isCorrect) {
             setScore(s => s + 1);
@@ -207,8 +236,6 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             applyMistake();
         }
 
-        setFallingItems([]); // Clear visuals immediately
-
         // Immediate End Case: Win at 4
         if (scoreRef.current >= 4) {
             triggerEndGame('RESULTS');
@@ -221,6 +248,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
     const triggerEndGame = (finalState) => {
         setGameState('TRANSITIONING');
+        fallingItemsRef.current = [];
         setFallingItems([]);
         isProcessingSetRef.current = false;
 
@@ -273,9 +301,11 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
     return (
         <div
             ref={gameContainerRef}
-            className="fixed inset-0 z-[1000] flex flex-col items-center justify-center overflow-hidden font-sans select-none touch-none"
+            className="fixed inset-0 z-[1000] flex flex-col items-center justify-center overflow-hidden font-sans select-none touch-none words-of-hope-container"
             style={bgStyle}
+            onPointerDown={handlePointerMove}
             onPointerMove={handlePointerMove}
+            onTouchStart={handlePointerMove}
             onTouchMove={handlePointerMove}
         >
             {/* ILLUSTRATIVE SCENERY BACKGROUND */}
@@ -345,15 +375,15 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             </div>
 
             {/* Header */}
-            <div className="absolute top-8 left-0 right-0 px-8 flex justify-between items-center z-50">
-                <div className="flex flex-col">
+            <div className="absolute top-8 left-0 right-0 px-8 flex justify-between items-center z-50 words-of-hope-hdr">
+                <div className="flex flex-col words-of-hope-hdr-title">
                     <h1 className="text-white font-black uppercase tracking-[0.3em] text-[10px] md:text-lg drop-shadow-lg">
                         {TERMINOLOGY_DATA.title}
                     </h1>
                     <div className="h-0.5 w-full bg-gradient-to-r from-teal-400 to-transparent rounded-full mt-1" />
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 words-of-hope-hdr-actions">
                     <div className="flex flex-col items-end">
                         <span className="text-[8px] font-black text-teal-400 uppercase tracking-widest leading-none mb-1">Target: 4 Seeds</span>
                         <span className="text-white font-black text-xl leading-none">{score}<span className="text-white/30 text-sm font-medium ml-1">/ 4</span></span>
@@ -368,7 +398,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             </div>
 
             {gameState === 'INTRO' && (
-                <div className="relative z-10 max-w-2xl w-full p-8 text-center animate-fade-in flex flex-col items-center">
+                <div className="relative z-10 max-w-2xl w-full p-8 text-center animate-fade-in flex flex-col items-center words-of-hope-hero">
                     <div className="w-32 h-32 bg-white/10 backdrop-blur-xl rounded-[2.5rem] mb-12 flex items-center justify-center border border-white/20 shadow-2xl rotate-3">
                         <img src="/stickman_assets/hope_stickman.svg" alt="Hope" className="w-20 h-20 animate-pulse" />
                     </div>
@@ -399,7 +429,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
                     </div>
 
                     {/* Knowledge Sidebar */}
-                    <div className={`absolute right-4 top-32 z-40 transition-all duration-700 ${isSidebarVisible ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`}>
+                    <div className={`absolute right-4 top-32 z-40 transition-all duration-700 words-of-hope-sidebar-right ${isSidebarVisible ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`}>
                         <div className="max-w-[240px] md:max-w-[280px] bg-white/95 backdrop-blur-xl rounded-2xl border border-white p-4 md:p-5 shadow-4xl flex flex-col h-fit">
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center text-lg">🌱</div>
@@ -424,7 +454,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
                     </div>
 
                     {/* Stigma Alert (Left Side) */}
-                    <div className={`absolute left-4 top-40 z-40 transition-all duration-700 ${isAlertVisible ? 'translate-x-0 opacity-100' : 'translate-x-[-120%] opacity-0'}`}>
+                    <div className={`absolute left-4 top-40 z-40 transition-all duration-700 words-of-hope-sidebar-left ${isAlertVisible ? 'translate-x-0 opacity-100' : 'translate-x-[-120%] opacity-0'}`}>
                         <div className="max-w-[240px] md:max-w-[280px] bg-slate-900/95 backdrop-blur-2xl rounded-2xl border border-red-500/30 p-4 md:p-5 shadow-[0_0_30px_rgba(239,68,68,0.2)] flex flex-col h-fit">
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center text-lg shadow-[inset_0_0_10px_rgba(239,68,68,0.3)]">⚠️</div>
@@ -473,12 +503,12 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             )}
 
             {gameState === 'GAME_OVER' && (
-                <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center">
+                <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center words-of-hope-results">
                     <div className="w-32 h-32 bg-teal-500 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl shadow-2xl border-4 border-white">🌱</div>
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Don't Give Up!</h2>
                     <p className="text-teal-200 text-lg md:text-xl font-bold mb-4 uppercase tracking-widest text-balance">Mistakes are part of learning. Try again to master the language of hope.</p>
                     <p className="text-white/50 text-xs font-black uppercase tracking-widest mb-12">Progress: {score}/4 Seeds Collected</p>
-                    <div className="flex flex-col gap-4 w-full">
+                    <div className="flex flex-col gap-4 w-full words-of-hope-retry-btns">
                         <button onClick={startGame} className="w-full py-5 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl hover:bg-slate-100 transition-all">Try Again</button>
                         <button onClick={onExit} className="w-full py-5 bg-white/10 text-white border border-white/20 rounded-2xl font-black uppercase tracking-widest text-xs transition-all opacity-50">Return</button>
                     </div>
@@ -486,7 +516,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             )}
 
             {gameState === 'RESULTS' && (
-                <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center">
+                <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center words-of-hope-results">
                     <div className="w-32 h-32 bg-teal-400 rounded-[2.5rem] mb-8 flex items-center justify-center shadow-2xl border-4 border-white overflow-hidden">
                         <img src="/stickman_assets/hope_stickman.svg" alt="Success" className="w-20 h-20 drop-shadow-lg" />
                     </div>

@@ -5,6 +5,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
     const [quizTimer, setQuizTimer] = useState(60);
     const [quizCards, setQuizCards] = useState({ deck: [], myth: [], fact: [] });
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+    const dragPositionRef = useRef({ x: 0, y: 0 }); // Ref for synchronous access
     const [isDragging, setIsDragging] = useState(false);
     const [isThrowing, setIsThrowing] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -50,6 +51,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
         setIsDragging(true);
         setDragStart({ x: clientX, y: clientY });
         setDragPosition({ x: 0, y: 0 });
+        dragPositionRef.current = { x: 0, y: 0 }; // Reset ref
         setActiveDragCard({ card, source });
         dragStartTime.current = Date.now();
     };
@@ -59,11 +61,15 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         const currentMoveX = clientX - dragStart.x;
+        const currentMoveY = clientY - dragStart.y;
 
-        setDragPosition({
+        const newPos = {
             x: currentMoveX,
-            y: clientY - dragStart.y
-        });
+            y: currentMoveY
+        };
+
+        setDragPosition(newPos);
+        dragPositionRef.current = newPos; // Update ref synchronously
 
         // Zone Entry Haptics
         let currentTarget = null;
@@ -84,7 +90,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
         if ((!isDragging && !isThrowing) || !activeDragCard) return;
 
         const timeElapsed = Date.now() - dragStartTime.current;
-        const moveX = dragPosition.x;
+        const moveX = dragPositionRef.current.x; // Read from Ref
         const velocity = Math.abs(moveX) / (timeElapsed || 1); // px/ms
 
         let target = activeDragCard.source;
@@ -99,8 +105,8 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                 else target = 'fact';
             } else {
                 // Classic distance threshold
-                if (moveX < -100) target = 'myth';
-                if (moveX > 100) target = 'fact';
+                if (moveX < -80) target = 'myth'; // Reduced threshold from 100 to 80
+                if (moveX > 80) target = 'fact';
             }
         } else if (activeDragCard.source === 'myth') {
             if (moveX > 300) target = 'fact';
@@ -119,7 +125,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
             const throwDistance = window.innerWidth;
             const throwX = moveX > 0 ? throwDistance : -throwDistance;
             // Add a slight Y arc or continuation based on trajectory
-            const throwY = dragPosition.y * 2;
+            const throwY = dragPositionRef.current.y * 2;
 
             setDragPosition({ x: throwX, y: throwY });
 
@@ -128,6 +134,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                 finalizeMove(activeDragCard.card, activeDragCard.source, target);
                 setIsThrowing(false);
                 setDragPosition({ x: 0, y: 0 });
+                dragPositionRef.current = { x: 0, y: 0 };
                 setActiveDragCard(null);
             }, 300); // Matches CSS transition duration
             return;
@@ -138,6 +145,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
         setIsDragging(false);
         if (!isFlick) {
             setDragPosition({ x: 0, y: 0 });
+            dragPositionRef.current = { x: 0, y: 0 };
             setActiveDragCard(null);
         }
     };
@@ -347,7 +355,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                         {/* Active Deck Card (Top) */}
                         {topDeckCard && (
                             <div
-                                className={`w-[300px] h-[420px] bg-white rounded-3xl shadow-2xl border-[6px] border-white flex flex-col items-center justify-center p-8 text-center cursor-grab active:cursor-grabbing transition-all duration-200 relative z-20 overflow-hidden group
+                                className={`w-[300px] h-[420px] bg-white rounded-3xl shadow-2xl border-[6px] border-white flex flex-col items-center justify-center p-8 text-center cursor-grab active:cursor-grabbing transition-all duration-200 relative z-20 overflow-hidden group quiz-card-container
                                 ${((isDragging || isThrowing) && activeDragCard?.card.id === topDeckCard.id) ? 'scale-105 opacity-0 pointer-events-none' : 'scale-100 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]'}
                                 `}
                                 onMouseDown={(e) => handleCardDragStart(e, topDeckCard, 'deck')}
@@ -357,10 +365,10 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                                 <div className="absolute top-0 w-full h-32 bg-gradient-to-b from-indigo-50 to-transparent pointer-events-none" />
                                 <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-purple-50 to-transparent pointer-events-none" />
 
-                                <div className="relative z-10 w-32 h-32 bg-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-indigo-100 group-hover:bg-indigo-100 transition-colors">
+                                <div className="relative z-10 w-32 h-32 bg-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-indigo-100 group-hover:bg-indigo-100 transition-colors quiz-card-icon">
                                     <img src="/stickman_assets/thinking_stickman.svg" className="w-24 h-24 drop-shadow-sm" alt="Thinking" />
                                 </div>
-                                <h3 className="relative z-10 text-xl md:text-2xl font-black text-slate-800 leading-tight pointer-events-none select-none px-2">
+                                <h3 className="relative z-10 text-xl md:text-2xl font-black text-slate-800 leading-tight pointer-events-none select-none px-2 quiz-card-text">
                                     {topDeckCard.question}
                                 </h3>
 
@@ -413,18 +421,18 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                 </div>
             ) : (
                 // Results Screen
-                <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col font-sans animate-fade-in text-slate-800">
+                <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col font-sans animate-fade-in text-slate-800 quiz-end-screen">
                     {/* Header */}
-                    <div className="shrink-0 py-4 px-6 md:px-8 bg-white shadow-sm flex flex-col md:flex-row items-center justify-between border-b border-slate-200 z-10 gap-4 md:gap-0">
+                    <div className="shrink-0 py-4 px-6 md:px-8 bg-white shadow-sm flex flex-col md:flex-row items-center justify-between border-b border-slate-200 z-10 gap-4 md:gap-0 quiz-end-header">
                         <div className="text-center md:text-left">
-                            <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                            <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 quiz-end-title">
                                 {totalCorrect === QUIZ_QUESTIONS.length ? "Perfect Score!" : "Time's Up!"}
                             </h2>
-                            <p className="text-slate-600 font-medium text-sm md:text-base">
+                            <p className="text-slate-600 font-medium text-sm md:text-base quiz-end-stats">
                                 You sorted <span className="text-indigo-600 font-black text-lg">{totalCorrect}</span> / <span className="font-bold">{QUIZ_QUESTIONS.length}</span> correctly.
                             </p>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 quiz-end-actions">
                             <button
                                 onClick={restartQuiz}
                                 className="px-5 py-3 min-h-[44px] bg-white text-indigo-600 border-2 border-indigo-100 rounded-full font-bold uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95 flex items-center gap-2 text-[10px] md:text-xs shadow-sm"
@@ -441,7 +449,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                     </div>
 
                     {/* Main Content Columns */}
-                    <div className="flex-1 overflow-hidden p-4 grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full max-w-7xl mx-auto">
+                    <div className="flex-1 overflow-hidden p-4 grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full max-w-7xl mx-auto quiz-end-content">
                         {/* Myth Column */}
                         <div className="flex flex-col bg-white rounded-2xl border border-orange-200 shadow-sm overflow-hidden h-full">
                             <div className="shrink-0 p-3 bg-orange-50 border-b border-orange-100 flex items-center gap-3">

@@ -191,7 +191,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                 {people.map(person => (
                     <div
                         key={person.uid}
-                        className="absolute group"
+                        className="absolute group signal-scout-person"
                         style={{
                             left: `${person.x}%`,
                             top: `${person.y}%`,
@@ -210,14 +210,13 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                                 className={`
                                     relative bg-white text-slate-900 p-3 rounded-2xl shadow-xl border-2 mb-2 cursor-pointer
                                     ${person.data.type === 'risk' ? 'border-red-100 hover:border-red-300' : 'border-blue-50 hover:border-blue-200'}
-                                    transition-colors duration-200
+                                    transition-colors duration-200 signal-scout-bubble
                                 `}
                             >
                                 <p className="text-[10px] md:text-xs font-bold leading-snug">{person.data.text}</p>
                                 {/* Tail */}
                                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-inherit transform rotate-45"></div>
                             </div>
-
                             {/* Stickman Asset */}
                             <div className={`h-24 md:h-32 w-full flex justify-center ${person.direction === -1 ? '-scale-x-100' : ''}`}>
                                 <img
@@ -248,21 +247,21 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
             {/* Intro Modal */}
             {gameState === 'INTRO' && (
-                <div className="absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-6">
-                    <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in relative overflow-hidden">
+                <div className="absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-6 signal-scout-intro-container">
+                    <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in relative overflow-hidden signal-scout-intro-card">
                         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-400 to-indigo-500"></div>
 
-                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner border-4 border-white">
+                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner border-4 border-white signal-scout-intro-icon">
                             🔭
                         </div>
 
-                        <h2 className="text-3xl font-black uppercase text-slate-800 mb-2 tracking-tight">Signal Scout</h2>
-                        <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed px-4">
+                        <h2 className="text-3xl font-black uppercase text-slate-800 mb-2 tracking-tight signal-scout-intro-title">Signal Scout</h2>
+                        <p className="text-slate-500 font-medium text-sm mb-8 leading-relaxed px-4 signal-scout-intro-desc">
                             Identify people showing <strong className="text-red-500 bg-red-50 px-1 rounded">Suicide Warning Signs</strong>.
                             <br />Tap their speech bubbles to intervene.
                         </p>
 
-                        <div className="space-y-3 mb-8 text-left">
+                        <div className="space-y-3 mb-8 text-left signal-scout-intro-examples">
                             <div className="flex items-center gap-4 bg-teal-50 p-3 rounded-xl border border-teal-100">
                                 <span className="text-2xl">🎁</span>
                                 <div>
@@ -283,7 +282,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
                         <button
                             onClick={startGame}
-                            className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 signal-scout-start-btn"
                         >
                             <span>Start Patrol</span> ➔
                         </button>
@@ -293,11 +292,11 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
             {/* End Modal */}
             {gameState === 'END' && (
-                <div className="absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-6">
-                    <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in border-4 border-slate-100">
-                        <h2 className="text-2xl font-black uppercase text-slate-400 mb-6 tracking-widest">Patrol Ended</h2>
+                <div className="absolute inset-0 z-[300] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-6 signal-scout-end-container">
+                    <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in border-4 border-slate-100 signal-scout-end-card">
+                        <h2 className="text-2xl font-black uppercase text-slate-400 mb-6 tracking-widest signal-scout-end-title">Patrol Ended</h2>
 
-                        <div className="relative py-8 mb-8">
+                        <div className="relative py-8 mb-8 signal-scout-end-score-area">
                             <div className="absolute inset-0 flex items-center justify-center opacity-10">
                                 <div className="w-32 h-32 bg-teal-500 rounded-full blur-2xl"></div>
                             </div>
@@ -305,7 +304,7 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                             <div className="text-7xl font-black text-slate-800 tracking-tighter">{score}</div>
                         </div>
 
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-3 signal-scout-end-buttons">
                             <button
                                 onClick={startGame}
                                 className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-[0.98]"

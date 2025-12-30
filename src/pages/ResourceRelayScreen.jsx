@@ -111,12 +111,12 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900 flex flex-col font-sans overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900 flex flex-col font-sans overflow-hidden resource-relay-container">
             {/* Background */}
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black pointer-events-none"></div>
 
             {/* Header / HUD */}
-            <div className="relative z-10 px-6 py-4 flex justify-between items-center bg-slate-800/80 backdrop-blur-xl border-b border-white/10">
+            <div className="relative z-10 px-6 py-4 flex justify-between items-center bg-slate-800/80 backdrop-blur-xl border-b border-white/10 resource-relay-header">
                 <div className="flex items-center gap-6">
                     <button
                         onClick={onExit}
@@ -150,10 +150,10 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
             </div>
 
             {/* Main Battle Arena */}
-            <div className="flex-1 relative flex flex-col items-center justify-center p-4">
+            <div className="flex-1 relative flex flex-col items-center justify-center p-4 resource-relay-arena">
 
                 {/* Sam / Opponent Area */}
-                <div className="relative flex flex-col items-center mb-10 w-full max-w-2xl">
+                <div className="relative flex flex-col items-center mb-10 w-full max-w-2xl resource-relay-sam-zone">
                     <div className={`transition-all duration-500 transform ${isSamAttacking ? 'scale-110 translate-y-4' : 'scale-100'}`}>
                         <Stickman
                             position={{ x: 0, y: 0 }}
@@ -185,7 +185,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                 {/* Info Modal Overlay */}
                 {inspectedCard && (
                     <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-                        <div className="max-w-sm w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl border-t-8 border-indigo-500 animate-slide-up relative">
+                        <div className="max-w-sm w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl border-t-8 border-indigo-500 animate-slide-up relative resource-relay-info-card">
                             <button onClick={() => setInspectedCard(null)} className="absolute top-6 right-6 text-slate-300 hover:text-slate-500 transition-colors py-2 px-2">✕</button>
 
                             <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -222,7 +222,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                 {/* Player Hand Area */}
                 {gameState === 'WIN' ? (
                     <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-fade-in">
-                        <div className="max-w-md w-full bg-white rounded-[3rem] p-10 text-center shadow-2xl border-b-8 border-teal-500 relative overflow-hidden">
+                        <div className="max-w-md w-full bg-white rounded-[3rem] p-10 text-center shadow-2xl border-b-8 border-teal-500 relative overflow-hidden resource-relay-win-card">
                             {/* Decorative background circle */}
                             <div className="absolute -top-20 -right-20 w-48 h-48 bg-teal-50 rounded-full opacity-50"></div>
 
@@ -252,12 +252,12 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                         </div>
                     </div>
                 ) : (
-                    <div className={`w-full max-w-4xl flex justify-center items-end gap-2 md:gap-4 h-[220px] pb-4 transition-all duration-500 ${gameState === 'RESOLVING' ? 'translate-y-full opacity-50' : 'translate-y-0 opacity-100'}`}>
+                    <div className={`w-full max-w-4xl flex justify-center items-end gap-2 md:gap-4 h-[220px] pb-4 transition-all duration-500 resource-relay-hand-area ${gameState === 'RESOLVING' ? 'translate-y-full opacity-50' : 'translate-y-0 opacity-100'}`}>
                         {playerHand.map((card, i) => (
                             <button
                                 key={card.id + i}
                                 onClick={() => setInspectedCard(card)}
-                                className="group relative w-32 h-44 md:w-40 md:h-56 bg-white rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out border-4 border-slate-100 hover:border-indigo-400 hover:z-50 active:scale-95 translate-y-0"
+                                className="group relative w-32 h-44 md:w-40 md:h-56 bg-white rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out border-4 border-slate-100 hover:border-indigo-400 hover:z-50 active:scale-95 translate-y-0 resource-relay-card-btn"
                                 style={{
                                     transform: `rotate(${(i - (playerHand.length - 1) / 2) * 5}deg) translateY(${Math.abs((i - (playerHand.length - 1) / 2) * 10)}px)`,
                                     zIndex: 10 + i
