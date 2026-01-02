@@ -1,9 +1,15 @@
-<svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Dress -->
-  <path d="M35,100 L65,100 L55,60 L45,60 Z" fill="#db2777" fill-opacity="0.3" stroke="#db2777" stroke-width="1" stroke-opacity="0.5" />
-  <circle cx="50" cy="30" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M60,20 Q75,25 70,45" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M50,45 L50,100" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M30,70 L50,60 L70,70" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M20,130 L50,100 L80,130" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hair -->
+  <path d="M30 15 c0 -15 40 -15 40 0 c0 15 -10 20 -20 20 s-20 -5 -20 -20 Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Head -->
+  <path d="M50 28 c-10 0 -17 -7 -17 -17 s7 -17 17 -17 s17 7 17 17 s-7 17 -17 17 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <!-- Body -->
+  <path d="M50 32 l-15 45 l30 0 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Jumping Arms with hands -->
+  <path d="M30 45 c-10 -10 -15 -25 -5 -35" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="25" cy="10" r="2.5" fill="currentColor" /> <!-- Hand 1 -->
+  <path d="M70 45 c10 -10 15 -25 5 -35" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="75" cy="10" r="2.5" fill="currentColor" /> <!-- Hand 2 -->
+  <!-- Jumping Legs -->
+  <path d="M35 77 l-10 30 l-5 -5 M65 77 l10 30 l5 -5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 
-const QuizGameScreen = ({ audioManager, onExit }) => {
+const QuizGameScreen = ({ audioManager, onExit, isPaused = false, playerGender = 'guy' }) => {
     const [quizTimer, setQuizTimer] = useState(60);
     const [quizCards, setQuizCards] = useState({ deck: [], myth: [], fact: [] });
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -25,7 +25,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
     }, []);
 
     useEffect(() => {
-        if (showResults) return;
+        if (showResults || isPaused) return;
 
         const timer = setInterval(() => {
             setQuizTimer(prev => {
@@ -42,9 +42,10 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [showResults, audioManager]);
+    }, [showResults, audioManager, isPaused]);
 
     const handleCardDragStart = (e, card, source) => {
+        if (isPaused) return;
         e.stopPropagation();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -260,7 +261,7 @@ const QuizGameScreen = ({ audioManager, onExit }) => {
                     {/* Left Zone: MYTH */}
                     <div className="absolute bottom-4 left-4 w-[42%] h-40 md:inset-y-4 md:w-1/3 md:h-auto bg-white/5 backdrop-blur-sm border-2 border-orange-400/30 rounded-3xl flex flex-col items-center justify-start md:pt-20 p-2 md:p-4 z-10 overflow-visible transition-colors hover:bg-orange-500/10 hover:border-orange-400/50">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none mix-blend-overlay">
-                            <img src="/stickman_assets/guy_distressed.svg" alt="Myth" className="w-24 h-24 md:w-64 md:h-64 filter invert" />
+                            <img src={`/stickman_assets/${playerGender}_distressed.svg`} alt="Myth" className="w-24 h-24 md:w-64 md:h-64 filter invert" />
                         </div>
                         <div className="absolute md:top-6 top-2 left-0 w-full text-center">
                             <h2 className="text-xl md:text-3xl font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-orange-300 to-orange-500 tracking-[0.2em] drop-shadow-sm">MYTH</h2>

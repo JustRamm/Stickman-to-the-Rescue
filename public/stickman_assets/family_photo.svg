@@ -1,82 +1,84 @@
-<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background: Warm Vintage Photo -->
-  <rect width="400" height="300" fill="#fff1f2"/>
-  
-  <!-- Subtle Bokeh/Lighting -->
-  <circle cx="50" cy="50" r="80" fill="#fecdd3" opacity="0.3"/>
-  <circle cx="350" cy="250" r="100" fill="#fee2e2" opacity="0.4"/>
-
-  <!-- Birthday Banner Background -->
-  <path d="M20 30 Q100 60 200 30 T380 30" fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="5 5"/>
-  <circle cx="100" cy="45" r="5" fill="#fcd34d"/>
-  <circle cx="200" cy="30" r="5" fill="#60a5fa"/>
-  <circle cx="300" cy="45" r="5" fill="#4ade80"/>
-
-  <!-- Grace (Mom) - Center -->
-  <g transform="translate(200, 180)">
-    <!-- Hair (Bun) -->
-    <circle cx="0" cy="-85" r="15" fill="#e5e5e5" stroke="#a3a3a3" stroke-width="2"/>
-    <!-- Body -->
-    <path d="M0 -60 L-20 100 L20 100 Z" fill="#d8b4fe" stroke="#9333ea" stroke-width="3"/>
-    <!-- Head -->
-    <circle cx="0" cy="-80" r="25" fill="white" stroke="#000" stroke-width="3"/>
-    <!-- Smile -->
-    <path d="M-10 -75 Q0 -65 10 -75" fill="none" stroke="#000" stroke-width="2"/>
-    <!-- Eyes -->
-    <circle cx="-8" cy="-85" r="2" fill="black"/>
-    <circle cx="8" cy="-85" r="2" fill="black"/>
-    <!-- Arms hugging -->
-    <path d="M-15 -50 Q-40 -40 -70 20" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
-    <path d="M15 -50 Q40 -40 70 20" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
-  </g>
-
-  <!-- Child 1 (Left - Boy) -->
-  <g transform="translate(120, 200) scale(0.8)">
-    <!-- Body -->
-    <line x1="0" y1="0" x2="0" y2="80" stroke="#000" stroke-width="5"/>
-    <line x1="0" y1="80" x2="-25" y2="120" stroke="#000" stroke-width="5"/>
-    <line x1="0" y1="80" x2="25" y2="120" stroke="#000" stroke-width="5"/>
-    <line x1="0" y1="20" x2="-30" y2="50" stroke="#000" stroke-width="5"/> <!-- Arm waving -->
-    <!-- Head -->
-    <circle cx="0" cy="-25" r="30" fill="white" stroke="#000" stroke-width="4"/>
-    <!-- Smile -->
-    <path d="M-10 -20 Q0 -10 10 -20" fill="none" stroke="#000" stroke-width="3"/>
-    <!-- Eyes -->
-    <circle cx="-10" cy="-30" r="2" fill="black"/>
-    <circle cx="10" cy="-30" r="2" fill="black"/>
-    <!-- Hat -->
-    <path d="M-25 -50 L0 -100 L25 -50 Z" fill="#60a5fa" stroke="#2563eb" stroke-width="2"/>
-  </g>
-
-  <!-- Child 2 (Right - Girl) -->
-  <g transform="translate(280, 200) scale(0.8)">
-    <!-- Body -->
-    <path d="M0 0 L-25 100 L25 100 Z" fill="#fbcfe8" stroke="#db2777" stroke-width="3"/>
-    <!-- Head -->
-    <circle cx="0" cy="-25" r="30" fill="white" stroke="#000" stroke-width="4"/>
-    <!-- Smile -->
-    <path d="M-10 -20 Q0 -10 10 -20" fill="none" stroke="#000" stroke-width="3"/>
-    <!-- Eyes -->
-    <circle cx="-10" cy="-30" r="2" fill="black"/>
-    <circle cx="10" cy="-30" r="2" fill="black"/>
-    <!-- Hat -->
-    <path d="M-25 -50 L0 -100 L25 -50 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
-    <!-- Pigtails -->
-    <path d="M-25 -30 Q-40 -20 -45 -40" fill="none" stroke="#000" stroke-width="2"/>
-    <path d="M25 -30 Q40 -20 45 -40" fill="none" stroke="#000" stroke-width="2"/>
-  </g>
-
-  <!-- Vintage Texture Overlay -->
-  <rect width="400" height="300" fill="url(#grain)" opacity="0.1"/>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sunset Background -->
   <defs>
-    <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
-    </filter>
-    <pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse">
-      <rect width="100" height="100" filter="url(#noise)" opacity="0.5"/>
+    <linearGradient id="sunset-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" /> <!-- Orange -->
+      <stop offset="100%" stop-color="#fb7185" /> <!-- Rose/Pink -->
+    </linearGradient>
+    <linearGradient id="ocean" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488" /> <!-- Teal -->
+      <stop offset="100%" stop-color="#115e59" /> <!-- Deep Teal -->
+    </linearGradient>
+    <pattern id="sand-texture" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.4" fill="#ca8a04" opacity="0.3" />
+      <circle cx="3" cy="3" r="0.4" fill="#ca8a04" opacity="0.2" />
     </pattern>
   </defs>
+  
+  <rect x="0" y="0" width="100" height="100" fill="url(#sunset-sky)" />
+  
+  <!-- Ocean with Waves -->
+  <path d="M0 60 q25 -5 50 0 t50 0 v40 h-100 Z" fill="url(#ocean)" opacity="0.8" />
+  <!-- Wave Ripples -->
+  <g stroke="white" stroke-width="0.5" fill="none" opacity="0.4">
+    <path d="M10 65 q15 -3 30 0" />
+    <path d="M55 63 q15 -3 30 0" />
+    <path d="M30 72 q20 -4 40 0" />
+  </g>
+  
+  <!-- Sand with Texture -->
+  <path d="M0 80 q50 -10 100 0 v20 h-100 Z" fill="#fef08a" />
+  <path d="M0 80 q50 -10 100 0 v20 h-100 Z" fill="url(#sand-texture)" />
+  <!-- Shore Foam -->
+  <path d="M0 80 q50 -10 100 0" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4 2" opacity="0.5" />
 
-  <!-- Water Damage Stain -->
-  <path d="M400 200 Q350 250 350 300 L400 300 Z" fill="#9ca3af" opacity="0.2"/>
+  <!-- Sun -->
+  <circle cx="20" cy="35" r="10" fill="#fef3c7" opacity="0.8">
+    <animate attributeName="opacity" values="0.7;0.9;0.7" dur="4s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- Birds -->
+  <path d="M70 15 q3 3 6 0 M77 17 q3 3 6 0 M65 10 q2 2 4 0" fill="none" stroke="#444" stroke-width="0.8" stroke-linecap="round" />
+
+  <!-- Clouds -->
+  <g stroke="white" stroke-width="1.2" fill="none" opacity="0.4">
+    <path d="M45 12 c4 -4 12 -4 16 0 c4 4 0 8 -8 8 s-12 -4 -8 -8" />
+    <path d="M15 22 c2 -2 6 -2 8 0 c2 2 0 4 -4 4 s-6 -2 -4 -4" />
+  </g>
+
+  <!-- Toys on Sand -->
+  <g transform="translate(10, 85) scale(0.12)" stroke="#0f172a" fill="none" stroke-width="6">
+    <path d="M10 10 l5 25 h20 l5 -25 Z" fill="#ef4444" opacity="0.9" />
+    <path d="M15 10 c0 -10 20 -10 20 0" />
+    <!-- Spade -->
+    <path d="M50 25 l-5 10 h10 Z M50 25 l0 -15" stroke-width="8" />
+  </g>
+
+  <!-- Happy Family of 3 -->
+  <!-- Mom (Center) -->
+  <g transform="translate(50, 58) scale(0.26)" stroke="#0f172a">
+    <circle cx="50" cy="18" r="17" fill="none" stroke-width="6" />
+    <path d="M42 16 v2 M58 16 v2 M40 28 q10 8 20 0" fill="none" stroke-width="4" stroke-linecap="round" />
+    <path d="M50 42 l-16 45 l32 0 Z" fill="none" stroke-width="6" stroke-linecap="round" />
+    <path d="M25 60 c10 -10 40 -10 50 0" fill="none" stroke-width="6" stroke-linecap="round" />
+    <path d="M42 87 l-8 35 M58 87 l8 35" fill="none" stroke-width="6" stroke-linecap="round" />
+  </g>
+  
+  <!-- Child 1 (Left) -->
+  <g transform="translate(25, 70) scale(0.18)" stroke="#1e293b">
+    <circle cx="50" cy="20" r="18" fill="none" stroke-width="7" />
+    <path d="M42 16 v3 M58 16 v3 M42 28 q8 6 16 0" fill="none" stroke-width="4" stroke-linecap="round" />
+    <path d="M50 40 l0 45" fill="none" stroke-width="8" stroke-linecap="round" />
+    <path d="M20 50 c10 -15 50 -15 60 0" fill="none" stroke-width="8" stroke-linecap="round" />
+    <path d="M50 85 l-15 30 M50 85 l15 30" fill="none" stroke-width="8" stroke-linecap="round" />
+  </g>
+  
+  <!-- Child 2 (Right) -->
+  <g transform="translate(75, 70) scale(0.18)" stroke="#1e293b">
+    <circle cx="50" cy="20" r="18" fill="none" stroke-width="7" />
+    <path d="M42 16 v3 M58 16 v3 M42 28 q8 6 16 0" fill="none" stroke-width="4" stroke-linecap="round" />
+    <path d="M50 40 l0 45" fill="none" stroke-width="8" stroke-linecap="round" />
+    <path d="M20 50 c10 -15 50 -15 60 0" fill="none" stroke-width="8" stroke-linecap="round" />
+    <path d="M50 85 l-15 30 M50 85 l15 30" fill="none" stroke-width="8" stroke-linecap="round" />
+  </g>
 </svg>

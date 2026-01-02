@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SCENARIOS } from '../data/signalScoutData';
+import Scenery from '../components/Scenery';
 
-const SignalScoutScreen = ({ audioManager, onExit }) => {
+const SignalScoutScreen = ({ audioManager, onExit, isPaused = false }) => {
     // Game State
     const [gameState, setGameState] = useState('INTRO'); // INTRO, PLAYING, END
     const [score, setScore] = useState(0);
@@ -40,10 +41,11 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
     // Timer
     useEffect(() => {
-        if (gameState !== 'PLAYING') return;
+        if (gameState !== 'PLAYING' || isPaused) return;
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
+                    clearInterval(timer);
                     setGameState('END');
                     if (audioManager) audioManager.playVictory(); // Or simple finish sound
                     return 0;
@@ -52,16 +54,16 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [gameState]);
+    }, [gameState, isPaused]);
 
     // Spawning System
     useEffect(() => {
         if (gameState !== 'PLAYING') return;
 
         const spawnPerson = () => {
-            // MAX LIMIT CHECK: 8 people active max
+            // MAX LIMIT CHECK: 10 people active max for higher density
             setPeople(currentPeople => {
-                if (currentPeople.length >= 8) return currentPeople;
+                if (currentPeople.length >= 10) return currentPeople;
 
                 // CRITICAL: We need to know what IDs are currently on screen + what have been used previously
                 const availableScenarios = SCENARIOS.filter(s => !usedScenarioIdsRef.current.has(s.id));
@@ -84,13 +86,23 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
 
                 const isLeftStart = Math.random() > 0.5;
 
+                // Prevent vertical overlap by checking existing lanes
+                const occupiedLanes = currentPeople.map(p => Math.floor(p.y / 15));
+                let potentialLane = Math.floor(Math.random() * 5); // 5 lanes (15, 30, 45, 60, 75)
+                let attempts = 0;
+                while (occupiedLanes.includes(potentialLane) && attempts < 5) {
+                    potentialLane = (potentialLane + 1) % 5;
+                    attempts++;
+                }
+
                 const newPerson = {
-                    uid: Date.now() + Math.random(), // Unique ID for key
+                    uid: Date.now() + Math.random(),
                     data: scenario,
-                    x: isLeftStart ? -15 : 115, // Start further off-screen
-                    y: 15 + Math.random() * 60, // Conserve vertical lanes better
+                    x: isLeftStart ? -15 : 115, // Start further out
+                    y: 15 + (potentialLane * 15),
                     direction: isLeftStart ? 1 : -1,
-                    speed: 0.04 + Math.random() * 0.02, // SLOWER MOVEMENT SPEEDS
+                    // Base Reading Speed (Slow in middle)
+                    baseSpeed: scenario.type === 'risk' ? (0.03 + Math.random() * 0.02) : (0.05 + Math.random() * 0.02),
                     asset: getStickmanAsset(scenario.category),
                     isClicked: false
                 };
@@ -99,33 +111,40 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             });
         };
 
-        // Spawn immediately on start
-        spawnPerson();
+        // Spawn multiple immediately on start to fill screen
+        for (let i = 0; i < 3; i++) spawnPerson();
 
-        // Spawn interval
-        spawnTimerRef.current = setInterval(spawnPerson, 2000);
+        // Spawn interval - Much faster spawn rate (1s)
+        spawnTimerRef.current = setInterval(spawnPerson, 1000);
 
         return () => clearInterval(spawnTimerRef.current);
     }, [gameState]);
 
-    // Movement Loop using RequestAnimationFrame via Interval for React simplicity
     useEffect(() => {
-        if (gameState !== 'PLAYING') return;
+        if (gameState !== 'PLAYING' || isPaused) return;
 
         const interval = setInterval(() => {
-            setPeople(prev => prev.map(p => ({
-                ...p,
-                x: p.x + (p.speed * p.direction)
-            })).filter(p => p.x > -20 && p.x < 120)); // Remove when off-screen
+            setPeople(prev => prev.map(p => {
+                // Dynamic Speed Curve: Fast at edges, Slow in Center [35% - 65%]
+                const distFromCenter = Math.abs(p.x - 50);
+                // Multiplier: 1x at center, scales up to 8x at edges
+                // If dist < 15 (within center 30%), multiplier is 1.
+                const speedMult = 1 + Math.max(0, (distFromCenter - 15) / 4);
+
+                return {
+                    ...p,
+                    x: p.x + (p.baseSpeed * speedMult * p.direction)
+                };
+            }).filter(p => p.x > -20 && p.x < 120));
         }, 16); // ~60fps
 
         return () => clearInterval(interval);
-    }, [gameState]);
+    }, [gameState, isPaused]);
 
 
     // Handle Click logic
     const handlePersonClick = (person) => {
-        if (person.isClicked || gameState !== 'PLAYING') return;
+        if (person.isClicked || gameState !== 'PLAYING' || isPaused) return;
 
         // Mark as clicked locally to prevent double taps
         setPeople(prev => prev.map(p => p.uid === person.uid ? { ...p, isClicked: true } : p));
@@ -135,12 +154,26 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             if (audioManager) audioManager.playDing();
             setScore(prev => prev + 100);
             setFoundSignals(prev => [...prev, person.data.id]);
-            setFeedback({ text: `Correct! ${person.data.clue}`, type: 'good', x: person.x, y: person.y });
+            setFeedback({
+                text: `Signal Found: ${person.data.clue}`,
+                desc: "This is a cry for help. Identifying these early is key to saving a life.",
+                type: 'good',
+                x: person.x,
+                y: person.y,
+                score: '+100'
+            });
         } else {
             // False Alarm
             if (audioManager) audioManager.playSad();
             setScore(prev => Math.max(0, prev - 50));
-            setFeedback({ text: "Just normal stress.", type: 'bad', x: person.x, y: person.y });
+            setFeedback({
+                text: "Normal Stress",
+                desc: "This person is expressing regular daily challenges, not a crisis.",
+                type: 'bad',
+                x: person.x,
+                y: person.y,
+                score: '-50'
+            });
         }
 
         // Clear feedback after delay
@@ -151,9 +184,9 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
     return (
         <div className="fixed inset-0 z-[100] bg-slate-900 flex flex-col overflow-hidden font-sans select-none">
 
-            {/* Binocular Vignette Effect */}
-            <div className="absolute inset-0 z-40 pointer-events-none opacity-40 mix-blend-multiply"
-                style={{ background: 'radial-gradient(circle at center, transparent 40%, #000 90%)' }}>
+            {/* Binocular Vignette Effect - Aspect Ratio Robust */}
+            <div className="absolute inset-0 z-40 pointer-events-none opacity-50 mix-blend-multiply"
+                style={{ background: 'radial-gradient(circle at center, transparent min(30vw, 30vh), #000 min(80vw, 80vh))' }}>
             </div>
 
             {/* Header / HUD */}
@@ -180,11 +213,12 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
             </div>
 
             {/* Game World */}
-            <div className="flex-1 relative bg-gradient-to-b from-slate-700 to-slate-900 overflow-hidden cursor-crosshair">
+            <div className="flex-1 relative overflow-hidden cursor-crosshair">
+                <Scenery theme="night_patrol" />
 
-                {/* Environment Layers */}
-                <div className="absolute inset-0 opacity-10"
-                    style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+                {/* Environment Layers - Tech Grid Overlay */}
+                <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
+                    style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.2) 1px, transparent 1px)', backgroundSize: '60px 60px' }}>
                 </div>
 
                 {/* Render People */}
@@ -231,16 +265,27 @@ const SignalScoutScreen = ({ audioManager, onExit }) => {
                     </div>
                 ))}
 
-                {/* Feedback Popup */}
+                {/* Feedback Popup & Score Indicator */}
                 {feedback && (
                     <div
-                        className={`absolute z-[200] max-w-[200px] text-center px-4 py-3 rounded-xl font-bold text-xs shadow-2xl animate-bounce-subtle pointer-events-none border-2 backdrop-blur-md
-                            ${feedback.type === 'good' ? 'bg-teal-500/90 text-white border-teal-300' : 'bg-slate-800/90 text-red-300 border-red-500/50'}
+                        className={`absolute z-[200] w-[240px] text-left px-5 py-4 rounded-2xl font-bold shadow-[0_20px_50px_rgba(0,0,0,0.3)] animate-pop-in pointer-events-none border-2 backdrop-blur-xl
+                            ${feedback.type === 'good' ? 'bg-teal-900/40 text-white border-teal-500/50' : 'bg-red-900/40 text-white border-red-500/50'}
                         `}
-                        style={{ left: `${feedback.x}%`, top: `${feedback.y - 15}%`, transform: 'translateX(-50%)' }}
+                        style={{ left: `${feedback.x}%`, top: `${feedback.y - 20}%`, transform: 'translateX(-50%)' }}
                     >
-                        <span className="block text-lg mb-1">{feedback.type === 'good' ? '✅' : '⚠️'}</span>
-                        {feedback.text}
+                        {/* Score Float */}
+                        <div className={`absolute -top-12 left-1/2 -translate-x-1/2 text-2xl font-black animate-float-up ${feedback.type === 'good' ? 'text-teal-400' : 'text-red-400'}`}>
+                            {feedback.score}
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${feedback.type === 'good' ? 'bg-teal-500' : 'bg-red-500'}`}>
+                                {feedback.type === 'good' ? '✓' : '⚠️'}
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Analysis</span>
+                        </div>
+                        <h4 className="text-sm font-black mb-1 leading-tight">{feedback.text}</h4>
+                        <p className="text-[10px] font-medium leading-relaxed opacity-80 italic">{feedback.desc}</p>
                     </div>
                 )}
             </div>

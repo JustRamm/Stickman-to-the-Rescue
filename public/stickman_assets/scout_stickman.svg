@@ -1,26 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Scout Vest -->
-  <path d="M42,55 L58,55 L60,85 L40,85 Z" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="1" stroke-opacity="0.4" />
-  <!-- Pants -->
-  <path d="M40,85 L60,85 L65,100 L50,85 L35,100 Z" fill="#64748b" fill-opacity="0.3" stroke="#64748b" stroke-width="1" stroke-opacity="0.5" />
-  <!-- Stickman Body -->
-  <line x1="50" y1="60" x2="50" y2="85" stroke="black" stroke-width="4" stroke-linecap="round"/>
-  <line x1="50" y1="85" x2="35" y2="100" stroke="black" stroke-width="4" stroke-linecap="round"/>
-  <line x1="50" y1="85" x2="65" y2="100" stroke="black" stroke-width="4" stroke-linecap="round"/>
-  
-  <!-- Arms holding binoculars -->
-  <path d="M50 65 Q 35 60 40 50" stroke="black" stroke-width="4" fill="none" stroke-linecap="round"/>
-  <path d="M50 65 Q 65 60 60 50" stroke="black" stroke-width="4" fill="none" stroke-linecap="round"/>
-
-  <!-- Head -->
-  <circle cx="50" cy="45" r="12" fill="white" stroke="black" stroke-width="4"/>
-
-  <!-- Binoculars -->
-  <rect x="38" y="42" width="10" height="8" rx="1" fill="#334155" stroke="black" stroke-width="1"/>
-  <rect x="52" y="42" width="10" height="8" rx="1" fill="#334155" stroke="black" stroke-width="1"/>
-  <line x1="48" y1="46" x2="52" y2="46" stroke="black" stroke-width="2"/>
-  
-  <!-- Lens Glint -->
-  <circle cx="41" cy="44" r="1.5" fill="white" opacity="0.5"/>
-  <circle cx="55" cy="44" r="1.5" fill="white" opacity="0.5"/>
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <path d="M50 35 c-9 0 -16 -7 -16 -16 s7 -16 16 -16 s16 7 16 16 s-7 16 -16 16 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M50 35 l0 55" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <!-- Binoculars held to eyes -->
+  <path d="M50 55 c-5 -10 -15 -35 -15 -35 h30 l-15 35" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M30 18 h15 v8 h-15 z M55 18 h15 v8 h-15 z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  <!-- Legs -->
+  <path d="M50 90 l-12 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M50 90 l12 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
 </svg>

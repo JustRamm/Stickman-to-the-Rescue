@@ -10,7 +10,9 @@ class SoundEngine {
         this.ttsEnabled = true; // User preference
         this.currentTrack = null; // To avoid restarting same track
         this.musicGeneration = 0; // Prevent race conditions on async loads
+        this.musicGeneration = 0; // Prevent race conditions on async loads
         this.owlTimeout = null; // Store timeout for cleanup
+        this.globalPaused = false;
     }
 
     init() {
@@ -72,7 +74,7 @@ class SoundEngine {
 
     // Satisfying "pop" for speech bubbles
     playPop() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -92,7 +94,7 @@ class SoundEngine {
 
     // Hopeful "ding" for trust increase
     playDing() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -112,7 +114,7 @@ class SoundEngine {
 
     // Tick sound for timer
     playTick() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -130,8 +132,33 @@ class SoundEngine {
         osc.stop(this.ctx.currentTime + 0.05);
     }
 
+    // New sound for Coach Reflection Popup
+    playCoachTip() {
+        if (!this.initialized || this.globalPaused) return;
+        const t = this.ctx.currentTime;
+
+        // Two ascending notes
+        [600, 800].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t + i * 0.1);
+
+            gain.gain.setValueAtTime(0, t + i * 0.1);
+            gain.gain.linearRampToValueAtTime(0.1, t + i * 0.1 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.15);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+
+            osc.start(t + i * 0.1);
+            osc.stop(t + i * 0.1 + 0.15);
+        });
+    }
+
     playHeartbeat() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const t = this.ctx.currentTime;
 
         // Helper to create a thump (lub/dub)
@@ -162,7 +189,7 @@ class SoundEngine {
 
     // Low "thud" for trust decrease or frown
     playSad() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -182,7 +209,7 @@ class SoundEngine {
 
     // Subtle footstep
     playStep() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const noise = this.ctx.createBufferSource();
         const bufferSize = this.ctx.sampleRate * 0.1;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
@@ -212,7 +239,7 @@ class SoundEngine {
 
     // Sound when finding a clue
     playInvestigate() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -231,7 +258,7 @@ class SoundEngine {
     }
 
     async playVictory() {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         this.stopMusic();
 
         try {
@@ -291,7 +318,7 @@ class SoundEngine {
 
     // Adaptive Ambient Pad
     async startAmbient(arg1, arg2 = 50) {
-        if (!this.initialized) return;
+        if (!this.initialized || this.globalPaused) return;
         // Handle flexible arguments: startAmbient(theme) or startAmbient(trust, theme)
         let theme = 'park';
         let trust = 50;
@@ -495,7 +522,7 @@ class SoundEngine {
 
     // Voice Synthesis (TTS)
     speak(text, isSam = true, gender = 'guy', voiceParams = null, onEnd = null) {
-        if (!this.ttsEnabled || !window.speechSynthesis) {
+        if (!this.ttsEnabled || !window.speechSynthesis || this.globalPaused) {
             if (onEnd) onEnd();
             return;
         }
@@ -586,6 +613,25 @@ class SoundEngine {
         }
 
         window.speechSynthesis.speak(this.utterance);
+    }
+    pauseAll() {
+        this.globalPaused = true;
+        if (this.ctx && this.ctx.state === 'running') {
+            this.ctx.suspend();
+        }
+        if (window.speechSynthesis && window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause();
+        }
+    }
+
+    resumeAll() {
+        this.globalPaused = false;
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+        if (window.speechSynthesis && window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+        }
     }
 }
 

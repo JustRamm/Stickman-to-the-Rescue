@@ -54,6 +54,16 @@ const App = () => {
     }
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Reusable Reset Logic
+  const handleResetGame = () => {
+    if (confirm('Are you sure? This will lock all scenarios except the Intro.')) {
+      setCompletedLevels([]);
+      setGameState('LEVEL_SELECT');
+      setIsSettingsOpen(false);
+    }
+  };
 
   // Player State
   const [playerName, setPlayerName] = useState('You');
@@ -189,6 +199,15 @@ const App = () => {
     }
   }, [gameState, selectedLevel, trust, currentNodeId, resolutionPhase]);
 
+  // Pause Logic (Audio & Global State)
+  useEffect(() => {
+    if (isPaused) {
+      audioManager.pauseAll();
+    } else {
+      audioManager.resumeAll();
+    }
+  }, [isPaused]);
+
   // Camera Logic
   useEffect(() => {
     if (isWalletOpen) setCamera({ scale: 1.15, x: -25, y: -5 });
@@ -200,19 +219,20 @@ const App = () => {
 
   // NPC Behavior Pacing
   useEffect(() => {
-    if (gameState !== 'APPROACH') { setNpcAction('idle'); return; }
+    if (gameState !== 'APPROACH' || isPaused) { if (isPaused && gameState === 'APPROACH') return; setNpcAction('idle'); return; }
     const interval = setInterval(() => {
       if (Math.abs(playerPos.x - samPos.x) < 20) return;
       const actions = ['idle', 'phone', 'pacing', 'sitting'];
       setNpcAction(actions[Math.floor(Math.random() * actions.length)]);
     }, 5000 + Math.random() * 5000);
     return () => clearInterval(interval);
-  }, [gameState, playerPos.x, samPos.x]);
+  }, [gameState, playerPos.x, samPos.x, isPaused]);
 
   // Keyboard Controls
   useEffect(() => {
     if (gameState !== 'APPROACH') return;
     const handleKeyDown = (e) => {
+      if (isPaused) return;
       audioManager.init();
       if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') setMoveDir(1);
       else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') setMoveDir(-1);
@@ -229,11 +249,11 @@ const App = () => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     return () => { window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('keyup', handleKeyUp); };
-  }, [gameState, moveDir]);
+  }, [gameState, moveDir, isPaused]);
 
   // Movement Engine (Loop)
   useEffect(() => {
-    if (gameState !== 'APPROACH' || moveDir === 0) { setIsWalking(false); return; }
+    if (gameState !== 'APPROACH' || moveDir === 0 || isPaused) { setIsWalking(false); return; }
     setIsWalking(true);
     const interval = setInterval(() => {
       setPlayerPos(p => {
@@ -244,11 +264,11 @@ const App = () => {
       });
     }, 30); // ~30fps
     return () => clearInterval(interval);
-  }, [gameState, moveDir]);
+  }, [gameState, moveDir, isPaused]);
 
   // NPC Movement Engine (Pacing)
   useEffect(() => {
-    if (gameState !== 'APPROACH' || npcAction !== 'pacing') return;
+    if (gameState !== 'APPROACH' || npcAction !== 'pacing' || isPaused) return;
 
     // NPC Pacing Range around initial spot
     const baseStopX = 75;
@@ -272,7 +292,7 @@ const App = () => {
       });
     }, 30);
     return () => clearInterval(interval);
-  }, [gameState, npcAction, playerPos.x]);
+  }, [gameState, npcAction, playerPos.x, isPaused]);
 
   // Proximity Check
   useEffect(() => {
@@ -323,6 +343,9 @@ const App = () => {
     const nextNodeId = selectedOption.next;
     const trustImpact = selectedOption.trust_impact;
 
+    // Clear the NPC's last words as soon as the user responds to prevent overlapping bubbles
+    setNpcLastSaid(null);
+
     if (trustImpact > 0) audioManager.playDing();
     else if (trustImpact < 0) audioManager.playSad();
 
@@ -345,15 +368,28 @@ const App = () => {
     setHistory(prev => [...prev, { nodeId: currentNodeId, choiceText: selectedOption.text, trustChange: trustImpact, npcEmotion: currentNode.npc_emotion }]);
     setPlayerLastSaid(selectedOption.text);
 
-    // Set Coach Feedback Tip
-    if (selectedOption.inner_thought) {
+    // Set Coach Feedback & Reflection Data
+    if (selectedOption.inner_thought || currentNode.options) {
+      const otherChoices = (currentNode.options || [])
+        .filter(opt => opt.text !== selectedOption.text)
+        .map(opt => ({
+          text: opt.text,
+          impact: opt.trust_impact,
+          reason: opt.inner_thought
+        }));
+
       setCoachFeedback({
         msg: selectedOption.inner_thought,
         impact: trustImpact,
-        type: trustImpact > 0 ? 'positive' : trustImpact < 0 ? 'negative' : 'neutral'
+        type: trustImpact > 0 ? 'positive' : trustImpact < 0 ? 'negative' : 'neutral',
+        others: otherChoices
       });
-      // Clear tip after a delay
-      setTimeout(() => setCoachFeedback(null), 5000);
+
+      // Play the new reflection sound
+      audioManager.playCoachTip();
+
+      // Clear tip after a slightly longer delay since it has more info
+      setTimeout(() => setCoachFeedback(null), 8000);
     }
 
     audioManager.speak(selectedOption.text, false, playerGender, null, () => {
@@ -393,6 +429,8 @@ const App = () => {
   // NPC Speech Effect
   useEffect(() => {
     if (gameState === 'DIALOGUE' && currentNode && (currentNode.npc_text || currentNode.message)) {
+      if (isPaused) return;
+
       const text = currentNode.npc_text || currentNode.message;
       const isEnd = currentNode.isEnd;
       const npcGender = selectedLevel.npc.gender;
@@ -402,12 +440,14 @@ const App = () => {
       setNpcLastSaid(text);
 
       const timer = setTimeout(() => {
+        if (isPaused) return; // Double check inside timeout
         audioManager.speak(text, true, npcGender, npcVoice, () => {
           // Reduced buffer time for snappier responses
           const bufferTime = Math.max(500, text.length * 5);
           setTimeout(() => {
             setIsNpcSpeaking(false);
-            if (!isEnd) setNpcLastSaid(null);
+            // We no longer clear npcLastSaid here. 
+            // It persists until the user chooses an option (handleSelectOption).
           }, bufferTime);
         });
       }, 500);
@@ -417,7 +457,7 @@ const App = () => {
         // Removed audioManager.stopSpeaking() to prevent cutting off transitions
       };
     }
-  }, [currentNode, gameState, selectedLevel]);
+  }, [currentNode, gameState, selectedLevel, isPaused]);
 
   // Wallet Toggle (Only pop up when it's the player's turn to respond)
   useEffect(() => {
@@ -534,17 +574,20 @@ const App = () => {
       audioManager={audioManager}
       isSettingsOpen={isSettingsOpen}
       setIsSettingsOpen={setIsSettingsOpen}
+      onResetGame={handleResetGame}
+      isPaused={isPaused}
+      setIsPaused={setIsPaused}
     />
   );
-  if (gameState === 'QUIZ_MODE') return <QuizGameScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
+  if (gameState === 'QUIZ_MODE') return <QuizGameScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
   if (gameState === 'RESOURCES') return <ResourcesScreen onBack={() => setGameState(prev => ['START', 'LEVEL_SELECT'].includes(prev) ? prev : 'START')} />;
   if (gameState === 'FINAL_SUCCESS') return <FinalSuccessScreen onRestart={() => { setGameState('START'); setCompletedLevels([]); audioManager.playVictory(); }} />;
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
-  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} />;
+  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
 
-  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
-  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} />;
+  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
+  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>
@@ -552,19 +595,40 @@ const App = () => {
       <SettingsOverlay
         settings={settings} setSettings={setSettings}
         audioManager={audioManager}
-        onResetGame={() => {
-          if (confirm('Are you sure? This will lock all scenarios except the Intro.')) {
-            setCompletedLevels([]);
-            setGameState('LEVEL_SELECT');
-          }
-        }}
+        onResetGame={handleResetGame}
         isSettingsOpen={isSettingsOpen} setIsSettingsOpen={setIsSettingsOpen} onNavigate={setGameState}
+        isPaused={isPaused}
+        setIsPaused={setIsPaused}
+        gameState={gameState}
       />
 
       <div className={`fixed inset-0 z-[999] bg-black pointer-events-none transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-100' : 'opacity-0'}`} />
 
       {/* Stress Vignette (Tunnel Vision / Inside Voice) */}
       <div className={`fixed inset-0 z-[45] pointer-events-none tunnel-vision transition-opacity duration-1000 ${trust < 40 ? 'opacity-100' : 'opacity-0'}`} />
+
+
+
+
+      {/* PAUSE OVERLAY */}
+      {isPaused && (gameState === 'APPROACH' || gameState === 'DIALOGUE') && (
+        <div className="fixed inset-0 z-[900] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 min-h-screen w-full animate-fade-in">
+          <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl border-4 border-white/20 text-center max-w-sm w-full mx-4 animate-scale-in">
+            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner text-orange-500 animate-pulse">
+              ⏸
+            </div>
+            <h2 className="text-3xl font-black uppercase text-slate-800 tracking-tight mb-2">Game Paused</h2>
+            <p className="text-slate-500 font-bold text-sm mb-8">Take a breather. We'll wait.</p>
+
+            <button
+              onClick={() => setIsPaused(false)}
+              className="w-full py-4 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-slate-800 transition-all active:scale-95"
+            >
+              Resume
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="absolute inset-0 w-full h-full transition-transform duration-1000 ease-in-out origin-center" style={{ transform: `scale(${camera.scale}) translate(${camera.x}%, ${camera.y}%)` }}>
         <div className="absolute inset-[-10%] w-[120%] h-[120%]">
@@ -627,39 +691,90 @@ const App = () => {
           </div>
         )}
 
-        <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} trust={trust} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} textSpeed={settings.textSpeed} />
-        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} trust={trust} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed / (selectedLevel.npc.voice?.rate || 1)} />
+        <Stickman speaker={playerName} position={playerPos} gender={playerGender} theme={selectedLevel.theme} trust={trust} isWalking={isWalking} isJumping={isJumping} isCrouching={isCrouching} currentMessage={playerLastSaid} textSpeed={settings.textSpeed} isPaused={isPaused} />
+        <Stickman speaker={selectedLevel.npc.name} position={samPos} gender={selectedLevel.npc.gender} emotion={currentNode.npc_emotion} theme={selectedLevel.theme} trust={trust} action={npcAction} currentMessage={npcLastSaid} textSpeed={settings.textSpeed / (selectedLevel.npc.voice?.rate || 1)} isPaused={isPaused} />
       </div>
 
       {selectedLevel.id === 'tutorial' && <TutorialOverlay gameState={gameState} playerPos={playerPos} foundClues={foundClues} />}
 
-      <div className="absolute top-4 left-4 z-40 flex flex-col gap-2 pointer-events-none">
+      <div className="absolute top-4 left-4 z-[60] flex flex-col gap-2 pointer-events-none">
         <HeartbeatMonitor trust={trust} />
         <div className="flex flex-col bg-black/30 backdrop-blur-sm p-3 rounded-xl border border-white/10 shadow-lg mt-2">
           <span className="text-xs font-black uppercase text-white drop-shadow-md tracking-widest">{selectedLevel.name}</span>
           <span className="text-[10px] font-bold text-teal-300 uppercase tracking-wider">{gameState === 'APPROACH' ? 'Explore Mode' : 'Conversation Mode'}</span>
         </div>
-        <div className="pointer-events-auto mt-2 exit-mission-btn-container">
+        <div className="pointer-events-auto mt-2 exit-mission-btn-container flex gap-2">
           <button onClick={() => { audioManager.stopMusic(); audioManager.stopSpeaking(); setGameState('LEVEL_SELECT'); }} className="px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all border border-red-400/50 backdrop-blur-sm exit-mission-btn">Exit Mission</button>
+          <button onClick={() => setIsPaused(!isPaused)} className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all border backdrop-blur-sm flex items-center gap-2 ${isPaused ? 'bg-orange-500 text-white border-orange-400' : 'bg-black/40 hover:bg-black/60 text-white border-white/20'}`}>
+            <span className="text-xs">{isPaused ? '▶' : '⏸'}</span>
+            {isPaused ? 'Resume' : 'Pause'}
+          </button>
         </div>
 
-        {/* Silent Coach Tip (Left Side) */}
+        {/* Detailed Empathy Reflection Popup */}
         {coachFeedback && (
-          <div className="pointer-events-none mt-4 w-64 animate-slide-in-left coach-feedback-popup">
-            <div className={`p-4 rounded-2xl border-l-4 backdrop-blur-md shadow-2xl ${coachFeedback.type === 'positive' ? 'bg-teal-500/20 border-teal-400' :
-              coachFeedback.type === 'negative' ? 'bg-red-500/20 border-red-400' : 'bg-slate-500/20 border-slate-400'
+          <div className="fixed left-6 top-24 z-[100] w-[320px] animate-slide-in-left pointer-events-auto">
+            <div className={`relative overflow-hidden rounded-3xl border backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${coachFeedback.type === 'positive' ? 'bg-teal-900/40 border-teal-500/50' :
+              coachFeedback.type === 'negative' ? 'bg-red-900/40 border-red-500/50' : 'bg-slate-900/40 border-slate-500/50'
               }`}>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Coach Tip</span>
-                <div className={`px-1.5 py-0.5 rounded text-[8px] font-black ${coachFeedback.type === 'positive' ? 'bg-teal-500 text-white' :
-                  coachFeedback.type === 'negative' ? 'bg-red-500 text-white' : 'bg-slate-500 text-white'
-                  }`}>
-                  {coachFeedback.impact > 0 ? `+${coachFeedback.impact}` : coachFeedback.impact} Empathy
+              {/* Animated Glow Background */}
+              <div className={`absolute -top-24 -left-24 w-48 h-48 rounded-full blur-[80px] opacity-30 animate-pulse ${coachFeedback.type === 'positive' ? 'bg-teal-400' : 'bg-red-400'
+                }`} />
+
+              <div className="relative p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${coachFeedback.type === 'positive' ? 'bg-teal-500 text-white' : 'bg-red-500 text-white'
+                      }`}>
+                      {coachFeedback.type === 'positive' ? '✓' : '⚠'}
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Empathy Reflection</span>
+                  </div>
+                  <button onClick={() => setCoachFeedback(null)} className="text-white/30 hover:text-white transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
                 </div>
+
+                {/* Selected Choice Summary */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[9px] font-bold text-white/40 uppercase">Your Choice</span>
+                    <span className={`text-[10px] font-black ${coachFeedback.impact > 0 ? 'text-teal-400' : 'text-red-400'}`}>
+                      {coachFeedback.impact > 0 ? `+${coachFeedback.impact}` : coachFeedback.impact} Impact
+                    </span>
+                  </div>
+                  <p className="text-white text-[13px] font-bold leading-relaxed mb-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                    "{coachFeedback.msg}"
+                  </p>
+                </div>
+
+                {/* Alternative Options Analysis */}
+                {coachFeedback.others && coachFeedback.others.length > 0 && (
+                  <div className="space-y-3 pt-3 border-t border-white/10">
+                    <span className="text-[9px] font-bold text-white/40 uppercase">Alternative Paths</span>
+                    {coachFeedback.others.map((other, idx) => (
+                      <div key={idx} className="group">
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${other.impact > 0 ? 'bg-teal-500' : 'bg-red-500'}`} />
+                          <div className="flex flex-col gap-1">
+                            <p className="text-white/60 text-[11px] italic line-clamp-1 group-hover:line-clamp-none transition-all">
+                              "{other.text}"
+                            </p>
+                            <p className={`text-[10px] font-bold ${other.impact > 0 ? 'text-teal-500/80' : 'text-red-500/80'}`}>
+                              {other.reason}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <p className="text-white text-xs font-semibold leading-relaxed drop-shadow-md">
-                {coachFeedback.msg}
-              </p>
+
+              {/* Progress bar for auto-hide */}
+              <div className="absolute bottom-0 left-0 h-1 bg-white/20 w-full overflow-hidden">
+                <div className="h-full bg-white/40 animate-progress-shrink origin-left" style={{ animationDuration: '8s' }} />
+              </div>
             </div>
           </div>
         )}

@@ -1,9 +1,16 @@
-<svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Dress -->
-  <path d="M30,110 L70,110 L55,70 L45,70 Z" fill="#db2777" fill-opacity="0.3" stroke="#db2777" stroke-width="1" stroke-opacity="0.5" />
-  <circle cx="50" cy="40" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M60,30 Q75,35 70,55" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M50,60 L50,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M60,90 L50,80 L40,90" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M80,140 L50,110 L20,140" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hair -->
+  <path d="M30 25 c0 -15 40 -15 40 0 c0 15 -10 20 -20 20 s-20 -5 -20 -20 Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Head -->
+  <path d="M50 38 c-10 0 -17 -7 -17 -17 s7 -17 17 -17 s17 7 17 17 s-7 17 -17 17 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <!-- Body (Moving Left) -->
+  <path d="M50 42 l-12 45 l24 0 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Arms with hands -->
+  <path d="M58 60 c10 5 15 15 10 30" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="68" cy="90" r="2.5" fill="currentColor" /> <!-- Hand 1 -->
+  <path d="M42 60 c-10 10 -25 25 -15 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="27" cy="100" r="2.5" fill="currentColor" /> <!-- Hand 2 -->
+  <!-- Walking Legs (Leftward) -->
+  <path d="M58 87 l-5 38" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M42 87 l-18 30 l12 12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

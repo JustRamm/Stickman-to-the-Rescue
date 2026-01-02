@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TERMINOLOGY_DATA } from '../data/terminologyData';
 
-const WordsOfHopeScreen = ({ audioManager, onExit }) => {
+const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGender = 'guy' }) => {
     // Game Flow States
     const [gameState, setGameState] = useState('INTRO'); // INTRO, PLAYING, RESULTS, GAME_OVER, TRANSITIONING
     const [score, setScore] = useState(0);
@@ -94,7 +94,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
     // Handle Mouse/Touch Movement
     const handlePointerMove = (e) => {
-        if (gameState !== 'PLAYING' || !gameContainerRef.current) return;
+        if (gameState !== 'PLAYING' || isPaused || !gameContainerRef.current) return;
 
         // Robust coordinate extraction for both Pointer and Touch events
         let clientX;
@@ -116,63 +116,61 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
     // The Game Loop
     const update = () => {
-        if (gameState !== 'PLAYING') {
+        if (gameState !== 'PLAYING' || isPaused) {
             requestRef.current = requestAnimationFrame(update);
             return;
         }
 
-        // 1. Move Items
+        // 1. Move & Process Items
         const currentItems = fallingItemsRef.current;
         const nextItems = [];
         let collisionOccurred = false;
+        const handledQuestionIds = new Set();
 
         for (const item of currentItems) {
+            // If we already handled this question in this frame (collision or miss), skip
+            if (handledQuestionIds.has(item.questionId)) continue;
+
             // Apply gravity/speed
             const newItem = { ...item, y: item.y + item.speed };
 
-            // Calculate Distance
-            const distanceX = Math.abs(newItem.x - playerRef.current);
-            const distanceY = Math.abs(newItem.y - 85);
-
             // Collision Check
-            // Expanded Y-range (75-95) for better feel on mobile landscape
-            // Expanded X-range (15) for easier catching
+            const distanceX = Math.abs(newItem.x - playerRef.current);
             const isYAligned = newItem.y > 75 && newItem.y < 95;
 
-            if (isYAligned && distanceX < 15 && !collisionOccurred && !hasInteractionRef.current) {
+            if (isYAligned && distanceX < 15 && !collisionOccurred) {
                 collisionOccurred = true;
                 processCollision(newItem);
-                break;
+                handledQuestionIds.add(item.questionId);
+                continue; // Item correctly processed, don't add to nextItems
             }
 
-            // Keep item if it hasn't fallen off screen
-            if (newItem.y < 110) {
-                nextItems.push(newItem);
-            }
-        }
-
-        // If no collision, update refs properly
-        if (!collisionOccurred) {
-            fallingItemsRef.current = nextItems;
-
-            // Check for Missed Set
-            if (isProcessingSetRef.current && currentItems.length > 0 && nextItems.length === 0) {
-                if (!hasInteractionRef.current) {
+            // Off-screen Check (Missed)
+            if (newItem.y >= 105) {
+                if (item.isCorrect) {
+                    // Only the 'correct' item triggers a mistake if missed
                     applyMistake();
-                    advanceToNextQuestion();
                 }
+                handledQuestionIds.add(item.questionId);
+                continue; // Item fell off, don't add to nextItems
             }
+
+            nextItems.push(newItem);
         }
 
-        // Sync to React State for Render
+        // Filter out any other items belonging to handled questions (e.g., the other half of the pair)
+        fallingItemsRef.current = nextItems.filter(item => !handledQuestionIds.has(item.questionId));
         setFallingItems([...fallingItemsRef.current]);
 
-        // 2. Spawning Logic
-        if (!isProcessingSetRef.current && gameState === 'PLAYING' && !hasInteractionRef.current) {
+        // 2. Spawning Logic (Stream-based)
+        if (gameState === 'PLAYING' && currentIndexRef.current < shuffledQuestions.length) {
             spawnCooldownRef.current -= 16;
             if (spawnCooldownRef.current <= 0) {
                 spawnSet();
             }
+        } else if (gameState === 'PLAYING' && currentIndexRef.current >= shuffledQuestions.length && fallingItemsRef.current.length === 0) {
+            // Handle End of Game when all items are gone
+            checkFinalOutcome();
         }
 
         requestRef.current = requestAnimationFrame(update);
@@ -184,16 +182,15 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
     }, [gameState]);
 
     const spawnSet = () => {
-        const qIndex = currentIndexRef.current;
-        if (qIndex >= shuffledQuestions.length) return;
+        if (currentIndexRef.current >= shuffledQuestions.length) return;
 
-        const q = shuffledQuestions[qIndex];
-        isProcessingSetRef.current = true;
-        hasInteractionRef.current = false;
+        const q = shuffledQuestions[currentIndexRef.current];
+        currentIndexRef.current += 1;
+        setCurrentIndex(currentIndexRef.current);
 
         const items = [
-            { id: `correct-${q.id}`, x: 35, y: -15, speed: 0.12, text: q.correct, isCorrect: true, questionId: q.id },
-            { id: `stigma-${q.id}`, x: 65, y: -15, speed: 0.12, text: q.stigma, isCorrect: false, questionId: q.id }
+            { id: `correct-${q.id}-${Date.now()}`, x: 35, y: -15, speed: 0.12, text: q.correct, isCorrect: true, questionId: q.id },
+            { id: `stigma-${q.id}-${Date.now()}`, x: 65, y: -15, speed: 0.12, text: q.stigma, isCorrect: false, questionId: q.id }
         ];
 
         if (Math.random() > 0.5) {
@@ -201,25 +198,23 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             items[1].x = 35;
         }
 
-        fallingItemsRef.current = items;
-        setFallingItems(items);
+        fallingItemsRef.current = [...fallingItemsRef.current, ...items];
+        setFallingItems([...fallingItemsRef.current]);
+
+        // Cooldown between sets - User requested 1-2 seconds after appearance
+        spawnCooldownRef.current = 2500;
     };
 
     const processCollision = (item) => {
-        if (hasInteractionRef.current) return;
-        hasInteractionRef.current = true;
-
-        const q = shuffledQuestions[currentIndexRef.current];
+        const q = shuffledQuestions.find(sq => sq.id === item.questionId);
         if (!q) return;
-
-        fallingItemsRef.current = []; // Clear loop state
-        setFallingItems([]);        // Clear visual state
 
         if (item.isCorrect) {
             setScore(s => s + 1);
             scoreRef.current += 1;
             setHarmony(h => Math.min(100, h + 15));
             audioManager.playDing();
+            audioManager.playCoachTip();
             setExplanation({
                 correct: q.correct,
                 why: q.why,
@@ -228,6 +223,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         } else {
             setHarmony(h => Math.max(0, h - 25));
             audioManager.playSad();
+            audioManager.playCoachTip();
             setStigmaAlert({
                 stigma: q.stigma,
                 correct: q.correct,
@@ -236,14 +232,23 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
             applyMistake();
         }
 
-        // Immediate End Case: Win at 4
+        // Win state check
         if (scoreRef.current >= 4) {
             triggerEndGame('RESULTS');
-            return;
         }
+    };
 
-        // Advance only if game is still active
-        advanceToNextQuestion();
+    const checkFinalOutcome = () => {
+        if (gameState !== 'PLAYING') return;
+        setGameState('TRANSITIONING');
+        setTimeout(() => {
+            if (scoreRef.current >= 4) {
+                setGameState('RESULTS');
+            } else {
+                setGameState('GAME_OVER');
+            }
+            audioManager.stopMusic();
+        }, 1000);
     };
 
     const triggerEndGame = (finalState) => {
@@ -269,27 +274,7 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
         });
     };
 
-    const advanceToNextQuestion = () => {
-        if (gameState !== 'PLAYING') return;
-
-        isProcessingSetRef.current = false;
-        currentIndexRef.current += 1;
-
-        if (currentIndexRef.current >= shuffledQuestions.length) {
-            setGameState('TRANSITIONING');
-            setTimeout(() => {
-                if (scoreRef.current >= 4) {
-                    setGameState('RESULTS');
-                } else {
-                    setGameState('GAME_OVER');
-                }
-                audioManager.stopMusic();
-            }, 2000);
-        } else {
-            setCurrentIndex(currentIndexRef.current);
-            spawnCooldownRef.current = 2000;
-        }
-    };
+    // Simplified endGame trigger handled in update loop and processCollision
 
     const bgStyle = {
         background: `linear-gradient(135deg, 
@@ -420,17 +405,26 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
                         {fallingItems.map(item => (
                             <div
                                 key={item.id}
-                                className="absolute transition-transform duration-100 flex items-center justify-center p-4 rounded-3xl border-2 backdrop-blur-md shadow-2xl bg-white/10 border-white/20 text-white"
-                                style={{ left: `${item.x}%`, top: `${item.y}%`, transform: `translate(-50%, -50%)`, maxWidth: '260px', textAlign: 'center' }}
+                                className="absolute transition-transform duration-100 flex items-center justify-center p-4 rounded-3xl border-2 shadow-2xl bg-white/10 border-white/20 text-white"
+                                style={{
+                                    left: `${item.x}%`,
+                                    top: `${item.y}%`,
+                                    transform: `translate(-50%, -50%)`,
+                                    maxWidth: 'min(260px, 40vw)',
+                                    textAlign: 'center',
+                                    backdropFilter: 'blur(12px)',
+                                    WebkitBackdropFilter: 'blur(12px)'
+                                }}
                             >
-                                <span className="text-[10px] md:text-xs font-black leading-tight uppercase tracking-wider">{item.text}</span>
+                                <span className="text-[10px] md:text-sm font-black leading-tight uppercase tracking-wider">{item.text}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* Knowledge Sidebar */}
                     <div className={`absolute right-4 top-32 z-40 transition-all duration-700 words-of-hope-sidebar-right ${isSidebarVisible ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`}>
-                        <div className="max-w-[240px] md:max-w-[280px] bg-white/95 backdrop-blur-xl rounded-2xl border border-white p-4 md:p-5 shadow-4xl flex flex-col h-fit">
+                        <div className="max-w-[240px] md:max-w-[320px] bg-white/95 rounded-2xl border border-white p-4 md:p-6 shadow-4xl flex flex-col h-fit"
+                            style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center text-lg">🌱</div>
                                 <span className="text-slate-900 font-black uppercase text-[9px] tracking-widest">Growth Log</span>
@@ -455,7 +449,8 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
 
                     {/* Stigma Alert (Left Side) */}
                     <div className={`absolute left-4 top-40 z-40 transition-all duration-700 words-of-hope-sidebar-left ${isAlertVisible ? 'translate-x-0 opacity-100' : 'translate-x-[-120%] opacity-0'}`}>
-                        <div className="max-w-[240px] md:max-w-[280px] bg-slate-900/95 backdrop-blur-2xl rounded-2xl border border-red-500/30 p-4 md:p-5 shadow-[0_0_30px_rgba(239,68,68,0.2)] flex flex-col h-fit">
+                        <div className="max-w-[240px] md:max-w-[320px] bg-slate-900/95 rounded-2xl border border-red-500/30 p-4 md:p-6 shadow-[0_0_30px_rgba(239,68,68,0.2)] flex flex-col h-fit"
+                            style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center text-lg shadow-[inset_0_0_10px_rgba(239,68,68,0.3)]">⚠️</div>
                                 <span className="text-red-400 font-black uppercase text-[9px] tracking-[0.2em]">Stigma Alert</span>
@@ -496,7 +491,11 @@ const WordsOfHopeScreen = ({ audioManager, onExit }) => {
                     <div className="absolute z-[100]" style={{ left: `${playerX}%`, bottom: '10%', transform: 'translateX(-50%)' }}>
                         <div className="relative">
                             <div className={`absolute inset-0 bg-teal-400/20 blur-3xl rounded-full transition-all duration-500 ${harmony > 60 ? 'scale-150' : 'scale-75'}`} />
-                            <img src={harmony > 30 ? "/stickman_assets/hope_stickman.svg" : "/stickman_assets/guy_distressed.svg"} alt="Player" className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl" />
+                            <img
+                                src={harmony > 30 ? "/stickman_assets/hope_stickman.svg" : `/stickman_assets/${playerGender}_distressed.svg`}
+                                alt="Player"
+                                className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl"
+                            />
                         </div>
                     </div>
                 </>

@@ -37,7 +37,7 @@ export const CLUE_DETAILS = {
     failing_grade: {
         title: "Academic Notice",
         visualType: 'grade_report',
-        description: "Academic Probation Warning. 'Student: Jessica'. Grade: F. Red ink circles the phrase 'Loss of Scholarship Eligibility'."
+        description: "Academic Probation Warning. 'Student: Annie'. Grade: F. Red ink circles the phrase 'Loss of Scholarship Eligibility'."
     },
     wet_envelope: {
         title: "Eviction Notice",

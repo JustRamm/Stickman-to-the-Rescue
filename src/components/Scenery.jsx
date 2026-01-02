@@ -352,6 +352,94 @@ const Scenery = ({ theme = 'park', trust = 50 }) => {
         );
     }
 
+    if (theme === 'night_patrol') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[#020617] transition-all duration-1000">
+                {/* Cyber Grid Floor */}
+                <div className="absolute bottom-0 inset-x-0 h-[40%] bg-[#081b33]">
+                    <div className="absolute inset-0 opacity-20"
+                        style={{
+                            backgroundImage: `
+                                linear-gradient(0deg, transparent 24%, rgba(34, 211, 238, .3) 25%, rgba(34, 211, 238, .3) 26%, transparent 27%, transparent 74%, rgba(34, 211, 238, .3) 75%, rgba(34, 211, 238, .3) 76%, transparent 77%, transparent),
+                                linear-gradient(90deg, transparent 24%, rgba(34, 211, 238, .3) 25%, rgba(34, 211, 238, .3) 26%, transparent 27%, transparent 74%, rgba(34, 211, 238, .3) 75%, rgba(34, 211, 238, .3) 76%, transparent 77%, transparent)
+                            `,
+                            backgroundSize: '50px 50px',
+                            transform: 'perspective(500px) rotateX(60deg) translateY(-100px)',
+                            transformOrigin: 'top'
+                        }}
+                    />
+                    <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#020617] to-transparent z-10" />
+                </div>
+
+                {/* Neon City Horizon */}
+                <div className="absolute bottom-[40%] inset-x-0 flex items-end justify-around px-10 opacity-30">
+                    {[...Array(12)].map((_, i) => (
+                        <div key={i} className="flex items-end gap-1">
+                            <div className="w-8 h-40 bg-slate-900 border-t border-x border-cyan-500/30 rounded-t-sm relative">
+                                <div className="absolute top-2 inset-x-1 h-0.5 bg-cyan-400 group-hover:bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
+                            </div>
+                            <div className="w-12 h-64 bg-slate-950 border-t border-x border-blue-500/20 rounded-t-lg" />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Digital "Stars" / Data Particles */}
+                <div className="absolute inset-0 z-0">
+                    {[...Array(50)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-1 h-1 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_cyan]"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 60}%`,
+                                animationDuration: `${2 + Math.random() * 3}s`,
+                                opacity: Math.random() * 0.5
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {/* Scanning Light Effect */}
+                <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 to-transparent animate-pulse" />
+            </div>
+        );
+    }
+
+    if (theme === 'backwaters') {
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[#f0f9ff] transition-all duration-1000">
+                {/* Morning Sky */}
+                <div className="absolute inset-x-0 top-0 h-[60%] bg-gradient-to-b from-sky-400/30 via-amber-100/20 to-teal-50/10" />
+
+                {/* Distant Palm Layers */}
+                <div className="absolute bottom-[35%] inset-x-0 h-40 flex items-end justify-between px-10 opacity-20">
+                    {[...Array(15)].map((_, i) => (
+                        <div key={i} className="relative flex flex-col items-center" style={{ transform: `scale(${0.5 + Math.random() * 0.5})` }}>
+                            <div className="w-1 h-32 bg-emerald-950 rounded-full" />
+                            <div className="absolute top-0 w-24 h-4 bg-emerald-900 rounded-full blur-[2px] -rotate-12" />
+                            <div className="absolute top-2 w-24 h-4 bg-emerald-900 rounded-full blur-[2px] rotate-12" />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Water Body */}
+                <div className="absolute top-[60%] inset-x-0 bottom-0 bg-gradient-to-b from-teal-500/10 to-blue-500/20">
+                    <div className="absolute inset-0 opacity-30" style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='ripple'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='2'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='10'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23ripple)' opacity='0.3'/%3E%3C/svg%3E")`
+                    }} />
+                    {/* Floating Lillies */}
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="absolute w-8 h-4 bg-emerald-400/20 rounded-full animate-pulse"
+                            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 80}%`, animationDelay: `${i * 0.5}s` }} />
+                    ))}
+                </div>
+
+                {/* Sun Glow */}
+                <div className="absolute top-20 right-[20%] w-64 h-64 bg-amber-200/20 blur-[100px] rounded-full pointer-events-none" />
+            </div>
+        );
+    }
+
     // Default Park Theme (Enhanced)
     return (
         <div

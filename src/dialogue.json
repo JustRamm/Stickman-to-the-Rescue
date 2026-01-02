@@ -455,7 +455,7 @@
                 "npc_emotion": "sad",
                 "options": [
                     {
-                        "text": "It sounds like you're carrying the weight of everyone's expectations, Jessica.",
+                        "text": "It sounds like you're carrying the weight of everyone's expectations, Annie.",
                         "next": "opening_up",
                         "trust_impact": 10,
                         "inner_thought": "Acknowledge the pressure of expectations."
@@ -480,7 +480,7 @@
                 "npc_emotion": "distressed",
                 "options": [
                     {
-                        "text": "Jessica, your parents love the daughter, not the athlete. You're more than your stats.",
+                        "text": "Annie, your parents love the daughter, not the athlete. You're more than your stats.",
                         "next": "deep_pain",
                         "trust_impact": 15,
                         "inner_thought": "Attempt to decouple identity from performance."
@@ -504,7 +504,7 @@
                         "inner_thought": "Reflect the feeling of being used/discarded."
                     },
                     {
-                        "text": "Jessica, you're a person, not a machine. It's okay to be 'broken' for a while.",
+                        "text": "Annie, you're a person, not a machine. It's okay to be 'broken' for a while.",
                         "next": "deep_pain",
                         "trust_impact": 10,
                         "inner_thought": "Rehumanize her."
@@ -512,7 +512,7 @@
                 ]
             },
             "deep_pain": {
-                "npc_text": "I've been looking at the bridge tonight. It's the only place where I don't have to be 'Jessica the Star' or 'Jessica the Failure'. I can just be nothing.",
+                "npc_text": "I've been looking at the bridge tonight. It's the only place where I don't have to be 'Annie the Star' or 'Annie the Failure'. I can just be nothing.",
                 "npc_emotion": "sad",
                 "options": [
                     {
@@ -547,7 +547,7 @@
                         "inner_thought": "Validating and Persuading."
                     },
                     {
-                        "text": "Jessica, I hear how much you're suffering. You don't have to face the bridge or these expectations alone. Can we talk about help?",
+                        "text": "Annie, I hear how much you're suffering. You don't have to face the bridge or these expectations alone. Can we talk about help?",
                         "next": "persuade",
                         "trust_impact": 15,
                         "inner_thought": "Express care and move toward persuasion."
@@ -618,13 +618,13 @@
             "success_end": {
                 "isEnd": true,
                 "result": "success",
-                "message": "Jessica agreed to visit the university health center center. Name: Jessica. Status: Seeking Help.",
+                "message": "Annie agreed to visit the university health center center. Name: Annie. Status: Seeking Help.",
                 "npc_emotion": "relief"
             },
             "leave_failure": {
                 "isEnd": true,
                 "result": "failure",
-                "message": "You left Jessica alone at her lowest point.",
+                "message": "You left Annie alone at her lowest point.",
                 "npc_emotion": "sad"
             }
         }

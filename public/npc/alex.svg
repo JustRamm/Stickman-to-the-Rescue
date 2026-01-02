@@ -1,13 +1,14 @@
-<svg width="100" height="125" viewBox="0 0 100 125" xmlns="http://www.w3.org/2000/svg">
-  <!-- Alex: Friendly Tutorial Mentor -->
-  <circle cx="50" cy="25" r="10" stroke="#0ea5e9" stroke-width="3" fill="white"/>
-  <!-- Blue Shirt/Vest -->
-  <path d="M40 35 L60 35 L65 55 L50 75 L35 55 Z" fill="#0ea5e9" opacity="0.4"/>
-  <line x1="50" y1="35" x2="50" y2="75" stroke="#0ea5e9" stroke-width="3"/>
-  <line x1="50" y1="45" x2="30" y2="65" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
-  <line x1="50" y1="45" x2="70" y2="65" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
-  <line x1="50" y1="75" x2="35" y2="110" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
-  <line x1="50" y1="75" x2="65" y2="110" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
-  <!-- Friendly Badge -->
-  <circle cx="55" cy="45" r="3" fill="#fbbf24"/>
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Head -->
+  <path d="M50 35 c-10 0 -18 -8 -18 -18 s8 -18 18 -18 s18 8 18 18 s-8 18 -18 18 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <!-- Body -->
+  <path d="M50 35 l0 60" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <!-- Arms (Waving or friendly posture) -->
+  <path d="M50 45 c-15 0 -25 -5 -30 -15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="16" cy="25" r="3" fill="currentColor" />
+  <path d="M50 45 c15 5 25 15 30 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="84" cy="75" r="3" fill="currentColor" />
+  <!-- Legs -->
+  <path d="M50 95 l-15 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M50 95 l15 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
 </svg>

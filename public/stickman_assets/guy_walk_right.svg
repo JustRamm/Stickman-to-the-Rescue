@@ -1,10 +1,11 @@
-<svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Shirt -->
-  <path d="M42,60 L58,60 L62,100 L38,100 Z" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6" stroke-width="1" stroke-opacity="0.5" />
-  <!-- Pants -->
-  <path d="M38,105 L62,105 L75,140 L50,110 L25,140 Z" fill="#64748b" fill-opacity="0.3" stroke="#64748b" stroke-width="1" stroke-opacity="0.5" />
-  <circle cx="50" cy="40" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M50,60 L50,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M40,90 L50,80 L60,90" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M20,140 L50,110 L80,140" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <path d="M50 40 c-10 0 -18 -8 -18 -18 s8 -18 18 -18 s18 8 18 18 s-8 18 -18 18 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M50 40 c-2 15 -5 30 -2 50" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <!-- Walking Arms with hands -->
+  <path d="M35 60 c5 -10 10 -20 20 -15 s20 10 25 15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="28" cy="55" r="2.5" fill="currentColor" /> <!-- Hand 1 -->
+  <circle cx="80" cy="75" r="2.5" fill="currentColor" /> <!-- Hand 2 -->
+  <!-- Walking Legs (Rightward motion) -->
+  <path d="M48 90 l-20 35" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M48 90 l25 25 l-5 10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

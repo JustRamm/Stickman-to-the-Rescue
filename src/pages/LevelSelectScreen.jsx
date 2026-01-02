@@ -14,7 +14,10 @@ const LevelSelectScreen = ({
     setSettings,
     audioManager,
     isSettingsOpen,
-    setIsSettingsOpen
+    setIsSettingsOpen,
+    onResetGame,
+    isPaused,
+    setIsPaused
 }) => {
     const sliderRef = useRef(null);
 
@@ -66,7 +69,10 @@ const LevelSelectScreen = ({
                 settings={settings} setSettings={setSettings}
                 audioManager={audioManager}
                 isSettingsOpen={isSettingsOpen} setIsSettingsOpen={setIsSettingsOpen} onNavigate={onNavigate}
-                showMiniGames={true}
+                onResetGame={onResetGame}
+                isPaused={isPaused}
+                setIsPaused={setIsPaused}
+                gameState="LEVEL_SELECT"
             />
 
             {/* Back to Title */}

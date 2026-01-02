@@ -1,9 +1,8 @@
-<svg width="120" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Dress -->
-  <path d="M35,110 L65,110 L55,75 L45,75 Z" fill="#db2777" fill-opacity="0.3" stroke="#db2777" stroke-width="1" stroke-opacity="0.5" />
-  <circle cx="50" cy="60" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M60,50 Q75,55 70,75" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M50,75 L50,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M30,90 L50,80 L70,90" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <path d="M30,120 L50,110 L70,120" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <path d="M30 65 c0 -15 40 -15 40 0 c0 15 -10 20 -20 20 s-20 -5 -20 -20 Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <path d="M50 78 c-10 0 -17 -7 -17 -17 s7 -17 17 -17 s17 7 17 17 s-7 17 -17 17 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M50 82 l-15 35 l30 0 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Crouching Legs -->
+  <path d="M35 117 l-10 20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M65 117 l10 20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
 </svg>

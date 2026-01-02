@@ -4,77 +4,88 @@ export const OBSTACLES = [
         text: "I cannot face my parents if I fail NEET. The pressure is too much.",
         weaknesses: ['hotline', 'counselor', 'textline'],
         sfx: 'anxious',
-        stickman_emotion: 'distressed'
+        stickman_emotion: 'distressed',
+        gender: 'girl'
     },
     {
         id: 'reputation',
         text: "If people in our colony find out I'm seeing a doctor for 'nerves', our family's name is ruined.",
         weaknesses: ['textline', 'hotline', 'counselor'],
         sfx: 'shy',
-        stickman_emotion: 'scared'
+        stickman_emotion: 'scared',
+        gender: 'guy'
     },
     {
         id: 'kerala_disha',
         text: "I need help but I only feel comfortable speaking in Malayalam. Who will understand me?",
         weaknesses: ['disha_kerala', 'hotline'],
         sfx: 'sad',
-        stickman_emotion: 'vulnerable'
+        stickman_emotion: 'vulnerable',
+        gender: 'guy'
     },
     {
         id: 'harassment',
         text: "Someone is sharing my private photos online. I don't know who to trust.",
         weaknesses: ['cyber_cell', 'hotline'],
         sfx: 'panic',
-        stickman_emotion: 'distressed'
+        stickman_emotion: 'distressed',
+        gender: 'girl'
     },
     {
         id: 'elderly_kerala',
         text: "My children are in Dubai. I am all alone in this big house with just my thoughts.",
         weaknesses: ['kudumbashree', 'hotline', 'disha_kerala'],
         sfx: 'tired',
-        stickman_emotion: 'sad'
+        stickman_emotion: 'sad',
+        gender: 'girl'
     },
     {
         id: 'debt',
         text: "My small business failed and the debt is piling up. I'm afraid of what the lenders might do.",
         weaknesses: ['hotline', 'textline', 'disha_kerala'],
         sfx: 'scared',
-        stickman_emotion: 'distressed'
+        stickman_emotion: 'distressed',
+        gender: 'guy'
     },
     {
         id: 'addiction',
         text: "I’ve started using substances to numb the pain. I feel like I'm losing control of my life.",
         weaknesses: ['disha_kerala', 'hotline'],
         sfx: 'tired',
-        stickman_emotion: 'sad'
+        stickman_emotion: 'sad',
+        gender: 'guy'
     },
     {
         id: 'workplace',
         text: "My supervisor makes me feel unsafe at work. I'm terrified of losing my job if I speak up.",
         weaknesses: ['kudumbashree', 'hotline', 'textline'],
         sfx: 'anxious',
-        stickman_emotion: 'scared'
+        stickman_emotion: 'scared',
+        gender: 'girl'
     },
     {
         id: 'aimless',
         text: "I’m a fresh graduate with no job. I feel like a weight on my family while everyone else is succeeding.",
         weaknesses: ['counselor', 'hotline', 'textline'],
         sfx: 'sad',
-        stickman_emotion: 'vulnerable'
+        stickman_emotion: 'vulnerable',
+        gender: 'guy'
     },
     {
         id: 'domestic',
         text: "Things are getting violent at home. I have nowhere to go and no one to turn to.",
         weaknesses: ['kudumbashree', 'disha_kerala', 'hotline'],
         sfx: 'panic',
-        stickman_emotion: 'scared'
+        stickman_emotion: 'scared',
+        gender: 'girl'
     },
     {
         id: 'identity',
         text: "I’m hiding my true identity from my community. The fear of being disowned is breaking me.",
         weaknesses: ['textline', 'hotline', 'kudumbashree'],
         sfx: 'shy',
-        stickman_emotion: 'vulnerable'
+        stickman_emotion: 'vulnerable',
+        gender: 'guy'
     }
 ];
 

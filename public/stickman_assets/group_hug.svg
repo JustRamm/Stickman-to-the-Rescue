@@ -1,24 +1,10 @@
-<svg width="200" height="150" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Right Stickman (Sam) -->
-  <circle cx="110" cy="45" r="15" stroke="#1e293b" stroke-width="3" />
-  <path d="M110,60 L110,110" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  <!-- Sam's Legs -->
-  <path d="M95,140 L110,110 L125,140" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-  
-  <!-- Left Stickman (Player) -->
-  <circle cx="90" cy="42" r="15" stroke="#0f766e" stroke-width="3" />
-  <path d="M90,57 L90,110" stroke="#0f766e" stroke-width="3" stroke-linecap="round" />
-  <!-- Player's Legs -->
-  <path d="M75,140 L90,110 L105,140" stroke="#0f766e" stroke-width="3" stroke-linecap="round" />
-
-  <!-- Arms Embracing -->
-  <!-- Player Arm wrapping around Sam -->
-  <path d="M90,75 C110,75 125,65 125,55" stroke="#0f766e" stroke-width="3" stroke-linecap="round" />
-  <!-- Sam Arm wrapping around Player -->
-  <path d="M110,75 C90,75 75,65 75,55" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
-
-  <!-- Heart Icon floating above -->
-  <path d="M100,25 C100,25 95,20 92,20 C88,20 85,23 85,27 C85,32 100,40 100,40 C100,40 115,32 115,27 C115,23 112,20 108,20 C105,20 100,25 100,25 Z" fill="#ef4444" stroke="#ef4444" stroke-width="1">
-    <animate attributeName="transform" type="translate" values="0 0; 0 -5; 0 0" dur="2s" repeatCount="indefinite" />
-  </path>
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <path d="M60 40 c-10 0 -18 -8 -18 -18 s8 -18 18 -18 s18 8 18 18 s-8 18 -18 18 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+  <path d="M60 40 l0 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+  <path d="M40 50 c-12 0 -22 -10 -22 -22 s10 -22 22 -22 s22 10 22 22 s-10 22 -22 22 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M40 50 l2 60" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M42 65 c20 0 35 0 35 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M38 65 c-10 0 -15 0 -15 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M42 110 l-10 30" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M42 110 l12 30" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
 </svg>

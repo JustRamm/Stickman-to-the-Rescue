@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { OBSTACLES, PLAYER_CARDS } from '../data/resourceRelayData';
 import Stickman from '../components/Stickman';
+import Scenery from '../components/Scenery';
 
-const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
+const ResourceRelayScreen = ({ audioManager, onComplete, onExit, isPaused = false }) => {
     // Game State
     const [level, setLevel] = useState(0);
     const [currentObstacle, setCurrentObstacle] = useState(null);
@@ -75,7 +76,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
     };
 
     const handleCardPlay = (card) => {
-        if (gameState !== 'PLAYING') return;
+        if (gameState !== 'PLAYING' || isPaused) return;
         setInspectedCard(null);
         setGameState('RESOLVING');
 
@@ -84,7 +85,7 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
 
         if (isMatch) {
             // Success
-            setFeedback({ type: 'success', msg: "Barrier Broken!" });
+            setFeedback({ type: 'success', msg: "Linked to Help!" });
             setSamEmotion('relief');
             if (navigator.vibrate) navigator.vibrate(50);
             if (audioManager) audioManager.playDing();
@@ -111,23 +112,24 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900 flex flex-col font-sans overflow-hidden resource-relay-container">
-            {/* Background */}
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black pointer-events-none"></div>
+        <div className="fixed inset-0 bg-sky-50 flex flex-col font-sans overflow-hidden resource-relay-container">
+            {/* Unique Backwaters Scenery Background */}
+            <Scenery theme="backwaters" trust={80} />
+            <div className="absolute inset-0 bg-white/5" style={{ backdropFilter: 'blur(1px)', WebkitBackdropFilter: 'blur(1px)' }}></div>
 
             {/* Header / HUD */}
-            <div className="relative z-10 px-6 py-4 flex justify-between items-center bg-slate-800/80 backdrop-blur-xl border-b border-white/10 resource-relay-header">
+            <div className="relative z-10 px-6 py-4 flex justify-between items-center bg-[#0d2d3a]/80 backdrop-blur-xl border-b border-teal-500/20 resource-relay-header">
                 <div className="flex items-center gap-6">
                     <button
                         onClick={onExit}
-                        className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-black text-red-400 hover:bg-red-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest"
+                        className="px-4 py-2 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[10px] font-black text-rose-400 hover:bg-rose-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest"
                     >
                         Exit Game
                     </button>
                     <div className="h-8 w-px bg-white/10 hidden md:block"></div>
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Referral Battle</span>
-                        <span className="text-white font-bold text-sm">Kerala Edition</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-400/60">Referral Battle</span>
+                        <span className="text-white font-black text-base tracking-tight">KERALA EDITION</span>
                     </div>
                 </div>
 
@@ -140,8 +142,8 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                         {[...Array(resistanceMax)].map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-1.5 rounded-full transition-all duration-500 ${i < level ? 'w-6 bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.5)]' :
-                                    i === level ? 'w-8 bg-white border border-teal-400 animate-pulse' : 'w-4 bg-slate-700'
+                                className={`h-1.5 rounded-full transition-all duration-500 ${i < level ? 'w-4 md:w-8 bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.5)]' :
+                                    i === level ? 'w-6 md:w-10 bg-white border border-teal-400 animate-pulse' : 'w-2 md:w-6 bg-slate-700'
                                     }`}
                             ></div>
                         ))}
@@ -158,26 +160,29 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                         <Stickman
                             position={{ x: 0, y: 0 }}
                             emotion={samEmotion}
-                            gender="guy"
-                            theme="neutral"
+                            gender={currentObstacle?.gender || 'guy'}
+                            theme="backwaters"
                             noWrapper
                             scale={1.5}
                         />
                     </div>
 
-                    {/* Threat/Obstacle Bubble */}
+                    {/* Crisis Warning Bubble */}
                     {gameState !== 'WIN' && (
-                        <div className={`mt-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[2rem] rounded-tl-none shadow-2xl relative animate-float-slow max-w-lg transition-all duration-300 ${feedback?.type === 'success' ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
-                            <div className="absolute -top-3 -left-3 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-lg shadow-lg animate-pulse">⚠️</div>
-                            <h3 className="text-red-200 font-bold uppercase text-xs tracking-widest mb-1">Barrier Detected</h3>
-                            <p className="text-xl md:text-2xl font-black text-white leading-tight">"{currentObstacle?.text}"</p>
+                        <div className={`mt-4 bg-[#082f49]/10 backdrop-blur-xl border border-[#082f49]/10 p-6 rounded-[2rem] rounded-tl-none shadow-2xl relative animate-float-slow max-w-lg transition-all duration-300 ${feedback?.type === 'success' ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
+                            <div className="absolute -top-3 -left-3 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-lg shadow-lg animate-pulse">⚠️</div>
+                            <h3 className="text-[#0d9488] font-black uppercase text-[10px] tracking-[0.3em] mb-1">Crisis Warning</h3>
+                            <p className="text-xl md:text-2xl font-black text-[#01161d] leading-tight">"{currentObstacle?.text}"</p>
                         </div>
                     )}
 
                     {/* Feedback Popup */}
                     {feedback && (
-                        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 px-8 py-4 rounded-2xl shadow-2xl border-2 animate-bounce-subtle whitespace-nowrap ${feedback.type === 'success' ? 'bg-teal-500 border-teal-300 text-white' : 'bg-red-500 border-red-300 text-white'}`}>
-                            <span className="text-2xl font-black uppercase tracking-widest">{feedback.msg}</span>
+                        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-10 py-6 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-4 animate-pop-in flex flex-col items-center gap-2 ${feedback.type === 'success' ? 'bg-teal-600 border-teal-300 text-white' : 'bg-red-600 border-red-300 text-white'}`}
+                            style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+                            <div className="text-4xl">{feedback.type === 'success' ? '✨' : '💥'}</div>
+                            <span className="text-3xl font-black uppercase tracking-[0.2em] drop-shadow-lg">{feedback.msg}</span>
+                            {feedback.type === 'success' && <span className="text-[10px] font-bold uppercase tracking-widest opacity-80">Barrier Resolved</span>}
                         </div>
                     )}
                 </div>
@@ -185,32 +190,38 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                 {/* Info Modal Overlay */}
                 {inspectedCard && (
                     <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-                        <div className="max-w-sm w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl border-t-8 border-indigo-500 animate-slide-up relative resource-relay-info-card">
-                            <button onClick={() => setInspectedCard(null)} className="absolute top-6 right-6 text-slate-300 hover:text-slate-500 transition-colors py-2 px-2">✕</button>
+                        <div className="max-w-sm w-full bg-white/95 rounded-[3rem] p-10 text-center shadow-4xl border border-white animate-pop-in relative resource-relay-info-card"
+                            style={{ backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)' }}>
+                            <button onClick={() => setInspectedCard(null)} className="absolute top-8 right-8 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all active:scale-90">✕</button>
 
-                            <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <img src={inspectedCard.icon} alt={inspectedCard.title} className="w-12 h-12 object-contain" />
+                            <div className="relative mb-8">
+                                <div className="absolute inset-0 bg-indigo-500/10 blur-2xl rounded-full scale-150" />
+                                <div className="relative w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center mx-auto shadow-xl border border-slate-50">
+                                    <img src={inspectedCard.icon} alt={inspectedCard.title} className="w-14 h-14 object-contain" />
+                                </div>
                             </div>
 
-                            <span className="inline-block bg-indigo-100 text-indigo-700 text-[10px] font-black px-3 py-1 rounded-full uppercase mb-2">Resource Profile</span>
-                            <h2 className="text-2xl font-black text-slate-900 mb-4">{inspectedCard.title}</h2>
+                            <div className="flex flex-col items-center gap-1 mb-6">
+                                <span className="bg-indigo-500/10 text-indigo-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Resource Insight</span>
+                                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">{inspectedCard.title}</h2>
+                            </div>
 
-                            <div className="bg-slate-50 p-4 rounded-2xl mb-8">
-                                <p className="text-slate-600 text-sm font-medium leading-relaxed italic">
+                            <div className="bg-gradient-to-br from-slate-50 to-indigo-50/30 p-6 rounded-[2rem] border border-indigo-100/50 mb-8">
+                                <p className="text-slate-700 text-sm font-bold leading-relaxed italic">
                                     "{inspectedCard.learn_info}"
                                 </p>
                             </div>
 
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-4">
                                 <button
                                     onClick={() => handleCardPlay(inspectedCard)}
-                                    className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg active:scale-95"
+                                    className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
                                 >
-                                    Use this Resource
+                                    Deploy Resource
                                 </button>
                                 <button
                                     onClick={() => setInspectedCard(null)}
-                                    className="w-full py-2 text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors"
+                                    className="text-[10px] font-black text-slate-400 hover:text-slate-900 uppercase tracking-[0.3em] transition-colors"
                                 >
                                     Keep Browsing
                                 </button>
@@ -254,24 +265,41 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit }) => {
                 ) : (
                     <div className={`w-full max-w-4xl flex justify-center items-end gap-2 md:gap-4 h-[220px] pb-4 transition-all duration-500 resource-relay-hand-area ${gameState === 'RESOLVING' ? 'translate-y-full opacity-50' : 'translate-y-0 opacity-100'}`}>
                         {playerHand.map((card, i) => (
-                            <button
+                            <div
                                 key={card.id + i}
-                                onClick={() => setInspectedCard(card)}
-                                className="group relative w-32 h-44 md:w-40 md:h-56 bg-white rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out border-4 border-slate-100 hover:border-indigo-400 hover:z-50 active:scale-95 translate-y-0 resource-relay-card-btn"
+                                className="group relative w-24 h-36 md:w-40 md:h-56 translate-y-0 select-none flex-shrink"
                                 style={{
                                     transform: `rotate(${(i - (playerHand.length - 1) / 2) * 5}deg) translateY(${Math.abs((i - (playerHand.length - 1) / 2) * 10)}px)`,
-                                    zIndex: 10 + i
+                                    zIndex: 10 + i,
+                                    maxWidth: '22vw'
                                 }}
                             >
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition-transform">
-                                    <img src={card.icon} alt={card.type} className="w-6 h-6 object-contain" />
-                                </div>
-                                <div className="mt-6 flex-1 flex flex-col items-center justify-center">
-                                    <h4 className="font-black text-slate-800 text-xs md:text-sm leading-tight mb-2 tracking-tight">{card.title}</h4>
-                                    <span className="bg-indigo-50 text-indigo-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2">{card.type}</span>
-                                    <p className="text-[9px] md:text-[10px] text-slate-400 leading-snug font-medium line-clamp-3 md:line-clamp-4">{card.desc}</p>
-                                </div>
-                            </button>
+                                {/* Eye Icon for Details */}
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setInspectedCard(card); }}
+                                    className="absolute -top-2 -right-2 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center shadow-xl border-2 border-emerald-100 text-emerald-600 hover:text-emerald-400 hover:scale-110 active:scale-90 transition-all z-50 pointer-events-auto"
+                                    title="View Support Details"
+                                >
+                                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    onClick={() => handleCardPlay(card)}
+                                    className="w-full h-full bg-[#f0f9ff]/90 rounded-2xl p-3 flex flex-col items-center text-center shadow-2xl hover:-translate-y-6 hover:scale-110 hover:shadow-[0_30px_60px_rgba(13,45,58,0.4)] transition-all duration-300 ease-out border-4 border-emerald-50 hover:border-emerald-400 active:scale-95 resource-relay-card-btn"
+                                >
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md border-2 border-white group-hover:scale-110 transition-transform">
+                                        <img src={card.icon} alt={card.type} className="w-6 h-6 object-contain brightness-0 invert" />
+                                    </div>
+                                    <div className="mt-6 flex-1 flex flex-col items-center justify-center">
+                                        <h4 className="font-black text-[#064e3b] text-xs md:text-sm leading-tight mb-2 tracking-tight uppercase">{card.title}</h4>
+                                        <span className="bg-emerald-50 text-emerald-700 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-[0.2em] mb-2">{card.type}</span>
+                                        <p className="text-[9px] md:text-[10px] text-emerald-900/60 leading-snug font-bold line-clamp-3 md:line-clamp-4">{card.desc}</p>
+                                    </div>
+                                </button>
+                            </div>
                         ))}
                     </div>
                 )}

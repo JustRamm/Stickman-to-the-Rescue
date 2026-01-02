@@ -1,0 +1,21 @@
+<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Annie's Ponytail -->
+  <path d="M64 12 c8 -2 15 5 12 15 c-2 8 -10 10 -12 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <path d="M64 12 l-3 3" stroke="currentColor" stroke-width="4" stroke-linecap="round" /> <!-- Hair tie -->
+  
+  <!-- Head -->
+  <path d="M50 38 c-10 0 -17 -7 -17 -17 s7 -17 17 -17 s17 7 17 17 s-7 17 -17 17 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- Body (Dress Style) -->
+  <path d="M50 42 l-18 48 l36 0 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Arms with hands -->
+  <path d="M36 60 c-10 -5 -15 5 -18 20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="18" cy="80" r="2.5" fill="currentColor" /> <!-- Hand 1 -->
+  <path d="M64 60 c10 -5 15 5 18 20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <circle cx="82" cy="80" r="2.5" fill="currentColor" /> <!-- Hand 2 -->
+  
+  <!-- Legs -->
+  <path d="M42 90 l-8 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  <path d="M58 90 l10 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+</svg>

@@ -18,9 +18,10 @@ const Stickman = ({
     action = 'idle',
     textSpeed = 50,
     scale = 1,
-    noWrapper = false
+    noWrapper = false,
+    isPaused = false
 }) => {
-    const isNPC = ['Alex', 'Grace', 'David', 'Jessica', 'Raj', 'Stranger'].includes(speaker);
+    const isNPC = ['Alex', 'Grace', 'David', 'Annie', 'Raj', 'Stranger'].includes(speaker);
     const isIdle = !isWalking && !isJumping && !isCrouching && !isSitting && !isPhoneChecking && (action === 'idle' || action === 'phone' || action === 'sitting');
     const isLowTrust = trust < 30;
     const [displayedText, setDisplayedText] = React.useState('');
@@ -79,7 +80,7 @@ const Stickman = ({
             ((emotion === 'distressed' || emotion === 'sad' || emotion === 'vulnerable') ? 'animate-stickman-shiver' : ''));
 
     // Determine if we should use light or dark theme for the stickman silhouette
-    const isDarkTheme = ['office', 'rainy_street', 'bridge_night'].includes(theme) ||
+    const isDarkTheme = ['office', 'rainy_street', 'bridge_night', 'night_patrol'].includes(theme) ||
         (theme === 'park' && isLowTrust);
 
     // Special case for campus: it's light daytime, but has dark buildings. 
@@ -99,7 +100,8 @@ const Stickman = ({
                 zIndex: isJumping ? 100 : 20,
                 transform: `scale(${scale})`,
                 transformOrigin: 'bottom center',
-                transition: isWalking || action === 'pacing' ? 'none' : 'left 0.3s ease-out, top 0.3s ease-out'
+                transition: isWalking || action === 'pacing' ? 'none' : 'left 0.3s ease-out, top 0.3s ease-out',
+                animationPlayState: isPaused ? 'paused' : 'running'
             }}
         >
             {/* Distress Visual Cues (Pulse) */}
@@ -133,7 +135,7 @@ const Stickman = ({
 
             {/* The Character Rendered as SVG Image */}
             <div className={`stickman-asset-container transition-transform duration-1000 ${animationClass} ${isIdle && !animationClass ? 'animate-breathing scale-[1.02]' : ''}`}
-                style={{ filter: stickmanFilter }}
+                style={{ filter: stickmanFilter, animationPlayState: isPaused ? 'paused' : 'running' }}
             >
                 <img
                     src={assetUrl}
