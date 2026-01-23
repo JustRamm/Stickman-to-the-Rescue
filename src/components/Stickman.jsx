@@ -117,11 +117,11 @@ const Stickman = ({
             {/* Dialogue Bubble */}
             {currentMessage && (
                 <div
-                    className={`absolute bottom-[130px] md:bottom-[160px] w-[60vw] md:w-auto md:min-w-[200px] md:max-w-[280px] bg-white p-3 md:p-4 rounded-2xl shadow-xl border-2 border-slate-100 animate-fade-in z-50
+                    className={`absolute bottom-[160px] w-auto min-w-[200px] max-w-[280px] bg-white p-4 rounded-2xl shadow-xl border-2 border-slate-100 animate-fade-in z-50
                     ${position.x < 50 ? 'left-0 origin-bottom-left rounded-bl-none' : 'right-0 origin-bottom-right rounded-br-none'}
                     `}
                 >
-                    <p className={`text-[11px] md:text-sm font-bold text-slate-800 leading-snug md:leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
+                    <p className={`text-sm font-bold text-slate-800 leading-relaxed ${textEffect === 'shake' ? 'shake text-orange-600' : ''}`}>
                         {displayedText}
                     </p>
                     {/* Tail */}
@@ -147,7 +147,7 @@ const Stickman = ({
 
             {!isJumping && !isCrouching && (
                 <div className="text-center mt-2">
-                    <span className="stickman-name-label text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">{speaker}</span>
+                    <span className="stickman-name-label text-[9px] font-black uppercase tracking-widest text-slate-400">{speaker}</span>
                 </div>
             )}
         </div>

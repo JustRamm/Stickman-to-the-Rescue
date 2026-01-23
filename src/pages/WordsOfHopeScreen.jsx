@@ -189,13 +189,13 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
         setCurrentIndex(currentIndexRef.current);
 
         const items = [
-            { id: `correct-${q.id}-${Date.now()}`, x: 35, y: -15, speed: 0.12, text: q.correct, isCorrect: true, questionId: q.id },
-            { id: `stigma-${q.id}-${Date.now()}`, x: 65, y: -15, speed: 0.12, text: q.stigma, isCorrect: false, questionId: q.id }
+            { id: `correct-${q.id}-${Date.now()}`, x: 25, y: -15, speed: 0.12, text: q.correct, isCorrect: true, questionId: q.id },
+            { id: `stigma-${q.id}-${Date.now()}`, x: 75, y: -15, speed: 0.12, text: q.stigma, isCorrect: false, questionId: q.id }
         ];
 
         if (Math.random() > 0.5) {
-            items[0].x = 65;
-            items[1].x = 35;
+            items[0].x = 75;
+            items[1].x = 25;
         }
 
         fallingItemsRef.current = [...fallingItemsRef.current, ...items];

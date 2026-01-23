@@ -459,11 +459,11 @@ const App = () => {
     }
   }, [currentNode, gameState, selectedLevel, isPaused]);
 
-  // Wallet Toggle (Only pop up when it's the player's turn to respond)
+  // Wallet Toggle (Only pop up when it's the player's turn to respond AND they have choices)
   useEffect(() => {
-    if (gameState === 'DIALOGUE' && !isNpcSpeaking && !playerLastSaid && currentNode?.required_resource) {
+    if (gameState === 'DIALOGUE' && !isNpcSpeaking && !playerLastSaid && currentNode?.required_resource && currentNode?.options?.length > 0) {
       setIsWalletOpen(true);
-    } else if (isNpcSpeaking || playerLastSaid || !currentNode?.required_resource) {
+    } else if (isNpcSpeaking || playerLastSaid || !currentNode?.required_resource || !currentNode?.options?.length) {
       setIsWalletOpen(false);
     }
   }, [currentNode, isNpcSpeaking, gameState, playerLastSaid]);
@@ -713,7 +713,7 @@ const App = () => {
 
         {/* Detailed Empathy Reflection Popup */}
         {coachFeedback && (
-          <div className="fixed left-6 top-24 z-[100] w-[320px] animate-slide-in-left pointer-events-auto">
+          <div className="fixed left-6 top-44 z-[100] w-[320px] animate-slide-in-left pointer-events-auto">
             <div className={`relative overflow-hidden rounded-3xl border backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${coachFeedback.type === 'positive' ? 'bg-teal-900/40 border-teal-500/50' :
               coachFeedback.type === 'negative' ? 'bg-red-900/40 border-red-500/50' : 'bg-slate-900/40 border-slate-500/50'
               }`}>

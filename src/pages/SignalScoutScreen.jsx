@@ -101,8 +101,8 @@ const SignalScoutScreen = ({ audioManager, onExit, isPaused = false }) => {
                     x: isLeftStart ? -15 : 115, // Start further out
                     y: 15 + (potentialLane * 15),
                     direction: isLeftStart ? 1 : -1,
-                    // Base Reading Speed (Slow in middle)
-                    baseSpeed: scenario.type === 'risk' ? (0.03 + Math.random() * 0.02) : (0.05 + Math.random() * 0.02),
+                    // Base Reading Speed (Slow in middle) - Reduced for better readability
+                    baseSpeed: scenario.type === 'risk' ? (0.015 + Math.random() * 0.01) : (0.025 + Math.random() * 0.01),
                     asset: getStickmanAsset(scenario.category),
                     isClicked: false
                 };
@@ -127,9 +127,9 @@ const SignalScoutScreen = ({ audioManager, onExit, isPaused = false }) => {
             setPeople(prev => prev.map(p => {
                 // Dynamic Speed Curve: Fast at edges, Slow in Center [35% - 65%]
                 const distFromCenter = Math.abs(p.x - 50);
-                // Multiplier: 1x at center, scales up to 8x at edges
+                // Multiplier: 1x at center, scales up to 4x at edges (reduced from 8x for readability)
                 // If dist < 15 (within center 30%), multiplier is 1.
-                const speedMult = 1 + Math.max(0, (distFromCenter - 15) / 4);
+                const speedMult = 1 + Math.max(0, (distFromCenter - 15) / 8);
 
                 return {
                     ...p,
