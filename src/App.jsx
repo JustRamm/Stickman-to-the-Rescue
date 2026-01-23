@@ -96,6 +96,13 @@ const App = () => {
   const [isNpcSpeaking, setIsNpcSpeaking] = useState(false);
   const [showDiscoveryPopup, setShowDiscoveryPopup] = useState(false);
 
+  // Track seen dialogue nodes for skip feature
+  const [seenDialogueNodes, setSeenDialogueNodes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('qpr_seen_dialogue_v1')) || {};
+    } catch { return {}; }
+  });
+
   // Movement State
   const [isWalking, setIsWalking] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
@@ -153,6 +160,11 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('qpr_completed_missions_v5', JSON.stringify(completedLevels));
   }, [completedLevels]);
+
+  // Save Seen Dialogue Nodes
+  useEffect(() => {
+    localStorage.setItem('qpr_seen_dialogue_v1', JSON.stringify(seenDialogueNodes));
+  }, [seenDialogueNodes]);
 
   // Clean Legacy Data
   useEffect(() => {
@@ -250,6 +262,24 @@ const App = () => {
     window.addEventListener('keyup', handleKeyUp);
     return () => { window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('keyup', handleKeyUp); };
   }, [gameState, moveDir, isPaused]);
+
+  // Keyboard Skip for Dialogue
+  useEffect(() => {
+    if (gameState !== 'DIALOGUE') return;
+    const handleKeyDown = (e) => {
+      if (isPaused) return;
+      const dialogueKey = `${selectedLevel.id}_${currentNodeId}`;
+      const hasSeenBefore = seenDialogueNodes[dialogueKey];
+
+      // Allow skip with Space or Enter if dialogue was seen before and NPC is speaking
+      if ((e.key === ' ' || e.key === 'Enter') && isNpcSpeaking && !playerLastSaid && hasSeenBefore) {
+        e.preventDefault();
+        handleSkipDialogue();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, isPaused, isNpcSpeaking, playerLastSaid, selectedLevel, currentNodeId, seenDialogueNodes]);
 
   // Movement Engine (Loop)
   useEffect(() => {
@@ -424,6 +454,11 @@ const App = () => {
     else setGameState('LEVEL_SELECT');
   };
 
+  const handleSkipDialogue = () => {
+    audioManager.stopSpeaking();
+    setIsNpcSpeaking(false);
+  };
+
 
 
   // NPC Speech Effect
@@ -435,6 +470,15 @@ const App = () => {
       const isEnd = currentNode.isEnd;
       const npcGender = selectedLevel.npc.gender;
       const npcVoice = selectedLevel.npc.voice;
+
+      // Mark this dialogue node as seen
+      const dialogueKey = `${selectedLevel.id}_${currentNodeId}`;
+      if (!seenDialogueNodes[dialogueKey]) {
+        setSeenDialogueNodes(prev => ({
+          ...prev,
+          [dialogueKey]: true
+        }));
+      }
 
       setIsNpcSpeaking(true);
       setNpcLastSaid(text);
@@ -457,7 +501,7 @@ const App = () => {
         // Removed audioManager.stopSpeaking() to prevent cutting off transitions
       };
     }
-  }, [currentNode, gameState, selectedLevel, isPaused]);
+  }, [currentNode, gameState, selectedLevel, isPaused, currentNodeId, seenDialogueNodes]);
 
   // Wallet Toggle (Only pop up when it's the player's turn to respond AND they have choices)
   useEffect(() => {
@@ -786,6 +830,25 @@ const App = () => {
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-teal-500 text-white px-6 py-3 rounded-full shadow-2xl animate-bounce flex items-center gap-3">
           <span className="text-xl">✅</span>
           <span className="font-bold uppercase tracking-widest text-xs">Clue Added to Journal</span>
+        </div>
+      )}
+
+      {/* Skip Dialogue Button - Shows when NPC is speaking on previously seen dialogue */}
+      {gameState === 'DIALOGUE' && isNpcSpeaking && !playerLastSaid && seenDialogueNodes[`${selectedLevel.id}_${currentNodeId}`] && (
+        <div className="absolute top-[15%] right-8 z-[100] animate-fade-in">
+          <button
+            onClick={handleSkipDialogue}
+            className="group flex items-center gap-2 px-4 py-2 bg-slate-800/90 hover:bg-slate-700 backdrop-blur-md border border-white/20 text-white rounded-full shadow-lg transition-all hover:scale-105 active:scale-95"
+          >
+            <span className="text-xs font-bold uppercase tracking-widest">Skip</span>
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+          <div className="text-center mt-1 space-y-0.5">
+            <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider block">Previously Seen</span>
+            <span className="text-[7px] font-medium text-white/30 uppercase tracking-wide">Press Space or Enter</span>
+          </div>
         </div>
       )}
 
