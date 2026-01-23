@@ -40,7 +40,7 @@ const GenderSelectScreen = ({ trust, playerGender, setPlayerGender, audioManager
                     }}
                     className="w-full py-2 md:py-3 bg-teal-600 text-white rounded-lg md:rounded-xl font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all hover:scale-[1.02] active:scale-95"
                 >
-                    Confirm & Continue
+                    Confirm Selection
                 </button>
             </div>
         </div>

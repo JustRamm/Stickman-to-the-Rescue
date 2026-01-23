@@ -84,8 +84,22 @@ const App = () => {
   };
 
   // Player State
-  const [playerName, setPlayerName] = useState('You');
-  const [playerGender, setPlayerGender] = useState('guy');
+  const [playerName, setPlayerName] = useState(() => {
+    return localStorage.getItem('qpr_player_name') || 'You';
+  });
+  const [playerGender, setPlayerGender] = useState(() => {
+    return localStorage.getItem('qpr_player_gender') || 'guy';
+  });
+
+  // Persist Player State
+  useEffect(() => {
+    localStorage.setItem('qpr_player_name', playerName);
+  }, [playerName]);
+
+  useEffect(() => {
+    localStorage.setItem('qpr_player_gender', playerGender);
+  }, [playerGender]);
+
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
   const [completedLevels, setCompletedLevels] = useState(() => {
     try {

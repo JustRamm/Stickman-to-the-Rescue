@@ -46,7 +46,7 @@ const NamingScreen = ({ trust, playerName, setPlayerName, onNext, onNavigate }) 
                     onClick={onNext}
                     className="w-full py-2 md:py-3 bg-teal-600 text-white rounded-lg md:rounded-xl font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-teal-700 shadow-xl shadow-teal-600/30 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
                 >
-                    Choose Gender
+                    Continue
                 </button>
             </div>
         </div>
