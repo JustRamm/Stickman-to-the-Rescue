@@ -120,7 +120,32 @@ Designed for a premium Landscape experience on mobile devices, installable as a 
 | **Styling** | Tailwind CSS (custom animations, glassmorphism) |
 | **State Management** | React Hooks, LocalStorage |
 | **Audio** | Web Audio API, Web Speech API |
+| **Authentication** | Supabase Auth (Email + Google OAuth) |
 | **PWA** | Service Worker, Web App Manifest |
+
+</div>
+
+---
+
+## Authentication
+
+The application uses **Supabase** for secure user authentication with support for:
+
+- ✅ **Email/Password Authentication** with email verification
+- ✅ **Google OAuth** for one-click sign-in
+- ✅ **Password Reset** functionality
+- ✅ **Session Management** with automatic token refresh
+- ✅ **Secure Storage** with PKCE flow
+
+### Setup Instructions
+
+1. **Email Authentication** is ready to use out of the box
+2. **Google OAuth** requires additional setup - see [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
+3. All authentication flows include proper error handling and user feedback
+
+For complete setup instructions and troubleshooting, see:
+- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - Detailed setup guide
+- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Technical implementation details
 
 </div>
 

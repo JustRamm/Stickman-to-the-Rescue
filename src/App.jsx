@@ -33,6 +33,8 @@ import { INNER_THOUGHTS, CLUE_POSITIONS, CLUE_DETAILS, BACKGROUND_NPCS } from '.
 import { audioManager } from './utils/audio';
 import { REAL_RESOURCES } from './data/resources';
 import { PLAYER_CARDS } from './data/resourceRelayData';
+import { authService } from './utils/authService';
+import { dbService } from './utils/dbService';
 
 const App = () => {
   // Game State
@@ -44,10 +46,9 @@ const App = () => {
   const [authView, setAuthView] = useState('signup'); // 'signup' or 'signin'
 
   // Logout Handler
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
-      localStorage.removeItem('qpr_auth_token');
-      localStorage.removeItem('qpr_user');
+      await authService.signOut();
       setIsAuthenticated(false);
       setCurrentUser(null);
       setGameState('START');
@@ -55,18 +56,99 @@ const App = () => {
     }
   };
 
-  // Check authentication on mount
+  // Check authentication on mount and listen for auth changes
   useEffect(() => {
-    // Removed to enforce authentication flow every time on start
-    /*
-    const authToken = localStorage.getItem('qpr_auth_token');
-    const userData = localStorage.getItem('qpr_user');
+    // Load user data from database
+    const loadUserData = async (userId) => {
+      try {
+        // Load profile
+        const { profile } = await dbService.getOrCreateProfile(userId);
+        if (profile) {
+          if (profile.username) {
+            setPlayerName(profile.username);
+          }
+          if (profile.player_gender) {
+            setPlayerGender(profile.player_gender);
+          }
+        }
 
-    if (authToken && userData) {
-      setIsAuthenticated(true);
-      setCurrentUser(JSON.parse(userData));
-    }
-    */
+        // Load completed missions
+        const { missions } = await dbService.getCompletedMissions(userId);
+        if (missions && missions.length > 0) {
+          const completedIds = missions.map(m => m.mission_id);
+          setCompletedLevels(completedIds);
+        }
+
+        // Load settings
+        const { settings: userSettings } = await dbService.getUserSettings(userId);
+        if (userSettings) {
+          setSettings({
+            audioVolume: userSettings.audio_volume,
+            ttsEnabled: userSettings.tts_enabled,
+            textSpeed: userSettings.text_speed,
+            devMode: false
+          });
+        }
+
+        // Determine which screen to show
+        if (profile?.username && profile?.player_gender) {
+          // User has completed profile setup, go to level select
+          setGameState('LEVEL_SELECT');
+        } else if (profile?.username) {
+          // Has username but not gender
+          setGameState('GENDER_SELECT');
+        } else {
+          // New user, start with naming
+          setGameState('NAMING');
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        setGameState('NAMING');
+      }
+    };
+
+    // Check for existing session
+    const checkSession = async () => {
+      const { session } = await authService.getSession();
+      if (session?.user) {
+        setIsAuthenticated(true);
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          createdAt: session.user.created_at
+        });
+
+        // Load user data from database
+        await loadUserData(session.user.id);
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth state changes (handles OAuth callbacks and sign-ins)
+    const subscription = authService.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event, session);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        setIsAuthenticated(true);
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          createdAt: session.user.created_at
+        });
+
+        // Load user data from database
+        await loadUserData(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setGameState('START');
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
   // Settings
@@ -106,14 +188,24 @@ const App = () => {
     return localStorage.getItem('qpr_player_gender') || 'guy';
   });
 
-  // Persist Player State
+  // Persist Player State to localStorage and database
   useEffect(() => {
     localStorage.setItem('qpr_player_name', playerName);
-  }, [playerName]);
+
+    // Save to database if user is authenticated
+    if (currentUser?.id && playerName !== 'You') {
+      dbService.updateProfile(currentUser.id, { username: playerName });
+    }
+  }, [playerName, currentUser]);
 
   useEffect(() => {
     localStorage.setItem('qpr_player_gender', playerGender);
-  }, [playerGender]);
+
+    // Save to database if user is authenticated
+    if (currentUser?.id) {
+      dbService.updateProfile(currentUser.id, { player_gender: playerGender });
+    }
+  }, [playerGender, currentUser]);
 
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
   const [completedLevels, setCompletedLevels] = useState(() => {
@@ -224,11 +316,21 @@ const App = () => {
   // Audio & Settings
   useEffect(() => {
     localStorage.setItem('qpr_settings', JSON.stringify(settings));
+
+    // Save to database if user is authenticated
+    if (currentUser?.id) {
+      dbService.updateUserSettings(currentUser.id, {
+        audio_volume: settings.audioVolume,
+        tts_enabled: settings.ttsEnabled,
+        text_speed: settings.textSpeed
+      });
+    }
+
     if (audioManager.initialized) {
       audioManager.setVolume(settings.audioVolume);
       audioManager.toggleTTS(settings.ttsEnabled);
     }
-  }, [settings]);
+  }, [settings, currentUser]);
 
   // Orientation Check
   useEffect(() => {
@@ -487,12 +589,19 @@ const App = () => {
     }
   };
 
-  const handleEndGameContinue = () => {
+  const handleEndGameContinue = async () => {
     audioManager.stopMusic();
     audioManager.stopSpeaking();
+
     if (currentNode.result === 'success' && !completedLevels.includes(selectedLevel.id)) {
       setCompletedLevels(prev => [...prev, selectedLevel.id]);
+
+      // Save to database if user is authenticated
+      if (currentUser?.id) {
+        await dbService.saveCompletedMission(currentUser.id, selectedLevel.id, trust);
+      }
     }
+
     setTrust(25);
     setPlayerPos({ x: 5, y: 70 });
     setHistory([]);

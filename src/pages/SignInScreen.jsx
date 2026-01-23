@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { authService } from '../utils/authService';
 
 const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp, onBack }) => {
     const [formData, setFormData] = useState({
@@ -7,6 +8,9 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp, onBack }) => {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [showResetPassword, setShowResetPassword] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetMessage, setResetMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -42,22 +46,67 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp, onBack }) => {
         if (!validateForm()) return;
 
         setIsLoading(true);
+        setErrors({});
 
-        // Simulate API call
-        setTimeout(() => {
-            // Check if user exists in localStorage
-            const storedUser = localStorage.getItem('qpr_user');
+        const { user, session, error } = await authService.signInWithEmail(
+            formData.email,
+            formData.password
+        );
 
-            if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                localStorage.setItem('qpr_auth_token', 'demo_token_' + Date.now());
-                setIsLoading(false);
-                onSignInSuccess(userData);
+        setIsLoading(false);
+
+        if (error) {
+            if (error.includes('Email not confirmed')) {
+                setErrors({ email: 'Please verify your email before signing in. Check your inbox for the verification link.' });
+            } else if (error.includes('Invalid login credentials')) {
+                setErrors({ email: 'Invalid email or password. Please try again.' });
             } else {
-                setIsLoading(false);
-                setErrors({ email: 'Account not found. Please sign up first.' });
+                setErrors({ email: error });
             }
-        }, 1500);
+            return;
+        }
+
+        const userData = {
+            id: user.id,
+            email: user.email,
+            createdAt: user.created_at
+        };
+        onSignInSuccess(userData);
+    };
+
+    const handleGoogleSignIn = async () => {
+        setIsLoading(true);
+        setErrors({});
+
+        const { error } = await authService.signInWithGoogle();
+
+        if (error) {
+            setIsLoading(false);
+            setErrors({ email: error });
+        }
+        // Note: Google OAuth will redirect, so we don't set loading to false here
+    };
+
+    const handleResetPassword = async () => {
+        if (!resetEmail) {
+            setResetMessage('Please enter your email address');
+            return;
+        }
+
+        setIsLoading(true);
+        const { error } = await authService.resetPassword(resetEmail);
+        setIsLoading(false);
+
+        if (error) {
+            setResetMessage(error);
+        } else {
+            setResetMessage('Password reset email sent! Check your inbox.');
+            setTimeout(() => {
+                setShowResetPassword(false);
+                setResetMessage('');
+                setResetEmail('');
+            }, 3000);
+        }
     };
 
     return (
@@ -213,6 +262,7 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp, onBack }) => {
                         <div className="flex justify-end">
                             <button
                                 type="button"
+                                onClick={() => setShowResetPassword(true)}
                                 className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest"
                             >
                                 Request Access Reset
@@ -240,6 +290,30 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp, onBack }) => {
                         </div>
                     </form>
 
+                    {/* Google Sign In */}
+                    <div className="mt-6">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="h-[1px] flex-1 bg-slate-200"></div>
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Or Continue With</span>
+                            <div className="h-[1px] flex-1 bg-slate-200"></div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading}
+                            className="w-full py-3 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold text-sm rounded-sm transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
+                        >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                            <span>Sign in with Google</span>
+                        </button>
+                    </div>
+
                     <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col items-center gap-3">
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">New to the mission?</p>
                         <button
@@ -263,6 +337,57 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp, onBack }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Password Reset Modal */}
+            {showResetPassword && (
+                <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-scale-in">
+                        <div className="flex justify-between items-start mb-6">
+                            <h2 className="text-2xl font-black uppercase text-slate-900 tracking-tight">Reset Password</h2>
+                            <button
+                                onClick={() => {
+                                    setShowResetPassword(false);
+                                    setResetMessage('');
+                                    setResetEmail('');
+                                }}
+                                className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                            Enter your email address and we'll send you a link to reset your password.
+                        </p>
+
+                        {resetMessage && (
+                            <div className={`mb-4 p-3 rounded-lg ${resetMessage.includes('sent') ? 'bg-teal-50 text-teal-700' : 'bg-red-50 text-red-700'}`}>
+                                <p className="text-sm font-medium">{resetMessage}</p>
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <input
+                                type="email"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                placeholder="your.email@example.com"
+                                className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-indigo-500 focus:outline-none transition-all"
+                            />
+
+                            <button
+                                onClick={handleResetPassword}
+                                disabled={isLoading}
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold uppercase tracking-widest text-xs rounded-lg transition-all disabled:opacity-50"
+                            >
+                                {isLoading ? 'Sending...' : 'Send Reset Link'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
