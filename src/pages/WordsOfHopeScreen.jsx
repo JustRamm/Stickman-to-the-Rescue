@@ -13,6 +13,14 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
     const [stigmaAlert, setStigmaAlert] = useState(null); // Left side alert data
     const [isAlertVisible, setIsAlertVisible] = useState(false);
 
+    // New Enhanced Features
+    const [streak, setStreak] = useState(0); // Consecutive correct catches
+    const [maxStreak, setMaxStreak] = useState(0); // Best streak this session
+    const [explanationMode, setExplanationMode] = useState(false); // Toggle for showing explanations
+    const [wordHistory, setWordHistory] = useState([]); // Track all word pairs encountered
+    const [baseSpeed, setBaseSpeed] = useState(0.12); // Progressive difficulty - increases with score
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false); // Glossary panel toggle
+
     // Refs for Game Loop (Prevents stale closures)
     const scoreRef = useRef(0);
     const currentIndexRef = useRef(0);
@@ -64,6 +72,13 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
         isProcessingSetRef.current = false;
         hasInteractionRef.current = false;
         spawnCooldownRef.current = 1000; // Initial delay
+
+        // Reset new enhanced features
+        setStreak(0);
+        setWordHistory([]);
+        setBaseSpeed(0.12); // Start at base difficulty
+        setIsHistoryOpen(false);
+
         audioManager.playPop();
         if (audioManager) audioManager.startAmbient('park');
     };
@@ -189,8 +204,26 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
         setCurrentIndex(currentIndexRef.current);
 
         const items = [
-            { id: `correct-${q.id}-${Date.now()}`, x: 25, y: -15, speed: 0.12, text: q.correct, isCorrect: true, questionId: q.id },
-            { id: `stigma-${q.id}-${Date.now()}`, x: 75, y: -15, speed: 0.12, text: q.stigma, isCorrect: false, questionId: q.id }
+            {
+                id: `correct-${q.id}-${Date.now()}`,
+                x: 25,
+                y: -15,
+                speed: baseSpeed,
+                text: q.correct,
+                isCorrect: true,
+                questionId: q.id,
+                trailColor: 'rgba(45, 212, 191, 0.3)' // Teal trail for correct
+            },
+            {
+                id: `stigma-${q.id}-${Date.now()}`,
+                x: 75,
+                y: -15,
+                speed: baseSpeed,
+                text: q.stigma,
+                isCorrect: false,
+                questionId: q.id,
+                trailColor: 'rgba(239, 68, 68, 0.3)' // Red trail for incorrect
+            }
         ];
 
         if (Math.random() > 0.5) {
@@ -209,10 +242,30 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
         const q = shuffledQuestions.find(sq => sq.id === item.questionId);
         if (!q) return;
 
+        // Add to word history (avoid duplicates)
+        setWordHistory(prev => {
+            const exists = prev.find(w => w.id === q.id);
+            if (!exists) {
+                return [...prev, { ...q, timestamp: Date.now(), wasCorrect: item.isCorrect }];
+            }
+            return prev;
+        });
+
         if (item.isCorrect) {
             setScore(s => s + 1);
             scoreRef.current += 1;
             setHarmony(h => Math.min(100, h + 15));
+
+            // Update streak
+            setStreak(prev => {
+                const newStreak = prev + 1;
+                setMaxStreak(max => Math.max(max, newStreak));
+                return newStreak;
+            });
+
+            // Progressive difficulty - increase speed slightly with each correct catch
+            setBaseSpeed(prev => Math.min(0.25, prev + 0.01)); // Cap at 0.25 for playability
+
             audioManager.playDing();
             audioManager.playCoachTip();
             setExplanation({
@@ -222,6 +275,10 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
             });
         } else {
             setHarmony(h => Math.max(0, h - 25));
+
+            // Break streak on mistake
+            setStreak(0);
+
             audioManager.playSad();
             audioManager.playCoachTip();
             setStigmaAlert({
@@ -368,11 +425,45 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                     <div className="h-0.5 w-full bg-gradient-to-r from-teal-400 to-transparent rounded-full mt-1" />
                 </div>
 
-                <div className="flex items-center gap-6 words-of-hope-hdr-actions">
+                <div className="flex items-center gap-4 words-of-hope-hdr-actions">
+                    {/* Streak Counter */}
+                    {gameState === 'PLAYING' && (
+                        <div className="flex flex-col items-center bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl">
+                            <span className="text-[8px] font-black text-orange-400 uppercase tracking-widest leading-none mb-1">🔥 Streak</span>
+                            <span className="text-white font-black text-2xl leading-none">{streak}</span>
+                            {maxStreak > 0 && <span className="text-[7px] text-white/40 mt-0.5">Best: {maxStreak}</span>}
+                        </div>
+                    )}
+
                     <div className="flex flex-col items-end">
                         <span className="text-[8px] font-black text-teal-400 uppercase tracking-widest leading-none mb-1">Target: 4 Seeds</span>
                         <span className="text-white font-black text-xl leading-none">{score}<span className="text-white/30 text-sm font-medium ml-1">/ 4</span></span>
                     </div>
+
+                    {/* Explanation Mode Toggle */}
+                    {gameState === 'PLAYING' && (
+                        <button
+                            onClick={() => setExplanationMode(!explanationMode)}
+                            className={`px-3 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 border ${explanationMode
+                                ? 'bg-teal-500 border-teal-400 text-white'
+                                : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                                }`}
+                            title="Show explanations on words"
+                        >
+                            💡 Tips
+                        </button>
+                    )}
+
+                    {/* Word History Button */}
+                    {gameState === 'PLAYING' && wordHistory.length > 0 && (
+                        <button
+                            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                            className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+                        >
+                            📚 History ({wordHistory.length})
+                        </button>
+                    )}
+
                     <button
                         onClick={onExit}
                         className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
@@ -402,23 +493,38 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                 <>
                     {/* Falling Items Area */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                        {fallingItems.map(item => (
-                            <div
-                                key={item.id}
-                                className="absolute transition-transform duration-100 flex items-center justify-center p-4 rounded-3xl border-2 shadow-2xl bg-white/10 border-white/20 text-white"
-                                style={{
-                                    left: `${item.x}%`,
-                                    top: `${item.y}%`,
-                                    transform: `translate(-50%, -50%)`,
-                                    maxWidth: 'min(260px, 40vw)',
-                                    textAlign: 'center',
-                                    backdropFilter: 'blur(12px)',
-                                    WebkitBackdropFilter: 'blur(12px)'
-                                }}
-                            >
-                                <span className="text-[10px] md:text-sm font-black leading-tight uppercase tracking-wider">{item.text}</span>
-                            </div>
-                        ))}
+                        {fallingItems.map(item => {
+                            const q = shuffledQuestions.find(sq => sq.id === item.questionId);
+                            return (
+                                <div
+                                    key={item.id}
+                                    className="absolute transition-transform duration-100 flex flex-col items-center justify-center p-4 rounded-3xl border-2 shadow-2xl bg-white/10 border-white/20 text-white group"
+                                    style={{
+                                        left: `${item.x}%`,
+                                        top: `${item.y}%`,
+                                        transform: `translate(-50%, -50%)`,
+                                        maxWidth: 'min(260px, 40vw)',
+                                        textAlign: 'center',
+                                        backdropFilter: 'blur(12px)',
+                                        WebkitBackdropFilter: 'blur(12px)',
+                                        // Visual trail effect
+                                        boxShadow: `0 0 30px ${item.trailColor}, 0 10px 40px ${item.trailColor}`
+                                    }}
+                                >
+                                    <span className="text-[10px] md:text-sm font-black leading-tight uppercase tracking-wider">{item.text}</span>
+
+                                    {/* Explanation Mode Tooltip */}
+                                    {explanationMode && q && (
+                                        <div className={`mt-2 text-[8px] font-medium leading-snug px-2 py-1 rounded-lg ${item.isCorrect
+                                            ? 'bg-teal-500/80 text-white'
+                                            : 'bg-red-500/80 text-white'
+                                            }`}>
+                                            {item.isCorrect ? '✓ Empowering' : '✗ Stigmatizing'}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {/* Knowledge Sidebar */}
@@ -487,6 +593,66 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                         ))}
                     </div>
 
+                    {/* Word History / Glossary Panel */}
+                    {isHistoryOpen && (
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] w-full max-w-2xl px-4 animate-scale-in">
+                            <div className="bg-white/95 backdrop-blur-xl rounded-3xl border-2 border-white shadow-2xl p-6 max-h-[70vh] overflow-hidden flex flex-col">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center text-2xl">📚</div>
+                                        <div>
+                                            <h3 className="text-lg font-black uppercase text-slate-800 tracking-wide">Word Glossary</h3>
+                                            <p className="text-[10px] text-slate-500 font-medium">Review what you've learned</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsHistoryOpen(false)}
+                                        className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition-all"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                {/* Scrollable Content */}
+                                <div className="overflow-y-auto flex-1 space-y-3 pr-2 custom-scrollbar">
+                                    {wordHistory.map((word, index) => (
+                                        <div key={word.id} className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                            <div className="flex items-start gap-3 mb-3">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg shrink-0 ${word.wasCorrect ? 'bg-teal-100 text-teal-600' : 'bg-red-100 text-red-600'
+                                                    }`}>
+                                                    {word.wasCorrect ? '✓' : '✗'}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[8px] font-black text-teal-600 uppercase tracking-widest">Better Choice</span>
+                                                    </div>
+                                                    <p className="text-sm font-bold text-slate-800 leading-tight mb-2">"{word.correct}"</p>
+
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[8px] font-black text-red-600 uppercase tracking-widest">Avoid</span>
+                                                    </div>
+                                                    <p className="text-xs font-medium text-slate-500 line-through leading-tight mb-3">"{word.stigma}"</p>
+
+                                                    <div className="pt-3 border-t border-slate-200">
+                                                        <p className="text-[10px] text-slate-600 font-medium leading-relaxed">{word.why}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Footer */}
+                                <div className="mt-4 pt-4 border-t border-slate-200 text-center">
+                                    <p className="text-[10px] text-slate-400 font-bold italic">
+                                        {wordHistory.length} word pair{wordHistory.length !== 1 ? 's' : ''} encountered
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Player */}
                     <div className="absolute z-[100]" style={{ left: `${playerX}%`, bottom: '10%', transform: 'translateX(-50%)' }}>
                         <div className="relative">
@@ -506,7 +672,18 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                     <div className="w-32 h-32 bg-teal-500 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl shadow-2xl border-4 border-white">🌱</div>
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Don't Give Up!</h2>
                     <p className="text-teal-200 text-lg md:text-xl font-bold mb-4 uppercase tracking-widest text-balance">Mistakes are part of learning. Try again to master the language of hope.</p>
-                    <p className="text-white/50 text-xs font-black uppercase tracking-widest mb-12">Progress: {score}/4 Seeds Collected</p>
+                    <div className="flex gap-6 mb-8">
+                        <div className="flex flex-col items-center">
+                            <p className="text-white/50 text-xs font-black uppercase tracking-widest">Progress</p>
+                            <p className="text-white text-2xl font-black">{score}/4</p>
+                        </div>
+                        {maxStreak > 0 && (
+                            <div className="flex flex-col items-center">
+                                <p className="text-white/50 text-xs font-black uppercase tracking-widest">Best Streak</p>
+                                <p className="text-orange-400 text-2xl font-black">🔥 {maxStreak}</p>
+                            </div>
+                        )}
+                    </div>
                     <div className="flex flex-col gap-4 w-full words-of-hope-retry-btns">
                         <button onClick={startGame} className="w-full py-5 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl hover:bg-slate-100 transition-all">Try Again</button>
                         <button onClick={onExit} className="w-full py-5 bg-white/10 text-white border border-white/20 rounded-2xl font-black uppercase tracking-widest text-xs transition-all opacity-50">Return</button>
@@ -520,7 +697,18 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                         <img src="/stickman_assets/hope_stickman.svg" alt="Success" className="w-20 h-20 drop-shadow-lg" />
                     </div>
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Wisdom Path</h2>
-                    <p className="text-teal-200 text-xl font-bold mb-4 uppercase tracking-widest">Final Score: {score}/4</p>
+                    <div className="flex gap-6 mb-4">
+                        <div className="flex flex-col items-center">
+                            <p className="text-teal-200 text-sm font-bold uppercase tracking-widest">Final Score</p>
+                            <p className="text-white text-3xl font-black">{score}/4</p>
+                        </div>
+                        {maxStreak > 0 && (
+                            <div className="flex flex-col items-center">
+                                <p className="text-orange-200 text-sm font-bold uppercase tracking-widest">Max Streak</p>
+                                <p className="text-orange-400 text-3xl font-black">🔥 {maxStreak}</p>
+                            </div>
+                        )}
+                    </div>
                     <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-12 italic">Seeds of Wisdom Rooted</p>
                     <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 mb-12 border border-white/20">
                         <p className="text-white text-lg font-medium leading-relaxed italic">"You have successfully navigated the language of stigma. Choosing the right words is the first step in saving a life."</p>
