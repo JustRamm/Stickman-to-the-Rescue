@@ -62,23 +62,90 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp }) => {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-indigo-900 via-slate-900 to-teal-900 flex items-center justify-center p-4 overflow-hidden relative">
-            {/* Animated Background Elements */}
+            {/* QPR Office Interior Background - Different Layout */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[20%] right-[10%] w-72 h-72 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-[15%] left-[10%] w-80 h-80 bg-teal-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+                {/* Floor */}
+                <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-slate-800/80 to-transparent"></div>
 
-                {/* Floating Stickman Characters */}
-                <img
-                    src="/stickman_assets/thinking_stickman.svg"
-                    alt=""
-                    className="absolute top-[10%] left-[15%] w-16 h-16 opacity-10 animate-float-slow"
-                />
-                <img
-                    src="/stickman_assets/stickman_hands.svg"
-                    alt=""
-                    className="absolute bottom-[25%] right-[12%] w-20 h-20 opacity-10 animate-float-slow"
-                    style={{ animationDelay: '1s' }}
-                />
+                {/* Back Wall */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-800/60 to-slate-900/40"></div>
+
+                {/* Large Window - Left Side */}
+                <div className="absolute top-[8%] left-[3%] w-[40%] h-[45%] bg-gradient-to-br from-indigo-900/30 to-teal-900/30 rounded-lg border-4 border-slate-700/50 overflow-hidden">
+                    {/* Window panes - 3x3 grid */}
+                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1.5 p-2">
+                        {[...Array(9)].map((_, i) => (
+                            <div key={i} className="bg-indigo-500/10 rounded"></div>
+                        ))}
+                    </div>
+                    {/* City skyline outside */}
+                    <div className="absolute bottom-[20%] left-[15%] w-3 h-8 bg-slate-700/40"></div>
+                    <div className="absolute bottom-[20%] left-[30%] w-4 h-12 bg-slate-700/40"></div>
+                    <div className="absolute bottom-[20%] right-[20%] w-3 h-10 bg-slate-700/40"></div>
+                </div>
+
+                {/* Conference Table - Center */}
+                <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 w-[30%] h-[18%]">
+                    {/* Table top */}
+                    <div className="absolute bottom-0 w-full h-[35%] bg-gradient-to-b from-slate-600/40 to-slate-700/40 rounded-lg border-2 border-slate-600/30"></div>
+                    {/* Table legs */}
+                    <div className="absolute bottom-0 left-[15%] w-[6%] h-[65%] bg-slate-700/40"></div>
+                    <div className="absolute bottom-0 right-[15%] w-[6%] h-[65%] bg-slate-700/40"></div>
+                    {/* Coffee mug on table */}
+                    <div className="absolute bottom-[35%] left-[40%] w-[12%] h-[20%] bg-teal-600/40 rounded-b-lg border border-teal-500/30"></div>
+                </div>
+
+                {/* Filing Cabinet - Right */}
+                <div className="absolute bottom-[15%] right-[10%] w-[18%] h-[30%] bg-slate-700/30 rounded border-2 border-slate-600/30">
+                    {/* Drawers */}
+                    <div className="absolute top-[15%] left-[10%] right-[10%] h-[18%] bg-slate-600/30 rounded border border-slate-500/20">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20%] h-[30%] bg-slate-500/40 rounded-sm"></div>
+                    </div>
+                    <div className="absolute top-[45%] left-[10%] right-[10%] h-[18%] bg-slate-600/30 rounded border border-slate-500/20">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20%] h-[30%] bg-slate-500/40 rounded-sm"></div>
+                    </div>
+                    <div className="absolute top-[75%] left-[10%] right-[10%] h-[18%] bg-slate-600/30 rounded border border-slate-500/20">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20%] h-[30%] bg-slate-500/40 rounded-sm"></div>
+                    </div>
+                </div>
+
+                {/* Wall Clock */}
+                <div className="absolute top-[15%] right-[45%] w-[8%] aspect-square">
+                    <div className="w-full h-full bg-slate-700/40 rounded-full border-2 border-slate-600/40 flex items-center justify-center">
+                        <div className="w-[70%] h-[70%] bg-slate-600/20 rounded-full"></div>
+                        {/* Clock hands */}
+                        <div className="absolute w-[2px] h-[30%] bg-slate-500/60 origin-bottom" style={{ transform: 'rotate(90deg)' }}></div>
+                        <div className="absolute w-[2px] h-[25%] bg-slate-500/60 origin-bottom" style={{ transform: 'rotate(180deg)' }}></div>
+                    </div>
+                </div>
+
+                {/* Motivational Poster - "You Can Save Lives" */}
+                <div className="absolute top-[25%] right-[8%] w-[18%] h-[25%] bg-slate-700/40 rounded border-2 border-slate-600/40 p-2 flex flex-col items-center justify-center">
+                    <div className="text-indigo-400/40 text-[10px] font-black text-center leading-tight">SAVE<br />LIVES</div>
+                    <div className="mt-2 w-[60%] h-[40%] flex items-center justify-center">
+                        <div className="w-8 h-8 bg-teal-500/20 rounded-full"></div>
+                    </div>
+                </div>
+
+                {/* Office Chair */}
+                <div className="absolute bottom-[15%] left-[15%] w-[12%] h-[18%]">
+                    {/* Seat */}
+                    <div className="absolute bottom-[40%] w-full h-[25%] bg-slate-600/40 rounded-t-lg border border-slate-500/30"></div>
+                    {/* Backrest */}
+                    <div className="absolute bottom-[50%] left-[20%] w-[60%] h-[40%] bg-slate-600/40 rounded-t-lg border border-slate-500/30"></div>
+                    {/* Base */}
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[35%] bg-slate-700/40"></div>
+                </div>
+
+                {/* Ceiling Light */}
+                <div className="absolute top-[5%] left-1/2 -translate-x-1/2 w-[15%] h-[8%]">
+                    <div className="w-full h-full bg-yellow-200/10 rounded-full blur-2xl"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40%] h-[40%] bg-slate-600/40 rounded-full border-2 border-slate-500/30"></div>
+                </div>
+
+                {/* Ambient Glow */}
+                <div className="absolute top-[20%] right-[10%] w-72 h-72 bg-indigo-500/5 rounded-full blur-[100px] animate-pulse"></div>
+                <div className="absolute bottom-[15%] left-[10%] w-80 h-80 bg-teal-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
             </div>
 
             {/* Main Card */}
@@ -123,8 +190,8 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp }) => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-3 rounded-xl border-2 ${errors.email
-                                            ? 'border-red-300 bg-red-50'
-                                            : 'border-slate-200 bg-white'
+                                        ? 'border-red-300 bg-red-50'
+                                        : 'border-slate-200 bg-white'
                                         } focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium text-slate-800`}
                                     placeholder="your.email@example.com"
                                 />
@@ -146,8 +213,8 @@ const SignInScreen = ({ onSignInSuccess, onSwitchToSignUp }) => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-3 rounded-xl border-2 ${errors.password
-                                            ? 'border-red-300 bg-red-50'
-                                            : 'border-slate-200 bg-white'
+                                        ? 'border-red-300 bg-red-50'
+                                        : 'border-slate-200 bg-white'
                                         } focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium text-slate-800`}
                                     placeholder="••••••••"
                                 />

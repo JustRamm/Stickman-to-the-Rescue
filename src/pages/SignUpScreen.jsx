@@ -70,23 +70,84 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn }) => {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 flex items-center justify-center p-4 overflow-hidden relative">
-            {/* Animated Background Elements */}
+            {/* QPR Office Interior Background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[10%] left-[5%] w-64 h-64 bg-teal-500/10 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-[10%] right-[5%] w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+                {/* Floor */}
+                <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-slate-800/80 to-transparent"></div>
 
-                {/* Floating Stickman Characters */}
-                <img
-                    src="/stickman_assets/hope_stickman.svg"
-                    alt=""
-                    className="absolute top-[15%] right-[10%] w-16 h-16 opacity-10 animate-float-slow"
-                />
-                <img
-                    src="/stickman_assets/happy_stickman.svg"
-                    alt=""
-                    className="absolute bottom-[20%] left-[8%] w-20 h-20 opacity-10 animate-float-slow"
-                    style={{ animationDelay: '2s' }}
-                />
+                {/* Back Wall */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-800/60 to-slate-900/40"></div>
+
+                {/* Window with City View */}
+                <div className="absolute top-[10%] right-[5%] w-[35%] h-[40%] bg-gradient-to-br from-teal-900/30 to-indigo-900/30 rounded-lg border-4 border-slate-700/50 overflow-hidden">
+                    {/* Window panes */}
+                    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-2 p-2">
+                        <div className="bg-teal-500/10 rounded"></div>
+                        <div className="bg-teal-500/10 rounded"></div>
+                        <div className="bg-indigo-500/10 rounded"></div>
+                        <div className="bg-indigo-500/10 rounded"></div>
+                    </div>
+                    {/* City lights outside */}
+                    <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-yellow-400/40 rounded-full blur-sm"></div>
+                    <div className="absolute top-[40%] right-[15%] w-2 h-2 bg-yellow-400/30 rounded-full blur-sm"></div>
+                    <div className="absolute bottom-[30%] left-[25%] w-2 h-2 bg-yellow-400/35 rounded-full blur-sm"></div>
+                </div>
+
+                {/* Desk on the left */}
+                <div className="absolute bottom-[15%] left-[8%] w-[25%] h-[20%]">
+                    {/* Desk surface */}
+                    <div className="absolute bottom-0 w-full h-[30%] bg-gradient-to-b from-slate-600/40 to-slate-700/40 rounded-t-lg border-2 border-slate-600/30"></div>
+                    {/* Desk legs */}
+                    <div className="absolute bottom-0 left-[10%] w-[8%] h-[70%] bg-slate-700/40"></div>
+                    <div className="absolute bottom-0 right-[10%] w-[8%] h-[70%] bg-slate-700/40"></div>
+                    {/* Laptop on desk */}
+                    <div className="absolute bottom-[30%] left-[30%] w-[40%] h-[25%] bg-slate-600/50 rounded-sm border border-slate-500/40">
+                        <div className="w-full h-[60%] bg-teal-500/20 rounded-sm"></div>
+                    </div>
+                </div>
+
+                {/* Bookshelf on the right */}
+                <div className="absolute bottom-[15%] right-[8%] w-[20%] h-[35%] bg-slate-700/30 rounded border-2 border-slate-600/30">
+                    {/* Shelves */}
+                    <div className="absolute top-[25%] left-0 right-0 h-[2px] bg-slate-600/40"></div>
+                    <div className="absolute top-[50%] left-0 right-0 h-[2px] bg-slate-600/40"></div>
+                    <div className="absolute top-[75%] left-0 right-0 h-[2px] bg-slate-600/40"></div>
+                    {/* Books */}
+                    <div className="absolute top-[10%] left-[10%] w-[15%] h-[12%] bg-teal-600/40 rounded-sm"></div>
+                    <div className="absolute top-[10%] left-[30%] w-[12%] h-[12%] bg-indigo-600/40 rounded-sm"></div>
+                    <div className="absolute top-[35%] left-[15%] w-[18%] h-[12%] bg-slate-500/40 rounded-sm"></div>
+                    <div className="absolute top-[60%] left-[20%] w-[20%] h-[12%] bg-teal-500/40 rounded-sm"></div>
+                </div>
+
+                {/* Office Plant */}
+                <div className="absolute bottom-[15%] left-[38%] w-[8%] h-[25%]">
+                    {/* Pot */}
+                    <div className="absolute bottom-0 left-[20%] w-[60%] h-[30%] bg-slate-600/40 rounded-b-lg border-2 border-slate-500/30"></div>
+                    {/* Plant leaves */}
+                    <div className="absolute bottom-[25%] left-[10%] w-[30%] h-[40%] bg-green-600/30 rounded-full blur-sm"></div>
+                    <div className="absolute bottom-[30%] right-[10%] w-[35%] h-[45%] bg-green-500/30 rounded-full blur-sm"></div>
+                    <div className="absolute bottom-[40%] left-[25%] w-[40%] h-[35%] bg-green-600/40 rounded-full blur-sm"></div>
+                </div>
+
+                {/* Ceiling Light */}
+                <div className="absolute top-[5%] left-1/2 -translate-x-1/2 w-[15%] h-[8%]">
+                    <div className="w-full h-full bg-yellow-200/10 rounded-full blur-2xl"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40%] h-[40%] bg-slate-600/40 rounded-full border-2 border-slate-500/30"></div>
+                </div>
+
+                {/* Wall Poster - QPR Method */}
+                <div className="absolute top-[20%] left-[10%] w-[15%] h-[20%] bg-slate-700/40 rounded border-2 border-slate-600/40 p-2">
+                    <div className="text-teal-400/40 text-[8px] font-black text-center">QPR</div>
+                    <div className="mt-1 space-y-1">
+                        <div className="h-1 bg-teal-500/20 rounded"></div>
+                        <div className="h-1 bg-teal-500/20 rounded"></div>
+                        <div className="h-1 bg-teal-500/20 rounded"></div>
+                    </div>
+                </div>
+
+                {/* Ambient Glow */}
+                <div className="absolute top-[10%] left-[5%] w-64 h-64 bg-teal-500/5 rounded-full blur-[100px] animate-pulse"></div>
+                <div className="absolute bottom-[10%] right-[5%] w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
             </div>
 
             {/* Main Card */}
@@ -131,8 +192,8 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn }) => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-3 rounded-xl border-2 ${errors.email
-                                            ? 'border-red-300 bg-red-50'
-                                            : 'border-slate-200 bg-white'
+                                        ? 'border-red-300 bg-red-50'
+                                        : 'border-slate-200 bg-white'
                                         } focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-medium text-slate-800`}
                                     placeholder="your.email@example.com"
                                 />
@@ -154,8 +215,8 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn }) => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-3 rounded-xl border-2 ${errors.password
-                                            ? 'border-red-300 bg-red-50'
-                                            : 'border-slate-200 bg-white'
+                                        ? 'border-red-300 bg-red-50'
+                                        : 'border-slate-200 bg-white'
                                         } focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-medium text-slate-800`}
                                     placeholder="••••••••"
                                 />
@@ -177,8 +238,8 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn }) => {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-3 rounded-xl border-2 ${errors.confirmPassword
-                                            ? 'border-red-300 bg-red-50'
-                                            : 'border-slate-200 bg-white'
+                                        ? 'border-red-300 bg-red-50'
+                                        : 'border-slate-200 bg-white'
                                         } focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-medium text-slate-800`}
                                     placeholder="••••••••"
                                 />
