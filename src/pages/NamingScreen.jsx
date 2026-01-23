@@ -4,14 +4,6 @@ import Scenery from '../components/Scenery';
 const NamingScreen = ({ trust, playerName, setPlayerName, onNext, onNavigate }) => {
     return (
         <div className="game-container min-h-screen w-full bg-slate-50 text-slate-900 overflow-hidden relative flex flex-col items-center justify-center">
-            {/* Back Button */}
-            <button
-                onClick={() => onNavigate('START')}
-                className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/50 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-lg transition-all"
-            >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            </button>
-
             <Scenery trust={trust} />
             <div className="relative z-20 max-w-lg w-[95%] md:w-full p-4 md:p-10 naming-card bg-white/80 backdrop-blur-md rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl border border-white/50 text-center animate-fade-in my-auto flex flex-col md:block">
 

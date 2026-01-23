@@ -43,8 +43,22 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [authView, setAuthView] = useState('signup'); // 'signup' or 'signin'
 
+  // Logout Handler
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('qpr_auth_token');
+      localStorage.removeItem('qpr_user');
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setGameState('START');
+      setIsSettingsOpen(false);
+    }
+  };
+
   // Check authentication on mount
   useEffect(() => {
+    // Removed to enforce authentication flow every time on start
+    /*
     const authToken = localStorage.getItem('qpr_auth_token');
     const userData = localStorage.getItem('qpr_user');
 
@@ -52,6 +66,7 @@ const App = () => {
       setIsAuthenticated(true);
       setCurrentUser(JSON.parse(userData));
     }
+    */
   }, []);
 
   // Settings
@@ -182,16 +197,11 @@ const App = () => {
   useEffect(() => {
     if (gameState === 'SPLASH' && loadingProgress >= 100) {
       const timer = setTimeout(() => {
-        // Check if user is authenticated
-        if (isAuthenticated) {
-          setGameState('START');
-        } else {
-          setGameState(authView === 'signup' ? 'SIGNUP' : 'SIGNIN');
-        }
+        setGameState('START');
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [loadingProgress, gameState, isAuthenticated, authView]);
+  }, [loadingProgress, gameState]);
 
   // Save Progress
   useEffect(() => {
@@ -648,7 +658,7 @@ const App = () => {
   const handleSignInSuccess = (userData) => {
     setIsAuthenticated(true);
     setCurrentUser(userData);
-    setGameState('START');
+    setGameState('NAMING');
   };
 
   const handleSwitchToSignIn = () => {
@@ -662,9 +672,19 @@ const App = () => {
   };
 
   if (gameState === 'SPLASH') return <SplashScreen loadingProgress={loadingProgress} />;
-  if (gameState === 'SIGNUP') return <SignUpScreen onSignUpSuccess={handleSignUpSuccess} onSwitchToSignIn={handleSwitchToSignIn} />;
-  if (gameState === 'SIGNIN') return <SignInScreen onSignInSuccess={handleSignInSuccess} onSwitchToSignUp={handleSwitchToSignUp} />;
-  if (gameState === 'START') return <StartScreen trust={trust} onStart={() => { audioManager.init(); setGameState('NAMING'); }} onResources={() => { audioManager.init(); setGameState('RESOURCES'); }} />;
+  if (gameState === 'SIGNUP') return <SignUpScreen onSignUpSuccess={handleSignUpSuccess} onSwitchToSignIn={handleSwitchToSignIn} onBack={() => setGameState('START')} />;
+  if (gameState === 'SIGNIN') return <SignInScreen onSignInSuccess={handleSignInSuccess} onSwitchToSignUp={handleSwitchToSignUp} onBack={() => setGameState('START')} />;
+
+  if (gameState === 'START') return (
+    <StartScreen
+      trust={trust}
+      onStart={() => {
+        audioManager.init();
+        setGameState('SIGNUP');
+      }}
+      onResources={() => { audioManager.init(); setGameState('RESOURCES'); }}
+    />
+  );
   if (gameState === 'NAMING') return <NamingScreen trust={trust} playerName={playerName} setPlayerName={setPlayerName} onNext={() => setGameState('GENDER_SELECT')} onNavigate={setGameState} />;
   if (gameState === 'GENDER_SELECT') return <GenderSelectScreen trust={trust} playerGender={playerGender} setPlayerGender={setPlayerGender} audioManager={audioManager} onNext={() => setGameState('LEVEL_SELECT')} onBack={() => setGameState('NAMING')} />;
   if (gameState === 'LEVEL_SELECT') return (
@@ -702,6 +722,7 @@ const App = () => {
         settings={settings} setSettings={setSettings}
         audioManager={audioManager}
         onResetGame={handleResetGame}
+        onLogout={handleLogout}
         isSettingsOpen={isSettingsOpen} setIsSettingsOpen={setIsSettingsOpen} onNavigate={setGameState}
         isPaused={isPaused}
         setIsPaused={setIsPaused}
