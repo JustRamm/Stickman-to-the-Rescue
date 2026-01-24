@@ -175,7 +175,13 @@ const LevelSelectScreen = ({
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em]">
                                         {isLocked ? 'Mission Locked' : isCompleted ? 'Replay Simulation' : 'Start Simulation'}
                                     </span>
-                                    <span className="text-lg">{isLocked ? '🔒' : '➔'}</span>
+                                    <div className="w-5 h-5 flex items-center justify-center">
+                                        {isLocked ? (
+                                            <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                                        ) : (
+                                            <svg className="w-4 h-4 text-teal-500 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                        )}
+                                    </div>
                                 </div>
                             </button>
                         );

@@ -170,7 +170,11 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit, isPaused = fals
                     {/* Crisis Warning Bubble */}
                     {gameState !== 'WIN' && (
                         <div className={`mt-4 bg-[#082f49]/10 backdrop-blur-xl border border-[#082f49]/10 p-6 rounded-[2rem] rounded-tl-none shadow-2xl relative animate-float-slow max-w-lg transition-all duration-300 ${feedback?.type === 'success' ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
-                            <div className="absolute -top-3 -left-3 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-lg shadow-lg animate-pulse">⚠️</div>
+                            <div className="absolute -top-3 -left-3 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center shadow-lg animate-pulse border-2 border-white">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
                             <h3 className="text-[#0d9488] font-black uppercase text-[10px] tracking-[0.3em] mb-1">Crisis Warning</h3>
                             <p className="text-xl md:text-2xl font-black text-[#01161d] leading-tight">"{currentObstacle?.text}"</p>
                         </div>
@@ -180,7 +184,13 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit, isPaused = fals
                     {feedback && (
                         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-10 py-6 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-4 animate-pop-in flex flex-col items-center gap-2 ${feedback.type === 'success' ? 'bg-teal-600 border-teal-300 text-white' : 'bg-red-600 border-red-300 text-white'}`}
                             style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-                            <div className="text-4xl">{feedback.type === 'success' ? '✨' : '💥'}</div>
+                            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center p-4">
+                                <img
+                                    src={feedback.type === 'success' ? '/stickman_assets/happy_stickman.svg' : '/stickman_assets/sad_stickman.svg'}
+                                    className="w-full h-full filter brightness-0 invert"
+                                    alt=""
+                                />
+                            </div>
                             <span className="text-3xl font-black uppercase tracking-[0.2em] drop-shadow-lg">{feedback.msg}</span>
                             {feedback.type === 'success' && <span className="text-[10px] font-bold uppercase tracking-widest opacity-80">Barrier Resolved</span>}
                         </div>
@@ -238,8 +248,8 @@ const ResourceRelayScreen = ({ audioManager, onComplete, onExit, isPaused = fals
                             <div className="absolute -top-20 -right-20 w-48 h-48 bg-teal-50 rounded-full opacity-50"></div>
 
                             <div className="relative z-10">
-                                <div className="w-24 h-24 bg-teal-100 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-6 shadow-inner animate-bounce-subtle">
-                                    🏆
+                                <div className="w-24 h-24 bg-teal-100 rounded-3xl flex items-center justify-center p-4 mx-auto mb-6 shadow-inner animate-bounce-subtle">
+                                    <img src="/stickman_assets/hope_stickman.svg" className="w-full h-full" alt="Success" />
                                 </div>
                                 <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Master Referral!</h2>
                                 <p className="text-slate-500 font-medium mb-8 leading-relaxed">

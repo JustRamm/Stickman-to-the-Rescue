@@ -532,7 +532,11 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                         <div className="max-w-[240px] md:max-w-[320px] bg-white/95 rounded-2xl border border-white p-4 md:p-6 shadow-4xl flex flex-col h-fit"
                             style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center text-lg">🌱</div>
+                                <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+                                    </svg>
+                                </div>
                                 <span className="text-slate-900 font-black uppercase text-[9px] tracking-widest">Growth Log</span>
                             </div>
                             {explanation && (
@@ -558,7 +562,11 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                         <div className="max-w-[240px] md:max-w-[320px] bg-slate-900/95 rounded-2xl border border-red-500/30 p-4 md:p-6 shadow-[0_0_30px_rgba(239,68,68,0.2)] flex flex-col h-fit"
                             style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center text-lg shadow-[inset_0_0_10px_rgba(239,68,68,0.3)]">⚠️</div>
+                                <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center shadow-[inset_0_0_10px_rgba(239,68,68,0.3)]">
+                                    <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
                                 <span className="text-red-400 font-black uppercase text-[9px] tracking-[0.2em]">Stigma Alert</span>
                             </div>
 
@@ -584,11 +592,12 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                         </div>
                     </div>
 
-                    {/* Hearts Count */}
                     <div className="absolute top-28 left-8 flex gap-2 z-50">
                         {[...Array(3)].map((_, i) => (
-                            <div key={i} className={`w-8 h-8 rounded-lg flex items-center justify-center text-xl transition-all duration-500 ${i < (3 - mistakes) ? 'bg-teal-500/10 text-teal-400' : 'bg-slate-900/40 text-slate-800 scale-75 opacity-20'}`}>
-                                {i < (3 - mistakes) ? '❤️' : '🥀'}
+                            <div key={i} className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center shadow-lg transition-all duration-500 ${i < (3 - mistakes) ? 'bg-teal-500 text-white border-teal-400 shadow-teal-500/20 scale-100' : 'bg-slate-900/40 text-slate-700 border-slate-800 scale-90 opacity-20'}`}>
+                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
                             </div>
                         ))}
                     </div>
@@ -600,7 +609,9 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                                 {/* Header */}
                                 <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center text-2xl">📚</div>
+                                        <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center p-2">
+                                            <img src="/stickman_assets/scholar_stickman.svg" className="w-full h-full" alt="" />
+                                        </div>
                                         <div>
                                             <h3 className="text-lg font-black uppercase text-slate-800 tracking-wide">Word Glossary</h3>
                                             <p className="text-[10px] text-slate-500 font-medium">Review what you've learned</p>
@@ -619,9 +630,13 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
                                     {wordHistory.map((word, index) => (
                                         <div key={word.id} className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                                             <div className="flex items-start gap-3 mb-3">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg shrink-0 ${word.wasCorrect ? 'bg-teal-100 text-teal-600' : 'bg-red-100 text-red-600'
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${word.wasCorrect ? 'bg-teal-100 text-teal-600' : 'bg-red-100 text-red-600'
                                                     }`}>
-                                                    {word.wasCorrect ? '✓' : '✗'}
+                                                    {word.wasCorrect ?
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                                        :
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                    }
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-1">
@@ -669,7 +684,11 @@ const WordsOfHopeScreen = ({ audioManager, onExit, isPaused = false, playerGende
 
             {gameState === 'GAME_OVER' && (
                 <div className="relative z-10 max-w-xl w-full p-8 text-center animate-pop-in flex flex-col items-center words-of-hope-results">
-                    <div className="w-32 h-32 bg-teal-500 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl shadow-2xl border-4 border-white">🌱</div>
+                    <div className="w-32 h-32 bg-teal-500 rounded-[2.5rem] mb-8 flex items-center justify-center p-6 shadow-2xl border-4 border-white">
+                        <svg className="w-full h-full text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+                        </svg>
+                    </div>
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-4 uppercase tracking-tighter">Don't Give Up!</h2>
                     <p className="text-teal-200 text-lg md:text-xl font-bold mb-4 uppercase tracking-widest text-balance">Mistakes are part of learning. Try again to master the language of hope.</p>
                     <div className="flex gap-6 mb-8">

@@ -137,7 +137,11 @@ const ClueOverlay = ({ viewedClue, onClose }) => {
             default:
                 return (
                     <div className="bg-teal-600 text-white w-[300px] md:w-[400px] shadow-2xl p-8 rounded-3xl relative border-4 border-white/20">
-                        <div className="absolute -top-6 -left-6 w-16 h-16 bg-white text-teal-600 rounded-full flex items-center justify-center text-3xl shadow-xl border-4 border-teal-500">🔍</div>
+                        <div className="absolute -top-6 -left-6 w-16 h-16 bg-white text-teal-600 rounded-full flex items-center justify-center shadow-xl border-4 border-teal-500 p-4">
+                            <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                         <h3 className="text-2xl font-black uppercase tracking-widest mb-4">{title}</h3>
                         <p className="text-teal-50 text-base md:text-lg leading-relaxed font-medium">
                             {description}
@@ -165,7 +169,10 @@ const ClueOverlay = ({ viewedClue, onClose }) => {
                 >
                     <div className="absolute inset-0 w-full h-full bg-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out"></div>
                     <span className="relative font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 group-hover/btn:text-white transition-colors">
-                        <span className="text-xl group-hover/btn:rotate-12 transition-transform">✅</span> Add to Case File
+                        <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center group-hover/btn:bg-white/20 transition-colors">
+                            <svg className="w-4 h-4 text-teal-600 group-hover/btn:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                        Add to Case File
                     </span>
                 </button>
                 <p className="text-center text-white/40 text-[9px] font-black uppercase tracking-widest mt-4">Tap anywhere to discard</p>

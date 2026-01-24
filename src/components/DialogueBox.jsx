@@ -27,7 +27,10 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
             <div className={`bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-2xl border ${requiredResource ? 'border-orange-400' : 'border-white/50'} space-y-3`}>
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-600 mb-2 text-center flex items-center justify-center gap-2">
                     {requiredResource ? (
-                        <span className="text-orange-600 animate-pulse">🔒 MISSION FINAL STEP: PROFESSIONAL REFERRAL</span>
+                        <span className="text-orange-600 animate-pulse flex items-center gap-2">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                            MISSION FINAL STEP: PROFESSIONAL REFERRAL
+                        </span>
                     ) : (
                         <>Your Response {foundClues.length > 0 && <span className="text-orange-500 ml-2">(+ {foundClues.length} CLUES)</span>}</>
                     )}
@@ -49,7 +52,13 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
                                     ? 'bg-teal-500 border-teal-400 text-white shadow-[0_0_20px_rgba(20,184,166,0.4)] hover:scale-[1.02] active:scale-95'
                                     : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'}`}
                         >
-                            <span className="text-3xl">{isCorrectResource ? '✅' : '🛡️'}</span>
+                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center p-2 mb-1">
+                                <img
+                                    src={isCorrectResource ? '/stickman_assets/hope_stickman.svg' : '/stickman_assets/shield_stickman.svg'}
+                                    className="w-full h-full filter brightness-0 invert"
+                                    alt=""
+                                />
+                            </div>
                             <span className="text-lg font-black uppercase tracking-widest text-inherit">
                                 {isCorrectResource
                                     ? `Authorize Referral to ${requiredResourceName}`
@@ -77,7 +86,11 @@ const DialogueBox = ({ node, onSelectOption, foundClues = [], requiredResource =
                                     </span>
                                     <div className="flex flex-col">
                                         <span className="text-sm font-bold leading-tight text-slate-600 group-hover:text-slate-900 flex items-center gap-2">
-                                            {option.required_clue && <span title="Key Insight Found">🔍</span>}
+                                            {option.required_clue && (
+                                                <svg className="w-3 h-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                            )}
                                             {option.text}
                                         </span>
                                     </div>

@@ -1133,7 +1133,7 @@ const App = () => {
             <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 text-indigo-100">Critical Choice</span>
             <span className="text-xl font-black uppercase tracking-widest text-center">Open Toolkit & Select Resource</span>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-2xl animate-pulse">👉</span>
+              <img src="/stickman_assets/pointing_stickman.svg" className="w-10 h-10 animate-bounce-subtle filter invert" alt="" />
               <span className="text-[10px] font-bold bg-white/20 px-3 py-1 rounded-full uppercase tracking-widest leading-none">
                 {walletResources.find(r => r.id === currentNode.required_resource)?.name || currentNode.required_resource} Needed
               </span>
@@ -1145,7 +1145,13 @@ const App = () => {
       {currentNode?.isEnd && (
         <div className="absolute inset-0 z-[100] bg-slate-900/90 backdrop-blur flex items-center justify-center p-4 md:p-6 animate-fade-in overflow-hidden">
           <div className="max-w-xl w-full bg-white rounded-3xl p-6 md:p-10 text-center shadow-2xl border-4 border-teal-500 relative flex flex-col items-center">
-            <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 md:mb-6 rounded-full flex items-center justify-center text-3xl md:text-5xl shadow-xl shrink-0 ${currentNode.result === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{currentNode.result === 'success' ? '🌟' : '💔'}</div>
+            <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 md:mb-6 rounded-full flex items-center justify-center p-4 shadow-xl shrink-0 ${currentNode.result === 'success' ? 'bg-green-100 text-green-600 border-2 border-green-200' : 'bg-red-100 text-red-600 border-2 border-red-200'}`}>
+              <img
+                src={currentNode.result === 'success' ? '/stickman_assets/happy_stickman.svg' : '/stickman_assets/sad_stickman.svg'}
+                className="w-full h-full"
+                alt={currentNode.result === 'success' ? 'Success' : 'Failure'}
+              />
+            </div>
             <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-800 mb-2 md:mb-4 tracking-tight leading-tight">{selectedLevel.id === 'tutorial' && currentNode.result === 'success' ? 'Training Complete' : currentNode.result === 'success' ? 'Mission Complete' : 'Mission Failed'}</h2>
             <p className="text-slate-600 text-sm md:text-xl font-medium leading-relaxed mb-6 md:mb-8">{currentNode.message}</p>
             {currentNode.result === 'failure' && <p className="text-[10px] md:text-xs text-orange-500 font-bold uppercase tracking-widest bg-orange-50 p-2 md:p-3 rounded-xl border border-orange-100 mb-6 md:mb-8">Tip: Try Validation First. Listen more.</p>}

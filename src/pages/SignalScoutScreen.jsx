@@ -296,8 +296,8 @@ const SignalScoutScreen = ({ audioManager, onExit, isPaused = false }) => {
                     <div className="max-w-md w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl animate-scale-in relative overflow-hidden signal-scout-intro-card">
                         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-400 to-indigo-500"></div>
 
-                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner border-4 border-white signal-scout-intro-icon">
-                            🔭
+                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center p-4 mx-auto mb-6 shadow-inner border-4 border-white signal-scout-intro-icon">
+                            <img src="/stickman_assets/scout_stickman.svg" className="w-full h-full" alt="" />
                         </div>
 
                         <h2 className="text-3xl font-black uppercase text-slate-800 mb-2 tracking-tight signal-scout-intro-title">Signal Scout</h2>
@@ -308,28 +308,41 @@ const SignalScoutScreen = ({ audioManager, onExit, isPaused = false }) => {
 
                         <div className="space-y-3 mb-8 text-left signal-scout-intro-examples">
                             <div className="flex items-center gap-4 bg-teal-50 p-3 rounded-xl border border-teal-100">
-                                <span className="text-2xl">🎁</span>
+                                <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                    </svg>
+                                </div>
                                 <div>
                                     <p className="text-xs font-bold text-teal-800 uppercase">Warning Sign</p>
                                     <p className="text-[10px] text-teal-600">"Giving away prized possessions"</p>
                                 </div>
-                                <span className="ml-auto font-black text-teal-400">TAP ✅</span>
+                                <div className="ml-auto flex flex-col items-center">
+                                    <svg className="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                    <span className="font-black text-teal-400 text-[8px] uppercase">Identify</span>
+                                </div>
                             </div>
                             <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100 opacity-60">
-                                <span className="text-2xl">😤</span>
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                                    <img src="/stickman_assets/guy_distressed.svg" className="w-full h-full grayscale" alt="" />
+                                </div>
                                 <div>
                                     <p className="text-xs font-bold text-slate-500 uppercase">Normal Stress</p>
                                     <p className="text-[10px] text-slate-400">"Traffic is terrible today"</p>
                                 </div>
-                                <span className="ml-auto font-black text-slate-300">IGNORE ❌</span>
+                                <div className="ml-auto flex flex-col items-center">
+                                    <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                                    <span className="font-black text-slate-300 text-[8px] uppercase">Ignore</span>
+                                </div>
                             </div>
                         </div>
 
                         <button
                             onClick={startGame}
-                            className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 signal-scout-start-btn"
+                            className="group w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest rounded-xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-4 signal-scout-start-btn"
                         >
-                            <span>Start Patrol</span> ➔
+                            <span>Start Patrol</span>
+                            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </button>
                     </div>
                 </div>
@@ -352,9 +365,10 @@ const SignalScoutScreen = ({ audioManager, onExit, isPaused = false }) => {
                         <div className="flex flex-col gap-3 signal-scout-end-buttons">
                             <button
                                 onClick={startGame}
-                                className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                                className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3"
                             >
-                                Play Again ↺
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                Play Again
                             </button>
                             <button
                                 onClick={onExit}

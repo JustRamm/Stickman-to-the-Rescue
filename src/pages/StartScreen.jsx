@@ -48,7 +48,8 @@ const StartScreen = ({ trust, onStart, onResources }) => {
                     className="group relative px-10 py-5 bg-white text-slate-900 rounded-full font-black text-xl tracking-widest uppercase shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(20,184,166,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
                 >
                     <span className="relative z-10 flex items-center gap-3">
-                        Start Simulation <span className="text-teal-600 transition-transform group-hover:translate-x-1">➔</span>
+                        Start Simulation
+                        <svg className="w-5 h-5 text-teal-600 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                     </span>
                     {/* Button Glint */}
                     <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-teal-200/50 opacity-0 group-hover:opacity-100 group-hover:animate-shine" />
@@ -60,7 +61,7 @@ const StartScreen = ({ trust, onStart, onResources }) => {
                 >
                     <span>Mental Health Resources</span>
                     <span className="w-4 h-px bg-teal-500/50" />
-                    <span className="text-sm">✚</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
                 </button>
 
                 <p className="mt-4 text-slate-500 text-[10px] font-bold uppercase tracking-widest max-w-sm opacity-60">

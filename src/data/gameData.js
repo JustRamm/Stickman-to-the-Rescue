@@ -21,7 +21,7 @@ export const CLUE_DETAILS = {
     tutorial_note: {
         title: "About Clues",
         visualType: 'tutorial',
-        description: "This is a clue. Clues provide context about the person's situation. Finding them unlocks special 'Key Insight' dialogue options marked with a 🔍 icon."
+        description: "This is a clue. Clues provide context about the person's situation. Finding them unlocks special 'Key Insight' dialogue options marked with a search icon."
     },
     family_photo: {
         title: "A Crumpled Photograph",

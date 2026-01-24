@@ -27,7 +27,7 @@
                 ]
             },
             "minigames_intro": {
-                "npc_text": "Those are your training modules! 🎓 is 'Fact vs Myth' to test your knowledge, and 🛡️ is 'Referral Battle' where you practice matching crises to the right Indian helplines like DISHA or KIRAN.",
+                "npc_text": "Those are your training modules! 'Fact vs Myth' tests your knowledge, and 'Referral Battle' is where you practice matching crises to the right Indian helplines like DISHA or KIRAN.",
                 "npc_emotion": "happy",
                 "options": [
                     {
@@ -39,7 +39,7 @@
                 ]
             },
             "movement_lesson": {
-                "npc_text": "Use the A/D keys (or arrows) to walk. When you see something suspicious, press 'Z' to investigate. Finding clues unlocks special responses marked with a 🔍.",
+                "npc_text": "Use the A/D keys (or arrows) to walk. When you see something suspicious, press 'Z' to investigate. Finding clues unlocks special responses marked with a Key Insight icon.",
                 "npc_emotion": "neutral",
                 "options": [
                     {
