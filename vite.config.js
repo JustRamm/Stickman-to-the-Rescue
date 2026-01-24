@@ -8,5 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    hmr: {
+      overlay: true
+    },
+    watch: {
+      // Force full reload for App.jsx changes (better for complex state changes)
+      ignored: ['!**/src/App.jsx']
+    }
+  }
 })
 

@@ -1,3 +1,4 @@
+/* @refresh reset */
 import React, { useState, useEffect, useRef } from 'react';
 import Stickman from './components/Stickman';
 import DialogueBox from './components/DialogueBox';
@@ -57,18 +58,34 @@ const App = () => {
     }
   };
 
+  // Flag to prevent saving while loading data from database
+  const isLoadingUserData = useRef(false);
+  // Track if we've loaded initial data to prevent saving defaults
+  const hasLoadedInitialData = useRef(false);
+  // Track if we've handled the initial session (to prevent re-redirecting on tab switch)
+  const hasHandledInitialSession = useRef(false);
+
   // Check authentication on mount and listen for auth changes
   useEffect(() => {
     // Load user data from database
     const loadUserData = async (userId, shouldRedirect = false) => {
       try {
+        console.log('📥 Loading user data for:', userId, 'shouldRedirect:', shouldRedirect);
+
+        // Set loading flag to prevent save useEffects from running
+        isLoadingUserData.current = true;
+
         // Load profile
         const { profile } = await dbService.getOrCreateProfile(userId);
+        console.log('👤 Profile loaded:', profile);
+
         if (profile) {
           if (profile.username) {
+            console.log('📝 Setting player name:', profile.username);
             setPlayerName(profile.username);
           }
           if (profile.player_gender) {
+            console.log('🎭 Setting player gender:', profile.player_gender);
             setPlayerGender(profile.player_gender);
           }
         }
@@ -77,12 +94,14 @@ const App = () => {
         const { missions } = await dbService.getCompletedMissions(userId);
         if (missions && missions.length > 0) {
           const completedIds = missions.map(m => m.mission_id);
+          console.log('🎮 Completed missions loaded:', completedIds);
           setCompletedLevels(completedIds);
         }
 
         // Load settings
         const { settings: userSettings } = await dbService.getUserSettings(userId);
         if (userSettings) {
+          console.log('⚙️ Settings loaded:', userSettings);
           setSettings({
             audioVolume: userSettings.audio_volume,
             ttsEnabled: userSettings.tts_enabled,
@@ -94,15 +113,27 @@ const App = () => {
         // Only redirect if explicitly requested (e.g., during active login)
         if (shouldRedirect) {
           if (profile?.username && profile?.player_gender) {
+            console.log('🎯 Redirecting to LEVEL_SELECT (profile complete)');
             setGameState('LEVEL_SELECT');
           } else if (profile?.username) {
+            console.log('🎯 Redirecting to GENDER_SELECT (username only)');
             setGameState('GENDER_SELECT');
           } else {
+            console.log('🎯 Redirecting to NAMING (no profile)');
             setGameState('NAMING');
           }
         }
+
+        // Clear loading flag after a short delay to ensure state updates complete
+        setTimeout(() => {
+          isLoadingUserData.current = false;
+          hasLoadedInitialData.current = true;
+          console.log('✅ User data loading complete');
+        }, 100);
       } catch (error) {
-        console.error('Error loading user data:', error);
+        console.error('❌ Error loading user data:', error);
+        isLoadingUserData.current = false;
+        hasLoadedInitialData.current = true;
         if (shouldRedirect) setGameState('NAMING');
       }
     };
@@ -118,8 +149,15 @@ const App = () => {
           createdAt: session.user.created_at
         });
 
-        // Load user data from database but DO NOT redirect (stay on splash/start)
-        await loadUserData(session.user.id, false);
+        // Only redirect if we're on an initial screen (not if user is already in the app)
+        const isInitialScreen = ['SPLASH', 'START', 'SIGNUP', 'SIGNIN'].includes(gameState);
+        if (isInitialScreen) {
+          console.log('🔄 checkSession: On initial screen, loading data and redirecting');
+          await loadUserData(session.user.id, true);
+        } else {
+          console.log('🔄 checkSession: User already in app, just loading data');
+          await loadUserData(session.user.id, false);
+        }
       }
     };
 
@@ -130,6 +168,7 @@ const App = () => {
       console.log('Auth event:', event, session);
 
       if (event === 'SIGNED_IN' && session?.user) {
+        // Handle actual sign-in (not initial session)
         setIsAuthenticated(true);
         setCurrentUser({
           id: session.user.id,
@@ -137,10 +176,22 @@ const App = () => {
           createdAt: session.user.created_at
         });
 
-        // ONLY redirect if we are actively on an auth screen
-        // This prevents auto-redirecting to level select on every refresh/initial mount
-        const isAuthFlow = ['SIGNIN', 'SIGNUP'].includes(gameState);
-        await loadUserData(session.user.id, isAuthFlow);
+        // Always redirect based on profile completion for new sign-ins
+        await loadUserData(session.user.id, true);
+      } else if (event === 'INITIAL_SESSION' && session?.user && !hasHandledInitialSession.current) {
+        // Only handle INITIAL_SESSION once (on first page load)
+        // Ignore subsequent INITIAL_SESSION events from tab switches
+        hasHandledInitialSession.current = true;
+
+        setIsAuthenticated(true);
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          createdAt: session.user.created_at
+        });
+
+        // Load data but don't redirect (checkSession already handled redirect)
+        await loadUserData(session.user.id, false);
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setCurrentUser(null);
@@ -155,22 +206,12 @@ const App = () => {
     };
   }, []);
 
-  // Settings
-  const [settings, setSettings] = useState(() => {
-    try {
-      const saved = localStorage.getItem('qpr_settings');
-      // Force devMode to false on logic load to prevent accidental persistent unlocks
-      const parsed = saved ? JSON.parse(saved) : {};
-      return {
-        audioVolume: 0.5,
-        ttsEnabled: true,
-        textSpeed: 50,
-        ...parsed,
-        devMode: false
-      };
-    } catch (e) {
-      return { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50, devMode: false };
-    }
+  // Settings - Initialize with defaults, will be loaded from database
+  const [settings, setSettings] = useState({
+    audioVolume: 0.5,
+    ttsEnabled: true,
+    textSpeed: 50,
+    devMode: false
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -184,39 +225,60 @@ const App = () => {
     }
   };
 
-  // Player State
-  const [playerName, setPlayerName] = useState(() => {
-    return localStorage.getItem('qpr_player_name') || 'You';
-  });
-  const [playerGender, setPlayerGender] = useState(() => {
-    return localStorage.getItem('qpr_player_gender') || 'guy';
-  });
+  // Player State - Initialize with defaults, will be loaded from database
+  // DO NOT read from localStorage here to avoid conflicts with database data
+  const [playerName, setPlayerName] = useState('You');
+  const [playerGender, setPlayerGender] = useState('guy');
 
-  // Persist Player State to localStorage and database
+  // Persist Player State to database only (not localStorage)
+  // Database is the single source of truth
   useEffect(() => {
-    localStorage.setItem('qpr_player_name', playerName);
+    // Don't save if we're currently loading data from database
+    if (isLoadingUserData.current) {
+      console.log('⏭️ Skipping save (loading in progress):', playerName);
+      return;
+    }
+
+    // Don't save until we've loaded initial data (prevents saving defaults)
+    if (!hasLoadedInitialData.current) {
+      console.log('⏭️ Skipping save (initial data not loaded yet):', playerName);
+      return;
+    }
 
     // Save to database if user is authenticated
     if (currentUser?.id && playerName !== 'You') {
-      dbService.updateProfile(currentUser.id, { username: playerName });
+      console.log('💾 Saving player name to database:', playerName);
+      dbService.updateProfile(currentUser.id, { username: playerName })
+        .then(() => console.log('✅ Player name saved successfully'))
+        .catch(err => console.error('❌ Error saving player name:', err));
     }
   }, [playerName, currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('qpr_player_gender', playerGender);
+    // Don't save if we're currently loading data from database
+    if (isLoadingUserData.current) {
+      console.log('⏭️ Skipping save (loading in progress):', playerGender);
+      return;
+    }
+
+    // Don't save until we've loaded initial data (prevents saving defaults)
+    if (!hasLoadedInitialData.current) {
+      console.log('⏭️ Skipping save (initial data not loaded yet):', playerGender);
+      return;
+    }
 
     // Save to database if user is authenticated
     if (currentUser?.id) {
-      dbService.updateProfile(currentUser.id, { player_gender: playerGender });
+      console.log('💾 Saving player gender to database:', playerGender);
+      dbService.updateProfile(currentUser.id, { player_gender: playerGender })
+        .then(() => console.log('✅ Player gender saved successfully'))
+        .catch(err => console.error('❌ Error saving player gender:', err));
     }
   }, [playerGender, currentUser]);
 
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
-  const [completedLevels, setCompletedLevels] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('qpr_completed_missions_v5')) || [];
-    } catch { return []; }
-  });
+  // Completed levels - Initialize empty, will be loaded from database
+  const [completedLevels, setCompletedLevels] = useState([]);
 
   // Gameplay State
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -334,17 +396,15 @@ const App = () => {
     localStorage.removeItem('qpr_completed_missions_v4');
   }, []);
 
-  // Audio & Settings
+  // Audio & Settings - Save to database only
   useEffect(() => {
-    localStorage.setItem('qpr_settings', JSON.stringify(settings));
-
     // Save to database if user is authenticated
     if (currentUser?.id) {
       dbService.updateUserSettings(currentUser.id, {
         audio_volume: settings.audioVolume,
         tts_enabled: settings.ttsEnabled,
         text_speed: settings.textSpeed
-      });
+      }).catch(err => console.error('Error saving settings:', err));
     }
 
     if (audioManager.initialized) {
