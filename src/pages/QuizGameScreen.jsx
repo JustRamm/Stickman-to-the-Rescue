@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { QUIZ_QUESTIONS } from '../data/quizData';
+import { dbService } from '../utils/dbService';
 
-const QuizGameScreen = ({ audioManager, onExit, isPaused = false, playerGender = 'guy' }) => {
+const QuizGameScreen = ({ currentUser, audioManager, onExit, isPaused = false, playerGender = 'guy' }) => {
     const [quizTimer, setQuizTimer] = useState(60);
     const [quizCards, setQuizCards] = useState({ deck: [], myth: [], fact: [] });
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -195,8 +196,19 @@ const QuizGameScreen = ({ audioManager, onExit, isPaused = false, playerGender =
         setShowResults(false);
     };
 
-    const finishQuiz = () => {
+    const finishQuiz = async () => {
         setShowResults(true);
+
+        // Save progress automatically
+        if (currentUser?.id) {
+            await dbService.saveMinigameScore(currentUser.id, {
+                gameType: 'quiz',
+                score: totalCorrect * 10,
+                totalQuestions: QUIZ_QUESTIONS.length,
+                correctAnswers: totalCorrect,
+                timeTaken: 60 - quizTimer
+            });
+        }
     };
 
     const topDeckCard = quizCards.deck[0];

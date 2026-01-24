@@ -75,13 +75,6 @@ const LevelSelectScreen = ({
                 gameState="LEVEL_SELECT"
             />
 
-            {/* Back to Title */}
-            <button
-                onClick={() => onNavigate('START')}
-                className="absolute top-6 left-6 z-50 px-4 py-2 bg-white/50 backdrop-blur rounded-full flex items-center justify-center text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:shadow-lg transition-all"
-            >
-                ← Exit to Title
-            </button>
 
             <Scenery theme={selectedLevel.theme} trust={trust} />
 

@@ -60,7 +60,7 @@ const App = () => {
   // Check authentication on mount and listen for auth changes
   useEffect(() => {
     // Load user data from database
-    const loadUserData = async (userId) => {
+    const loadUserData = async (userId, shouldRedirect = false) => {
       try {
         // Load profile
         const { profile } = await dbService.getOrCreateProfile(userId);
@@ -91,20 +91,19 @@ const App = () => {
           });
         }
 
-        // Determine which screen to show
-        if (profile?.username && profile?.player_gender) {
-          // User has completed profile setup, go to level select
-          setGameState('LEVEL_SELECT');
-        } else if (profile?.username) {
-          // Has username but not gender
-          setGameState('GENDER_SELECT');
-        } else {
-          // New user, start with naming
-          setGameState('NAMING');
+        // Only redirect if explicitly requested (e.g., during active login)
+        if (shouldRedirect) {
+          if (profile?.username && profile?.player_gender) {
+            setGameState('LEVEL_SELECT');
+          } else if (profile?.username) {
+            setGameState('GENDER_SELECT');
+          } else {
+            setGameState('NAMING');
+          }
         }
       } catch (error) {
         console.error('Error loading user data:', error);
-        setGameState('NAMING');
+        if (shouldRedirect) setGameState('NAMING');
       }
     };
 
@@ -119,8 +118,8 @@ const App = () => {
           createdAt: session.user.created_at
         });
 
-        // Load user data from database
-        await loadUserData(session.user.id);
+        // Load user data from database but DO NOT redirect (stay on splash/start)
+        await loadUserData(session.user.id, false);
       }
     };
 
@@ -138,12 +137,16 @@ const App = () => {
           createdAt: session.user.created_at
         });
 
-        // Load user data from database
-        await loadUserData(session.user.id);
+        // ONLY redirect if we are actively on an auth screen
+        // This prevents auto-redirecting to level select on every refresh/initial mount
+        const isAuthFlow = ['SIGNIN', 'SIGNUP'].includes(gameState);
+        await loadUserData(session.user.id, isAuthFlow);
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setCurrentUser(null);
-        setGameState('START');
+        // Clear all persistent mission state on logout for security/cleanliness
+        localStorage.removeItem('qpr_active_mission_session');
+        setGameState('SIGNUP');
       }
     });
 
@@ -286,7 +289,7 @@ const App = () => {
     return () => clearInterval(timer);
   }, [gameState]);
 
-  // Handle auto-transition from splash
+  // Handle auto-transition from splash (Go to Start Screen as requested)
   useEffect(() => {
     if (gameState === 'SPLASH' && loadingProgress >= 100) {
       const timer = setTimeout(() => {
@@ -300,6 +303,23 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('qpr_completed_missions_v5', JSON.stringify(completedLevels));
   }, [completedLevels]);
+
+  // AUTO-SAVE MISSION STATE (Resume Logic)
+  useEffect(() => {
+    const isGameplay = ['APPROACH', 'DIALOGUE', 'RESOLUTION', 'HANDOFF'].includes(gameState);
+    if (isGameplay && selectedLevel) {
+      const stateToSave = {
+        levelId: selectedLevel.id,
+        nodeId: currentNodeId,
+        trust: trust,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('qpr_active_mission_session', JSON.stringify(stateToSave));
+    } else if (gameState === 'LEVEL_SELECT' || gameState === 'START' || gameState === 'SIGNUP' || gameState === 'SIGNIN') {
+      // Clear session when intentionally leaving or before starting
+      localStorage.removeItem('qpr_active_mission_session');
+    }
+  }, [gameState, selectedLevel, currentNodeId, trust]);
 
   // Save Seen Dialogue Nodes
   useEffect(() => {
@@ -758,17 +778,28 @@ const App = () => {
     </div>
   );
 
+  // Helper to determine next screen based on profile completion
+  const continueToGame = () => {
+    audioManager.init();
+    // Re-enforce Auth flow on start as requested: "should sign in always"
+    // We send them to SIGNUP (which has the toggle to SIGNIN)
+    setGameState('SIGNUP');
+  };
+
   // Auth Handlers
-  const handleSignUpSuccess = (userData) => {
-    setIsAuthenticated(true);
-    setCurrentUser(userData);
-    setGameState('NAMING');
+  const handleSignUpSuccess = async (userData) => {
+    // Force manual sign-in after account creation
+    await authService.signOut();
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setGameState('SIGNIN');
+    alert("Profile Reserved. Please sign in with your credentials to authorize access.");
   };
 
   const handleSignInSuccess = (userData) => {
     setIsAuthenticated(true);
     setCurrentUser(userData);
-    setGameState('NAMING');
+    // Routing is now handled intelligently by the auth listener's loadUserData call
   };
 
   const handleSwitchToSignIn = () => {
@@ -788,10 +819,7 @@ const App = () => {
   if (gameState === 'START') return (
     <StartScreen
       trust={trust}
-      onStart={() => {
-        audioManager.init();
-        setGameState('SIGNUP');
-      }}
+      onStart={continueToGame}
       onResources={() => { audioManager.init(); setGameState('RESOURCES'); }}
     />
   );
@@ -844,15 +872,15 @@ const App = () => {
       audioManager={audioManager}
     />
   );
-  if (gameState === 'QUIZ_MODE') return <QuizGameScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
+  if (gameState === 'QUIZ_MODE') return <QuizGameScreen currentUser={currentUser} audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
   if (gameState === 'RESOURCES') return <ResourcesScreen onBack={() => setGameState(prev => ['START', 'LEVEL_SELECT'].includes(prev) ? prev : 'START')} />;
   if (gameState === 'FINAL_SUCCESS') return <FinalSuccessScreen onRestart={() => { setGameState('START'); setCompletedLevels([]); audioManager.playVictory(); }} />;
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
-  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
+  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen currentUser={currentUser} audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
 
-  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
-  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
+  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen currentUser={currentUser} audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
+  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen currentUser={currentUser} audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>

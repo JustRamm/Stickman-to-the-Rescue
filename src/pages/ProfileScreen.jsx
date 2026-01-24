@@ -145,13 +145,13 @@ const ProfileScreen = ({
     ];
 
     const tabs = [
-        { id: 'progress', label: 'My Progress', icon: '⭐️' },
-        { id: 'settings', label: 'Settings', icon: '⚙️' },
-        { id: 'about', label: 'About QPR', icon: 'ℹ️' }
+        { id: 'progress', label: 'My Progress', icon: 'happy_stickman.svg' },
+        { id: 'settings', label: 'Settings', icon: 'thinking_stickman.svg' },
+        { id: 'about', label: 'About QPR', icon: 'scholar_stickman.svg' }
     ];
 
     if (isDev) {
-        tabs.push({ id: 'admin', label: 'Admin Console', icon: '📟' });
+        tabs.push({ id: 'admin', label: 'Admin Console', icon: 'stickman_laptop.svg' });
     }
 
     return (
@@ -215,21 +215,21 @@ const ProfileScreen = ({
                     <button
                         key={tab.id}
                         onClick={() => { audioManager.init(); setActiveTab(tab.id); }}
-                        className={`px-6 h-full text-[10px] md:text-[11px] font-black uppercase tracking-widest flex items-center gap-2 border-b-2 transition-all ${activeTab === tab.id
-                                ? (isDev && tab.id === 'admin' ? 'border-purple-500 text-purple-400 bg-purple-500/10' : 'border-teal-500 text-teal-600 bg-teal-50/30')
-                                : (isDev ? 'border-transparent text-slate-500 hover:text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-200')
+                        className={`px-6 h-full text-[10px] md:text-[11px] font-black uppercase tracking-widest flex items-center gap-3 border-b-2 transition-all ${activeTab === tab.id
+                            ? (isDev && tab.id === 'admin' ? 'border-purple-500 text-purple-400 bg-purple-500/10' : 'border-teal-500 text-teal-600 bg-teal-50/30')
+                            : (isDev ? 'border-transparent text-slate-500 hover:text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-200')
                             }`}
                     >
-                        <span>{tab.icon}</span>
+                        <img src={`/stickman_assets/${tab.icon}`} alt="" className={`w-5 h-5 object-contain ${activeTab === tab.id ? '' : 'opacity-40 grayscale'}`} />
                         {tab.label}
                     </button>
                 ))}
 
                 <button
                     onClick={onLogout}
-                    className="ml-auto px-6 py-4 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-400 hover:text-red-500 transition-colors flex items-center gap-2"
+                    className="ml-auto px-6 py-4 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-500 hover:text-red-600 transition-colors flex items-center gap-3"
                 >
-                    <span>🚪</span>
+                    <img src="/stickman_assets/guy_walk_right.svg" alt="" className="w-5 h-5 object-contain filter brightness-100" />
                     Terminate Session
                 </button>
             </div>
@@ -241,7 +241,9 @@ const ProfileScreen = ({
                         {/* Missions Grid */}
                         <div className="flex-1 min-h-0 mb-6">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${isDev ? 'bg-purple-900/50 text-purple-400' : 'bg-teal-100/50 text-teal-600'}`}>🎮</div>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDev ? 'bg-purple-900/50' : 'bg-teal-100/50'}`}>
+                                    <img src="/stickman_assets/scout_stickman.svg" className="w-6 h-6 object-contain" alt="" />
+                                </div>
                                 <h3 className={`text-[10px] md:text-xs font-black uppercase tracking-[0.2em] ${isDev ? 'text-purple-400/60' : 'text-slate-400'}`}>Scenario Simulation History</h3>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-[calc(100%-2rem)]">
@@ -249,14 +251,18 @@ const ProfileScreen = ({
                                     const isCompleted = completedLevels.includes(mission.id);
                                     return (
                                         <div key={mission.id} className={`p-2 md:p-4 rounded-2xl border-2 flex items-center gap-3 md:gap-4 transition-all ${isCompleted
-                                                ? (isDev ? 'border-purple-500/50 bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : 'border-teal-200 bg-teal-50/40')
-                                                : (isDev ? 'border-slate-800 bg-slate-900/50 opacity-40' : 'border-slate-100 bg-slate-50/50 grayscale opacity-60')
+                                            ? (isDev ? 'border-purple-500/50 bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : 'border-teal-200 bg-teal-50/40')
+                                            : (isDev ? 'border-slate-800 bg-slate-900/50 opacity-40' : 'border-slate-100 bg-slate-50/50 grayscale opacity-60')
                                             }`}>
-                                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${isCompleted
-                                                    ? (isDev ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-teal-500 text-white shadow-lg shadow-teal-500/30')
-                                                    : (isDev ? 'bg-slate-800 text-slate-600' : 'bg-slate-200 text-slate-400')
+                                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 ${isCompleted
+                                                ? (isDev ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-teal-500 text-white shadow-lg shadow-teal-500/30')
+                                                : (isDev ? 'bg-slate-800 text-slate-600' : 'bg-slate-200 text-slate-400')
                                                 }`}>
-                                                {isCompleted ? '✓' : '🔒'}
+                                                {isCompleted ? (
+                                                    <img src="/stickman_assets/happy_stickman.svg" alt="Done" className="w-7 h-7 filter brightness-0 invert" />
+                                                ) : (
+                                                    <img src="/stickman_assets/guy_crouch.svg" alt="Locked" className="w-7 h-7 opacity-30 grayscale" />
+                                                )}
                                             </div>
                                             <div className="min-w-0">
                                                 <h4 className={`text-[10px] md:text-sm font-black uppercase tracking-tight truncate ${isDev ? 'text-purple-100' : 'text-slate-700'}`}>{mission.name}</h4>
@@ -271,7 +277,9 @@ const ProfileScreen = ({
                         {/* Mini Games Grid */}
                         <div className="shrink-0">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${isDev ? 'bg-indigo-900/50 text-indigo-400' : 'bg-indigo-100/50 text-indigo-600'}`}>🕹️</div>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDev ? 'bg-indigo-900/50' : 'bg-indigo-100/50'}`}>
+                                    <img src="/stickman_assets/shield_stickman.svg" className="w-6 h-6 object-contain" alt="" />
+                                </div>
                                 <h3 className={`text-[10px] md:text-xs font-black uppercase tracking-[0.2em] ${isDev ? 'text-indigo-400/60' : 'text-slate-400'}`}>Field Training Data</h3>
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -302,8 +310,10 @@ const ProfileScreen = ({
                             {/* Left Side: Account Security */}
                             <div className="space-y-6">
                                 <div className="text-left mb-4">
-                                    <h3 className={`text-xl font-black uppercase tracking-tight flex items-center gap-2 ${isDev ? 'text-purple-400' : 'text-slate-800'}`}>
-                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${isDev ? 'bg-purple-900/50' : 'bg-slate-100'}`}>🔐</span>
+                                    <h3 className={`text-xl font-black uppercase tracking-tight flex items-center gap-3 ${isDev ? 'text-purple-400' : 'text-slate-800'}`}>
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDev ? 'bg-purple-900/50' : 'bg-slate-100'}`}>
+                                            <img src="/stickman_assets/shield_stickman.svg" className="w-6 h-6 object-contain" alt="" />
+                                        </div>
                                         Encryption Keys & Access
                                     </h3>
                                 </div>
@@ -344,8 +354,10 @@ const ProfileScreen = ({
                             {/* Right Side: Game Configuration */}
                             <div className="space-y-6">
                                 <div className="text-left mb-4">
-                                    <h3 className={`text-xl font-black uppercase tracking-tight flex items-center gap-2 ${isDev ? 'text-indigo-400' : 'text-slate-800'}`}>
-                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${isDev ? 'bg-indigo-900/50' : 'bg-indigo-100'}`}>⚙️</span>
+                                    <h3 className={`text-xl font-black uppercase tracking-tight flex items-center gap-3 ${isDev ? 'text-indigo-400' : 'text-slate-800'}`}>
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDev ? 'bg-indigo-900/50' : 'bg-indigo-100'}`}>
+                                            <img src="/stickman_assets/thinking_stickman.svg" className="w-6 h-6 object-contain" alt="" />
+                                        </div>
                                         Core System Params
                                     </h3>
                                 </div>
@@ -421,7 +433,9 @@ const ProfileScreen = ({
                     <div className="h-full animate-fade-in-up">
                         <div className="h-full flex flex-col">
                             <div className="flex items-center gap-4 mb-6 border-b border-purple-500/20 pb-4">
-                                <div className="w-12 h-12 bg-purple-900/50 rounded-2xl flex items-center justify-center text-2xl animate-pulse">📟</div>
+                                <div className="w-14 h-14 bg-purple-900/50 rounded-2xl flex items-center justify-center p-2 animate-pulse">
+                                    <img src="/stickman_assets/stickman_laptop.svg" className="w-full h-full object-contain" alt="" />
+                                </div>
                                 <div>
                                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">System Override Console</h3>
                                     <p className="text-[10px] text-purple-400/60 font-black uppercase tracking-[0.3em] mt-1">Experimental Terminal v2.9.0-BETA</p>
@@ -489,28 +503,36 @@ const ProfileScreen = ({
                                             onClick={handleInstaWin}
                                             className="bg-slate-800 hover:bg-white hover:text-slate-900 p-2 rounded-xl text-[8px] font-black uppercase flex flex-col items-center justify-center transition-all border border-white/5 active:scale-95 group"
                                         >
-                                            <span className="text-lg group-hover:scale-125 transition-transform">⚡</span>
+                                            <div className="w-8 h-8 mb-1 group-hover:scale-125 transition-transform">
+                                                <img src="/stickman_assets/catch_stickman.svg" className="w-full h-full object-contain filter invert group-hover:invert-0" alt="" />
+                                            </div>
                                             <span>Insta-Win</span>
                                         </button>
                                         <button
                                             onClick={handleSndTest}
                                             className="bg-slate-800 hover:bg-white hover:text-slate-900 p-2 rounded-xl text-[8px] font-black uppercase flex flex-col items-center justify-center transition-all border border-white/5 active:scale-95 group"
                                         >
-                                            <span className="text-lg group-hover:rotate-12 transition-transform">🔊</span>
+                                            <div className="w-8 h-8 mb-1 group-hover:rotate-12 transition-transform">
+                                                <img src="/stickman_assets/happy_stickman.svg" className="w-full h-full object-contain filter invert group-hover:invert-0" alt="" />
+                                            </div>
                                             <span>SND Test</span>
                                         </button>
                                         <button
                                             onClick={() => { addLog("NODE_RENDER: GFX_MODE_TOGGLE", "warning"); }}
                                             className="bg-slate-800 hover:bg-white hover:text-slate-900 p-2 rounded-xl text-[8px] font-black uppercase flex flex-col items-center justify-center transition-all border border-white/5 active:scale-95 group"
                                         >
-                                            <span className="text-lg group-hover:animate-spin">🎨</span>
+                                            <div className="w-8 h-8 mb-1 group-hover:animate-spin">
+                                                <img src="/stickman_assets/pointing_stickman.svg" className="w-full h-full object-contain filter invert group-hover:invert-0" alt="" />
+                                            </div>
                                             <span>GFX Mode</span>
                                         </button>
                                         <button
                                             onClick={handleExportLogs}
                                             className="bg-slate-800 hover:bg-white hover:text-slate-900 p-2 rounded-xl text-[8px] font-black uppercase flex flex-col items-center justify-center transition-all border border-white/5 active:scale-95 group"
                                         >
-                                            <span className="text-lg group-hover:-translate-y-1 transition-transform">📝</span>
+                                            <div className="w-8 h-8 mb-1 group-hover:-translate-y-1 transition-transform">
+                                                <img src="/stickman_assets/stickman_laptop.svg" className="w-full h-full object-contain filter invert group-hover:invert-0" alt="" />
+                                            </div>
                                             <span>Log Txt</span>
                                         </button>
                                     </div>
