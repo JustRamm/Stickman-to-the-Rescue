@@ -94,7 +94,6 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
             setIsLoading(false);
             setErrors({ email: error });
         }
-        // Note: Google OAuth will redirect, so we don't set loading to false here
     };
 
     return (
@@ -108,7 +107,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
             </button>
 
             {/* Realistic Corporate Office Room Environment */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none select-none bg-slate-200">
+            <div className="fixed inset-0 overflow-hidden pointer-events-none select-none bg-slate-900 backdrop-blur-[4px]">
                 {/* Office Ceiling with Lighting System */}
                 <div className="absolute top-0 inset-x-0 h-[12%] bg-slate-300 border-b-2 border-slate-400/50 z-20">
                     <div className="absolute inset-0 grid grid-cols-4 gap-12 px-20 py-3">
@@ -121,7 +120,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                 </div>
 
                 {/* Office Walls with Professional Texture */}
-                <div className="absolute inset-x-0 top-[12%] bottom-[20%] bg-[#f8fafc] flex">
+                <div className="absolute inset-x-0 top-[12%] bottom-[20%] bg-[#0f172a] flex opacity-80">
                     <div className="w-1/3 h-full border-r border-slate-200/50"></div>
                     <div className="w-1/3 h-full border-r border-slate-200/50"></div>
                     <div className="w-1/3 h-full"></div>
@@ -129,14 +128,11 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                 </div>
 
                 {/* Wall Mounted AC Unit */}
-                <div className="absolute top-[15%] left-[6%] w-48 h-12 bg-white rounded-sm border-2 border-slate-100 shadow-md z-30">
+                <div className="absolute top-[15%] left-[6%] w-48 h-12 bg-white rounded-sm border-2 border-slate-100 shadow-md z-30 opacity-60">
                     <div className="absolute top-1 left-2 text-[4px] font-bold text-slate-300 uppercase">OFFICE-CHILL 2.0</div>
                     <div className="absolute bottom-2 inset-x-3 h-3 border-t border-slate-50 flex flex-col gap-0.5 pt-0.5">
                         <div className="w-full h-[1px] bg-slate-50"></div>
                         <div className="w-full h-[1px] bg-slate-50"></div>
-                    </div>
-                    <div className="absolute bottom-2 right-3 flex items-center gap-1">
-                        <div className="w-0.5 h-0.5 rounded-full bg-emerald-400 animate-pulse"></div>
                     </div>
                 </div>
 
@@ -151,7 +147,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                 </div>
 
                 {/* Panoramic Window with Night City View */}
-                <div className="absolute top-[22%] right-[5%] w-[40%] h-[40%] rounded-xl border-[8px] border-slate-800 shadow-2xl overflow-hidden bg-black z-10">
+                <div className="absolute top-[22%] right-[5%] w-[40%] h-[40%] rounded-xl border-[8px] border-slate-800 shadow-2xl overflow-hidden bg-black z-10 opacity-70">
                     <div className="absolute inset-0 bg-[#020617]"></div>
                     <div className="absolute bottom-0 inset-x-0 h-full flex items-end justify-between px-6 gap-2">
                         {[
@@ -171,19 +167,16 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                             </div>
                         ))}
                     </div>
-                    <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#020617] to-transparent"></div>
                 </div>
 
-                {/* Desk Corner Visual Anchor */}
-                <div className="absolute bottom-[-8%] left-[4%] w-[35%] h-[20%] bg-[#211710] rounded-t-[2.5rem] shadow-[0_-15px_60px_rgba(0,0,0,0.7)] border-t border-white/5 z-30">
-                    <div className="w-full h-full bg-gradient-to-b from-white/5 via-transparent to-black/70 rounded-t-[2.5rem]"></div>
-                </div>
+                {/* Focus Overlay */}
+                <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md z-[40]"></div>
             </div>
 
             {/* Main Interactive Enrollment Form UI */}
             <div className="relative z-[50] w-full max-w-lg lg:max-w-xl animate-scale-in">
                 {/* Official Paper Sheet Aesthetic */}
-                <div className="bg-[#fcfcfa] rounded-sm shadow-[0_25px_60px_-5px_rgba(0,0,0,0.5),_0_0_20px_rgba(0,0,0,0.1)] border border-slate-200 p-8 md:p-12 relative overflow-hidden group rotate-[-0.1deg]">
+                <div className="bg-[#fcfcfa] rounded-sm shadow-[0_25px_60px_-5px_rgba(0,0,0,0.5),_0_0_20px_rgba(0,0,0,0.1)] border border-slate-200 px-8 py-6 md:px-12 md:py-8 relative overflow-hidden group rotate-[-0.1deg]">
                     {/* Printed Form Header Decoration */}
                     <div className="absolute top-0 inset-x-0 h-1 bg-teal-600"></div>
                     <div className="absolute top-4 right-6 text-[8px] font-mono text-slate-400 tracking-tighter uppercase font-bold">
@@ -191,8 +184,8 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                     </div>
 
                     {/* Official Letterhead */}
-                    <div className="text-center mb-6 relative">
-                        <div className="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                    <div className="text-center mb-4 relative">
+                        <div className="flex justify-between items-start mb-4 border-b-2 border-slate-100 pb-3">
                             <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center border border-slate-200 shadow-sm ring-4 ring-slate-50 rotate-[-1deg] shrink-0">
                                 <img
                                     src="/logo.svg"
@@ -202,23 +195,23 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                             </div>
                             <div className="text-right">
                                 <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">
-                                    Personnel<br />Registration
+                                    Personnel Registration
                                 </h1>
-                                <p className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] mt-2">
+                                <p className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] mt-1">
                                     Official Enrollment Center
                                 </p>
                             </div>
                         </div>
-                        <div className="bg-slate-50 p-3 border-l-4 border-teal-500 rounded-r-sm text-left">
+                        <div className="bg-slate-50 p-2 border-l-4 border-teal-500 rounded-r-sm text-left">
                             <p className="text-slate-600 font-bold text-xs italic leading-relaxed">
-                                "Saving a life begins with your signature. Please complete the following credentials to authorize your participation."
+                                "Saving a life begins with your signature. Please complete credentials to authorize participation."
                             </p>
                         </div>
                     </div>
 
                     {/* Success Message */}
                     {successMessage && (
-                        <div className="mb-6 p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r-sm animate-fade-in">
+                        <div className="mb-4 p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r-sm animate-fade-in">
                             <p className="text-teal-700 font-bold text-sm leading-relaxed">
                                 {successMessage}
                             </p>
@@ -227,7 +220,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
 
                     {/* General Error Message */}
                     {errors.general && (
-                        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-sm animate-fade-in">
+                        <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-sm animate-fade-in">
                             <p className="text-red-700 font-bold text-sm leading-relaxed">
                                 {errors.general}
                             </p>
@@ -237,11 +230,11 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                     {/* Form Fields Styled as Paper Blanks */}
                     {!needsVerification && (
                         <>
-                            <form onSubmit={handleSubmit} className="space-y-5">
-                                <div className="space-y-1.5">
+                            <form onSubmit={handleSubmit} className="space-y-3">
+                                <div className="space-y-1">
                                     <div className="flex justify-between items-center px-1">
                                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-                                            Primary Email Identity
+                                            Email Identity
                                         </label>
                                         <span className="text-[7px] font-mono text-slate-300">REQ-001</span>
                                     </div>
@@ -250,7 +243,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className={`w-full px-4 py-3 bg-slate-50 border-b-2 border-slate-200 rounded-t-sm focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-bold text-slate-800 placeholder-slate-300 text-sm ${errors.email ? 'border-red-500 bg-red-50' : ''}`}
+                                        className={`w-full px-4 py-2.5 bg-slate-50 border-b-2 border-slate-200 rounded-t-sm focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-bold text-slate-800 placeholder-slate-300 text-sm ${errors.email ? 'border-red-500 bg-red-50' : ''}`}
                                         placeholder="Enter professional email..."
                                     />
                                     {errors.email && (
@@ -258,10 +251,10 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                     )}
                                 </div>
 
-                                <div className="space-y-1.5">
+                                <div className="space-y-1">
                                     <div className="flex justify-between items-center px-1">
                                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-                                            Security Credentials
+                                            Security Key
                                         </label>
                                         <span className="text-[7px] font-mono text-slate-300">REQ-002</span>
                                     </div>
@@ -270,7 +263,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                         name="password"
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className={`w-full px-4 py-3 bg-slate-50 border-b-2 border-slate-200 rounded-t-sm focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-bold text-slate-800 placeholder-slate-300 text-sm ${errors.password ? 'border-red-500 bg-red-50' : ''}`}
+                                        className={`w-full px-4 py-2.5 bg-slate-50 border-b-2 border-slate-200 rounded-t-sm focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-bold text-slate-800 placeholder-slate-300 text-sm ${errors.password ? 'border-red-500 bg-red-50' : ''}`}
                                         placeholder="••••••••"
                                     />
                                     {errors.password && (
@@ -278,10 +271,10 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                     )}
                                 </div>
 
-                                <div className="space-y-1.5">
+                                <div className="space-y-1">
                                     <div className="flex justify-between items-center px-1">
                                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-                                            Verify Security Key
+                                            Verify Key
                                         </label>
                                         <span className="text-[7px] font-mono text-slate-300">REQ-003</span>
                                     </div>
@@ -290,7 +283,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                         name="confirmPassword"
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
-                                        className={`w-full px-4 py-3 bg-slate-50 border-b-2 border-slate-200 rounded-t-sm focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-bold text-slate-800 placeholder-slate-300 text-sm ${errors.confirmPassword ? 'border-red-500 bg-red-50' : ''}`}
+                                        className={`w-full px-4 py-2.5 bg-slate-50 border-b-2 border-slate-200 rounded-t-sm focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-bold text-slate-800 placeholder-slate-300 text-sm ${errors.confirmPassword ? 'border-red-500 bg-red-50' : ''}`}
                                         placeholder="••••••••"
                                     />
                                     {errors.confirmPassword && (
@@ -298,11 +291,11 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                     )}
                                 </div>
 
-                                <div className="pt-2">
+                                <div className="pt-1">
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-black uppercase tracking-[0.25em] text-xs shadow-lg transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden"
+                                        className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-black uppercase tracking-[0.25em] text-[10px] shadow-lg transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden"
                                     >
                                         {isLoading ? (
                                             <>
@@ -311,7 +304,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                             </>
                                         ) : (
                                             <>
-                                                <span>AUTHORIZE REGISTRATION</span>
+                                                <span>AUTHORIZE ENROLLMENT</span>
                                                 <span className="text-xl">⤑</span>
                                             </>
                                         )}
@@ -320,8 +313,8 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                             </form>
 
                             {/* Google Sign In */}
-                            <div className="mt-6">
-                                <div className="flex items-center gap-4 mb-4">
+                            <div className="mt-4">
+                                <div className="flex items-center gap-4 mb-3">
                                     <div className="h-[1px] flex-1 bg-slate-200"></div>
                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Or Continue With</span>
                                     <div className="h-[1px] flex-1 bg-slate-200"></div>
@@ -331,7 +324,7 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                                     type="button"
                                     onClick={handleGoogleSignUp}
                                     disabled={isLoading}
-                                    className="w-full py-3 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold text-sm rounded-sm transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
+                                    className="w-full py-2.5 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold text-[10px] rounded-sm transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
                                 >
                                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -348,18 +341,17 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
                     {/* Verification Notice - Show after successful signup */}
                     {needsVerification && (
                         <div className="space-y-4">
-                            <div className="p-6 bg-teal-50 rounded-lg border-2 border-teal-200">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-black text-teal-900 uppercase tracking-tight mb-2">Check Your Email</h3>
-                                        <p className="text-sm text-teal-700 font-medium leading-relaxed">
-                                            We've sent a verification link to <span className="font-bold">{formData.email}</span>.
-                                            Please click the link to verify your account, then return here to sign in.
+                                        <h3 className="text-base font-black text-teal-900 uppercase tracking-tight mb-1">Check Your Email</h3>
+                                        <p className="text-[11px] text-teal-700 font-medium leading-relaxed">
+                                            We've sent a link to <span className="font-bold">{formData.email}</span>. Click it to verify your account.
                                         </p>
                                     </div>
                                 </div>
@@ -367,31 +359,28 @@ const SignUpScreen = ({ onSignUpSuccess, onSwitchToSignIn, onBack }) => {
 
                             <button
                                 onClick={onSwitchToSignIn}
-                                className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-black uppercase tracking-widest text-xs rounded-sm transition-all"
+                                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-black uppercase tracking-widest text-[9px] rounded-sm transition-all"
                             >
                                 Go to Sign In
                             </button>
                         </div>
                     )}
 
-                    <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col items-center gap-3">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Already an active operative?</p>
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active Operative?</p>
                         <button
                             onClick={onSwitchToSignIn}
-                            className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px] rounded-sm transition-all"
+                            className="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black uppercase tracking-widest text-[9px] rounded-sm transition-all"
                         >
-                            Log in to Operative Portal
+                            Log In Now
                         </button>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-center gap-4 opacity-20">
+                    <div className="mt-4 flex items-center justify-center gap-4 opacity-20">
                         <div className="h-[1px] flex-1 bg-slate-400"></div>
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
                         <div className="h-[1px] flex-1 bg-slate-400"></div>
                     </div>
-                    <p className="mt-4 text-center text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
-                        © 2024 QPR GLOBAL • CONFIDENTIAL DOCUMENT
-                    </p>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase';
+import { supabase } from '../config/supabaseClient';
 
 /**
  * Authentication service for handling Supabase auth operations

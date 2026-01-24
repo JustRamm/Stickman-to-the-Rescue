@@ -25,6 +25,7 @@ import ResourceRelayScreen from './pages/ResourceRelayScreen';
 import SignalScoutScreen from './pages/SignalScoutScreen'; // New Game
 import WordsOfHopeScreen from './pages/WordsOfHopeScreen'; // New Game
 import TutorialOverlay from './pages/TutorialOverlay';
+import ProfileScreen from './pages/ProfileScreen';
 
 // Data
 import dialogueData from './dialogue.json';
@@ -810,8 +811,37 @@ const App = () => {
       isSettingsOpen={isSettingsOpen}
       setIsSettingsOpen={setIsSettingsOpen}
       onResetGame={handleResetGame}
+      onLogout={handleLogout}
       isPaused={isPaused}
       setIsPaused={setIsPaused}
+    />
+  );
+
+  const handleUnlockAll = async () => {
+    if (!currentUser) return;
+    const allIds = MISSIONS.map(m => m.id);
+    setCompletedLevels(allIds);
+    // Silent DB update for all missions
+    try {
+      await Promise.all(allIds.map(id => dbService.completeMission(currentUser.id, id, 100)));
+    } catch (e) {
+      console.error("Admin Unlock Error:", e);
+    }
+  };
+
+  if (gameState === 'PROFILE') return (
+    <ProfileScreen
+      currentUser={currentUser}
+      playerName={playerName}
+      playerGender={playerGender}
+      completedLevels={completedLevels}
+      settings={settings}
+      setSettings={setSettings}
+      onResetGame={handleResetGame}
+      onAdminUnlockAll={handleUnlockAll}
+      onNavigate={setGameState}
+      onLogout={handleLogout}
+      audioManager={audioManager}
     />
   );
   if (gameState === 'QUIZ_MODE') return <QuizGameScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;

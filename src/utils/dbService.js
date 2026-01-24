@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase';
+import { supabase } from '../config/supabaseClient';
 
 /**
  * Database service for managing user profiles and game progress
@@ -286,13 +286,13 @@ export const dbService = {
             // Get total missions completed
             const { data: missions } = await supabase
                 .from('game_progress')
-                .select('id', { count: 'exact' })
+                .select('*')
                 .eq('user_id', userId);
 
             // Get total minigames played
             const { data: minigames } = await supabase
                 .from('minigame_scores')
-                .select('id', { count: 'exact' })
+                .select('*')
                 .eq('user_id', userId);
 
             // Get average trust score
