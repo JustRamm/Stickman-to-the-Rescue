@@ -9,8 +9,6 @@ import ClueOverlay from './components/ClueOverlay';
 
 // Pages
 import SplashScreen from './pages/SplashScreen';
-import SignUpScreen from './pages/SignUpScreen';
-import SignInScreen from './pages/SignInScreen';
 import StartScreen from './pages/StartScreen';
 import NamingScreen from './pages/NamingScreen';
 import GenderSelectScreen from './pages/GenderSelectScreen';
@@ -36,23 +34,7 @@ import { PLAYER_CARDS } from './data/resourceRelayData';
 
 const App = () => {
   // Game State
-  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, SIGNUP, SIGNIN, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY, WORDS_OF_HOPE
-
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authView, setAuthView] = useState('signup'); // 'signup' or 'signin'
-
-  // Check authentication on mount
-  useEffect(() => {
-    const authToken = localStorage.getItem('qpr_auth_token');
-    const userData = localStorage.getItem('qpr_user');
-
-    if (authToken && userData) {
-      setIsAuthenticated(true);
-      setCurrentUser(JSON.parse(userData));
-    }
-  }, []);
+  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY, WORDS_OF_HOPE
 
   // Settings
   const [settings, setSettings] = useState(() => {
@@ -182,16 +164,11 @@ const App = () => {
   useEffect(() => {
     if (gameState === 'SPLASH' && loadingProgress >= 100) {
       const timer = setTimeout(() => {
-        // Check if user is authenticated
-        if (isAuthenticated) {
-          setGameState('START');
-        } else {
-          setGameState(authView === 'signup' ? 'SIGNUP' : 'SIGNIN');
-        }
+        setGameState('START');
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [loadingProgress, gameState, isAuthenticated, authView]);
+  }, [loadingProgress, gameState]);
 
   // Save Progress
   useEffect(() => {
@@ -544,7 +521,7 @@ const App = () => {
   useEffect(() => {
     if (gameState === 'DIALOGUE' && !isNpcSpeaking && !playerLastSaid && currentNode?.required_resource && currentNode?.options?.length > 0) {
       setIsWalletOpen(true);
-    } else if (isNpcSpeaking || playerLastSaid || !currentNode?.required_resource || !currentNode?.options?.length) {
+    } else {
       setIsWalletOpen(false);
     }
   }, [currentNode, isNpcSpeaking, gameState, playerLastSaid]);
@@ -638,32 +615,7 @@ const App = () => {
     </div>
   );
 
-  // Auth Handlers
-  const handleSignUpSuccess = (userData) => {
-    setIsAuthenticated(true);
-    setCurrentUser(userData);
-    setGameState('NAMING');
-  };
-
-  const handleSignInSuccess = (userData) => {
-    setIsAuthenticated(true);
-    setCurrentUser(userData);
-    setGameState('START');
-  };
-
-  const handleSwitchToSignIn = () => {
-    setAuthView('signin');
-    setGameState('SIGNIN');
-  };
-
-  const handleSwitchToSignUp = () => {
-    setAuthView('signup');
-    setGameState('SIGNUP');
-  };
-
   if (gameState === 'SPLASH') return <SplashScreen loadingProgress={loadingProgress} />;
-  if (gameState === 'SIGNUP') return <SignUpScreen onSignUpSuccess={handleSignUpSuccess} onSwitchToSignIn={handleSwitchToSignIn} />;
-  if (gameState === 'SIGNIN') return <SignInScreen onSignInSuccess={handleSignInSuccess} onSwitchToSignUp={handleSwitchToSignUp} />;
   if (gameState === 'START') return <StartScreen trust={trust} onStart={() => { audioManager.init(); setGameState('NAMING'); }} onResources={() => { audioManager.init(); setGameState('RESOURCES'); }} />;
   if (gameState === 'NAMING') return <NamingScreen trust={trust} playerName={playerName} setPlayerName={setPlayerName} onNext={() => setGameState('GENDER_SELECT')} onNavigate={setGameState} />;
   if (gameState === 'GENDER_SELECT') return <GenderSelectScreen trust={trust} playerGender={playerGender} setPlayerGender={setPlayerGender} audioManager={audioManager} onNext={() => setGameState('LEVEL_SELECT')} onBack={() => setGameState('NAMING')} />;
@@ -966,7 +918,9 @@ const App = () => {
         </div>
       )}
 
-      <ResourceWallet isOpen={isWalletOpen} setIsOpen={setIsWalletOpen} selectedResource={selectedResource} onSelectResource={setSelectedResource} trust={trust} resources={walletResources} />
+      {gameState === 'DIALOGUE' && (
+        <ResourceWallet isOpen={isWalletOpen} setIsOpen={setIsWalletOpen} selectedResource={selectedResource} onSelectResource={setSelectedResource} trust={trust} resources={walletResources} />
+      )}
 
     </div>
   );
