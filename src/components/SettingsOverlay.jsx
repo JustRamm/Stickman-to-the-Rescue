@@ -5,7 +5,6 @@ const SettingsOverlay = ({
     setSettings,
     audioManager,
     onResetGame,
-    onLogout,
     onNavigate,
     showMiniGames = false,
     isPaused,
@@ -49,18 +48,7 @@ const SettingsOverlay = ({
                     </button>
                 )}
 
-                {/* Profile Button */}
-                {gameState === 'LEVEL_SELECT' && (
-                    <button
-                        onClick={() => { audioManager.init(); onNavigate('PROFILE'); }}
-                        className="w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-slate-600 hover:text-indigo-600 shadow-xl transition-all border border-white/50 group"
-                        title="Your Profile"
-                    >
-                        <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    </button>
-                )}
+
             </div>
 
             {/* Mini Games Selection Modal */}
