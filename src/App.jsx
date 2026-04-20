@@ -1,4 +1,3 @@
-/* @refresh reset */
 import React, { useState, useEffect, useRef } from 'react';
 import Stickman from './components/Stickman';
 import DialogueBox from './components/DialogueBox';
@@ -10,8 +9,6 @@ import ClueOverlay from './components/ClueOverlay';
 
 // Pages
 import SplashScreen from './pages/SplashScreen';
-import SignUpScreen from './pages/SignUpScreen';
-import SignInScreen from './pages/SignInScreen';
 import StartScreen from './pages/StartScreen';
 import NamingScreen from './pages/NamingScreen';
 import GenderSelectScreen from './pages/GenderSelectScreen';
@@ -26,7 +23,6 @@ import ResourceRelayScreen from './pages/ResourceRelayScreen';
 import SignalScoutScreen from './pages/SignalScoutScreen'; // New Game
 import WordsOfHopeScreen from './pages/WordsOfHopeScreen'; // New Game
 import TutorialOverlay from './pages/TutorialOverlay';
-import ProfileScreen from './pages/ProfileScreen';
 
 // Data
 import dialogueData from './dialogue.json';
@@ -35,183 +31,27 @@ import { INNER_THOUGHTS, CLUE_POSITIONS, CLUE_DETAILS, BACKGROUND_NPCS } from '.
 import { audioManager } from './utils/audio';
 import { REAL_RESOURCES } from './data/resources';
 import { PLAYER_CARDS } from './data/resourceRelayData';
-import { authService } from './utils/authService';
-import { dbService } from './utils/dbService';
 
 const App = () => {
   // Game State
-  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, SIGNUP, SIGNIN, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY, WORDS_OF_HOPE
+  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY, WORDS_OF_HOPE
 
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authView, setAuthView] = useState('signup'); // 'signup' or 'signin'
-
-  // Logout Handler
-  const handleLogout = async () => {
-    if (confirm('Are you sure you want to logout?')) {
-      await authService.signOut();
-      setIsAuthenticated(false);
-      setCurrentUser(null);
-      setGameState('START');
-      setIsSettingsOpen(false);
+  // Settings
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('qpr_settings');
+      // Force devMode to false on logic load to prevent accidental persistent unlocks
+      const parsed = saved ? JSON.parse(saved) : {};
+      return {
+        audioVolume: 0.5,
+        ttsEnabled: true,
+        textSpeed: 50,
+        ...parsed,
+        devMode: false
+      };
+    } catch (e) {
+      return { audioVolume: 0.5, ttsEnabled: true, textSpeed: 50, devMode: false };
     }
-  };
-
-  // Flag to prevent saving while loading data from database
-  const isLoadingUserData = useRef(false);
-  // Track if we've loaded initial data to prevent saving defaults
-  const hasLoadedInitialData = useRef(false);
-  // Track if we've handled the initial session (to prevent re-redirecting on tab switch)
-  const hasHandledInitialSession = useRef(false);
-
-  // Check authentication on mount and listen for auth changes
-  useEffect(() => {
-    // Load user data from database
-    const loadUserData = async (userId, shouldRedirect = false) => {
-      try {
-        console.log('📥 Loading user data for:', userId, 'shouldRedirect:', shouldRedirect);
-
-        // Set loading flag to prevent save useEffects from running
-        isLoadingUserData.current = true;
-
-        // Load profile
-        const { profile } = await dbService.getOrCreateProfile(userId);
-        console.log('👤 Profile loaded:', profile);
-
-        if (profile) {
-          if (profile.username) {
-            console.log('📝 Setting player name:', profile.username);
-            setPlayerName(profile.username);
-          }
-          if (profile.player_gender) {
-            console.log('🎭 Setting player gender:', profile.player_gender);
-            setPlayerGender(profile.player_gender);
-          }
-        }
-
-        // Load completed missions
-        const { missions } = await dbService.getCompletedMissions(userId);
-        if (missions && missions.length > 0) {
-          const completedIds = missions.map(m => m.mission_id);
-          console.log('🎮 Completed missions loaded:', completedIds);
-          setCompletedLevels(completedIds);
-        }
-
-        // Load settings
-        const { settings: userSettings } = await dbService.getUserSettings(userId);
-        if (userSettings) {
-          console.log('⚙️ Settings loaded:', userSettings);
-          setSettings({
-            audioVolume: userSettings.audio_volume,
-            ttsEnabled: userSettings.tts_enabled,
-            textSpeed: userSettings.text_speed,
-            devMode: false
-          });
-        }
-
-        // Only redirect if explicitly requested (e.g., during active login)
-        if (shouldRedirect) {
-          if (profile?.username && profile?.player_gender) {
-            console.log('🎯 Redirecting to LEVEL_SELECT (profile complete)');
-            setGameState('LEVEL_SELECT');
-          } else if (profile?.username) {
-            console.log('🎯 Redirecting to GENDER_SELECT (username only)');
-            setGameState('GENDER_SELECT');
-          } else {
-            console.log('🎯 Redirecting to NAMING (no profile)');
-            setGameState('NAMING');
-          }
-        }
-
-        // Clear loading flag after a short delay to ensure state updates complete
-        setTimeout(() => {
-          isLoadingUserData.current = false;
-          hasLoadedInitialData.current = true;
-          console.log('✅ User data loading complete');
-        }, 100);
-      } catch (error) {
-        console.error('❌ Error loading user data:', error);
-        isLoadingUserData.current = false;
-        hasLoadedInitialData.current = true;
-        if (shouldRedirect) setGameState('NAMING');
-      }
-    };
-
-    // Check for existing session
-    const checkSession = async () => {
-      const { session } = await authService.getSession();
-      if (session?.user) {
-        setIsAuthenticated(true);
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email,
-          createdAt: session.user.created_at
-        });
-
-        // Only redirect if we're on an initial screen (not if user is already in the app)
-        const isInitialScreen = ['SPLASH', 'START', 'SIGNUP', 'SIGNIN'].includes(gameState);
-        if (isInitialScreen) {
-          console.log('🔄 checkSession: On initial screen, loading data and redirecting');
-          await loadUserData(session.user.id, true);
-        } else {
-          console.log('🔄 checkSession: User already in app, just loading data');
-          await loadUserData(session.user.id, false);
-        }
-      }
-    };
-
-    checkSession();
-
-    // Listen for auth state changes (handles OAuth callbacks and sign-ins)
-    const subscription = authService.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event, session);
-
-      if (event === 'SIGNED_IN' && session?.user) {
-        // Handle actual sign-in (not initial session)
-        setIsAuthenticated(true);
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email,
-          createdAt: session.user.created_at
-        });
-
-        // Always redirect based on profile completion for new sign-ins
-        await loadUserData(session.user.id, true);
-      } else if (event === 'INITIAL_SESSION' && session?.user && !hasHandledInitialSession.current) {
-        // Only handle INITIAL_SESSION once (on first page load)
-        // Ignore subsequent INITIAL_SESSION events from tab switches
-        hasHandledInitialSession.current = true;
-
-        setIsAuthenticated(true);
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email,
-          createdAt: session.user.created_at
-        });
-
-        // Load data but don't redirect (checkSession already handled redirect)
-        await loadUserData(session.user.id, false);
-      } else if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
-        setCurrentUser(null);
-        // Clear all persistent mission state on logout for security/cleanliness
-        localStorage.removeItem('qpr_active_mission_session');
-        setGameState('SIGNUP');
-      }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []);
-
-  // Settings - Initialize with defaults, will be loaded from database
-  const [settings, setSettings] = useState({
-    audioVolume: 0.5,
-    ttsEnabled: true,
-    textSpeed: 50,
-    devMode: false
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -225,60 +65,29 @@ const App = () => {
     }
   };
 
-  // Player State - Initialize with defaults, will be loaded from database
-  // DO NOT read from localStorage here to avoid conflicts with database data
-  const [playerName, setPlayerName] = useState('You');
-  const [playerGender, setPlayerGender] = useState('guy');
+  // Player State
+  const [playerName, setPlayerName] = useState(() => {
+    return localStorage.getItem('qpr_player_name') || 'You';
+  });
+  const [playerGender, setPlayerGender] = useState(() => {
+    return localStorage.getItem('qpr_player_gender') || 'guy';
+  });
 
-  // Persist Player State to database only (not localStorage)
-  // Database is the single source of truth
+  // Persist Player State
   useEffect(() => {
-    // Don't save if we're currently loading data from database
-    if (isLoadingUserData.current) {
-      console.log('⏭️ Skipping save (loading in progress):', playerName);
-      return;
-    }
-
-    // Don't save until we've loaded initial data (prevents saving defaults)
-    if (!hasLoadedInitialData.current) {
-      console.log('⏭️ Skipping save (initial data not loaded yet):', playerName);
-      return;
-    }
-
-    // Save to database if user is authenticated
-    if (currentUser?.id && playerName !== 'You') {
-      console.log('💾 Saving player name to database:', playerName);
-      dbService.updateProfile(currentUser.id, { username: playerName })
-        .then(() => console.log('✅ Player name saved successfully'))
-        .catch(err => console.error('❌ Error saving player name:', err));
-    }
-  }, [playerName, currentUser]);
+    localStorage.setItem('qpr_player_name', playerName);
+  }, [playerName]);
 
   useEffect(() => {
-    // Don't save if we're currently loading data from database
-    if (isLoadingUserData.current) {
-      console.log('⏭️ Skipping save (loading in progress):', playerGender);
-      return;
-    }
-
-    // Don't save until we've loaded initial data (prevents saving defaults)
-    if (!hasLoadedInitialData.current) {
-      console.log('⏭️ Skipping save (initial data not loaded yet):', playerGender);
-      return;
-    }
-
-    // Save to database if user is authenticated
-    if (currentUser?.id) {
-      console.log('💾 Saving player gender to database:', playerGender);
-      dbService.updateProfile(currentUser.id, { player_gender: playerGender })
-        .then(() => console.log('✅ Player gender saved successfully'))
-        .catch(err => console.error('❌ Error saving player gender:', err));
-    }
-  }, [playerGender, currentUser]);
+    localStorage.setItem('qpr_player_gender', playerGender);
+  }, [playerGender]);
 
   const [selectedLevel, setSelectedLevel] = useState(MISSIONS[0]);
-  // Completed levels - Initialize empty, will be loaded from database
-  const [completedLevels, setCompletedLevels] = useState([]);
+  const [completedLevels, setCompletedLevels] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('qpr_completed_missions_v5')) || [];
+    } catch { return []; }
+  });
 
   // Gameplay State
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -351,7 +160,7 @@ const App = () => {
     return () => clearInterval(timer);
   }, [gameState]);
 
-  // Handle auto-transition from splash (Go to Start Screen as requested)
+  // Handle auto-transition from splash
   useEffect(() => {
     if (gameState === 'SPLASH' && loadingProgress >= 100) {
       const timer = setTimeout(() => {
@@ -366,23 +175,6 @@ const App = () => {
     localStorage.setItem('qpr_completed_missions_v5', JSON.stringify(completedLevels));
   }, [completedLevels]);
 
-  // AUTO-SAVE MISSION STATE (Resume Logic)
-  useEffect(() => {
-    const isGameplay = ['APPROACH', 'DIALOGUE', 'RESOLUTION', 'HANDOFF'].includes(gameState);
-    if (isGameplay && selectedLevel) {
-      const stateToSave = {
-        levelId: selectedLevel.id,
-        nodeId: currentNodeId,
-        trust: trust,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('qpr_active_mission_session', JSON.stringify(stateToSave));
-    } else if (gameState === 'LEVEL_SELECT' || gameState === 'START' || gameState === 'SIGNUP' || gameState === 'SIGNIN') {
-      // Clear session when intentionally leaving or before starting
-      localStorage.removeItem('qpr_active_mission_session');
-    }
-  }, [gameState, selectedLevel, currentNodeId, trust]);
-
   // Save Seen Dialogue Nodes
   useEffect(() => {
     localStorage.setItem('qpr_seen_dialogue_v1', JSON.stringify(seenDialogueNodes));
@@ -396,22 +188,14 @@ const App = () => {
     localStorage.removeItem('qpr_completed_missions_v4');
   }, []);
 
-  // Audio & Settings - Save to database only
+  // Audio & Settings
   useEffect(() => {
-    // Save to database if user is authenticated
-    if (currentUser?.id) {
-      dbService.updateUserSettings(currentUser.id, {
-        audio_volume: settings.audioVolume,
-        tts_enabled: settings.ttsEnabled,
-        text_speed: settings.textSpeed
-      }).catch(err => console.error('Error saving settings:', err));
-    }
-
+    localStorage.setItem('qpr_settings', JSON.stringify(settings));
     if (audioManager.initialized) {
       audioManager.setVolume(settings.audioVolume);
       audioManager.toggleTTS(settings.ttsEnabled);
     }
-  }, [settings, currentUser]);
+  }, [settings]);
 
   // Orientation Check
   useEffect(() => {
@@ -670,19 +454,12 @@ const App = () => {
     }
   };
 
-  const handleEndGameContinue = async () => {
+  const handleEndGameContinue = () => {
     audioManager.stopMusic();
     audioManager.stopSpeaking();
-
     if (currentNode.result === 'success' && !completedLevels.includes(selectedLevel.id)) {
       setCompletedLevels(prev => [...prev, selectedLevel.id]);
-
-      // Save to database if user is authenticated
-      if (currentUser?.id) {
-        await dbService.saveCompletedMission(currentUser.id, selectedLevel.id, trust);
-      }
     }
-
     setTrust(25);
     setPlayerPos({ x: 5, y: 70 });
     setHistory([]);
@@ -744,7 +521,7 @@ const App = () => {
   useEffect(() => {
     if (gameState === 'DIALOGUE' && !isNpcSpeaking && !playerLastSaid && currentNode?.required_resource && currentNode?.options?.length > 0) {
       setIsWalletOpen(true);
-    } else if (isNpcSpeaking || playerLastSaid || !currentNode?.required_resource || !currentNode?.options?.length) {
+    } else {
       setIsWalletOpen(false);
     }
   }, [currentNode, isNpcSpeaking, gameState, playerLastSaid]);
@@ -838,51 +615,8 @@ const App = () => {
     </div>
   );
 
-  // Helper to determine next screen based on profile completion
-  const continueToGame = () => {
-    audioManager.init();
-    // Re-enforce Auth flow on start as requested: "should sign in always"
-    // We send them to SIGNUP (which has the toggle to SIGNIN)
-    setGameState('SIGNUP');
-  };
-
-  // Auth Handlers
-  const handleSignUpSuccess = async (userData) => {
-    // Force manual sign-in after account creation
-    await authService.signOut();
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    setGameState('SIGNIN');
-    alert("Profile Reserved. Please sign in with your credentials to authorize access.");
-  };
-
-  const handleSignInSuccess = (userData) => {
-    setIsAuthenticated(true);
-    setCurrentUser(userData);
-    // Routing is now handled intelligently by the auth listener's loadUserData call
-  };
-
-  const handleSwitchToSignIn = () => {
-    setAuthView('signin');
-    setGameState('SIGNIN');
-  };
-
-  const handleSwitchToSignUp = () => {
-    setAuthView('signup');
-    setGameState('SIGNUP');
-  };
-
   if (gameState === 'SPLASH') return <SplashScreen loadingProgress={loadingProgress} />;
-  if (gameState === 'SIGNUP') return <SignUpScreen onSignUpSuccess={handleSignUpSuccess} onSwitchToSignIn={handleSwitchToSignIn} onBack={() => setGameState('START')} />;
-  if (gameState === 'SIGNIN') return <SignInScreen onSignInSuccess={handleSignInSuccess} onSwitchToSignUp={handleSwitchToSignUp} onBack={() => setGameState('START')} />;
-
-  if (gameState === 'START') return (
-    <StartScreen
-      trust={trust}
-      onStart={continueToGame}
-      onResources={() => { audioManager.init(); setGameState('RESOURCES'); }}
-    />
-  );
+  if (gameState === 'START') return <StartScreen trust={trust} onStart={() => { audioManager.init(); setGameState('NAMING'); }} onResources={() => { audioManager.init(); setGameState('RESOURCES'); }} />;
   if (gameState === 'NAMING') return <NamingScreen trust={trust} playerName={playerName} setPlayerName={setPlayerName} onNext={() => setGameState('GENDER_SELECT')} onNavigate={setGameState} />;
   if (gameState === 'GENDER_SELECT') return <GenderSelectScreen trust={trust} playerGender={playerGender} setPlayerGender={setPlayerGender} audioManager={audioManager} onNext={() => setGameState('LEVEL_SELECT')} onBack={() => setGameState('NAMING')} />;
   if (gameState === 'LEVEL_SELECT') return (
@@ -899,48 +633,19 @@ const App = () => {
       isSettingsOpen={isSettingsOpen}
       setIsSettingsOpen={setIsSettingsOpen}
       onResetGame={handleResetGame}
-      onLogout={handleLogout}
       isPaused={isPaused}
       setIsPaused={setIsPaused}
     />
   );
-
-  const handleUnlockAll = async () => {
-    if (!currentUser) return;
-    const allIds = MISSIONS.map(m => m.id);
-    setCompletedLevels(allIds);
-    // Silent DB update for all missions
-    try {
-      await Promise.all(allIds.map(id => dbService.completeMission(currentUser.id, id, 100)));
-    } catch (e) {
-      console.error("Admin Unlock Error:", e);
-    }
-  };
-
-  if (gameState === 'PROFILE') return (
-    <ProfileScreen
-      currentUser={currentUser}
-      playerName={playerName}
-      playerGender={playerGender}
-      completedLevels={completedLevels}
-      settings={settings}
-      setSettings={setSettings}
-      onResetGame={handleResetGame}
-      onAdminUnlockAll={handleUnlockAll}
-      onNavigate={setGameState}
-      onLogout={handleLogout}
-      audioManager={audioManager}
-    />
-  );
-  if (gameState === 'QUIZ_MODE') return <QuizGameScreen currentUser={currentUser} audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
+  if (gameState === 'QUIZ_MODE') return <QuizGameScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
   if (gameState === 'RESOURCES') return <ResourcesScreen onBack={() => setGameState(prev => ['START', 'LEVEL_SELECT'].includes(prev) ? prev : 'START')} />;
   if (gameState === 'FINAL_SUCCESS') return <FinalSuccessScreen onRestart={() => { setGameState('START'); setCompletedLevels([]); audioManager.playVictory(); }} />;
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
-  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen currentUser={currentUser} audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
+  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
 
-  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen currentUser={currentUser} audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
-  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen currentUser={currentUser} audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
+  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
+  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>
@@ -949,7 +654,6 @@ const App = () => {
         settings={settings} setSettings={setSettings}
         audioManager={audioManager}
         onResetGame={handleResetGame}
-        onLogout={handleLogout}
         isSettingsOpen={isSettingsOpen} setIsSettingsOpen={setIsSettingsOpen} onNavigate={setGameState}
         isPaused={isPaused}
         setIsPaused={setIsPaused}
@@ -1193,7 +897,7 @@ const App = () => {
             <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 text-indigo-100">Critical Choice</span>
             <span className="text-xl font-black uppercase tracking-widest text-center">Open Toolkit & Select Resource</span>
             <div className="flex items-center gap-2 mt-2">
-              <img src="/stickman_assets/pointing_stickman.svg" className="w-10 h-10 animate-bounce-subtle filter invert" alt="" />
+              <span className="text-2xl animate-pulse">👉</span>
               <span className="text-[10px] font-bold bg-white/20 px-3 py-1 rounded-full uppercase tracking-widest leading-none">
                 {walletResources.find(r => r.id === currentNode.required_resource)?.name || currentNode.required_resource} Needed
               </span>
@@ -1205,13 +909,7 @@ const App = () => {
       {currentNode?.isEnd && (
         <div className="absolute inset-0 z-[100] bg-slate-900/90 backdrop-blur flex items-center justify-center p-4 md:p-6 animate-fade-in overflow-hidden">
           <div className="max-w-xl w-full bg-white rounded-3xl p-6 md:p-10 text-center shadow-2xl border-4 border-teal-500 relative flex flex-col items-center">
-            <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 md:mb-6 rounded-full flex items-center justify-center p-4 shadow-xl shrink-0 ${currentNode.result === 'success' ? 'bg-green-100 text-green-600 border-2 border-green-200' : 'bg-red-100 text-red-600 border-2 border-red-200'}`}>
-              <img
-                src={currentNode.result === 'success' ? '/stickman_assets/happy_stickman.svg' : '/stickman_assets/sad_stickman.svg'}
-                className="w-full h-full"
-                alt={currentNode.result === 'success' ? 'Success' : 'Failure'}
-              />
-            </div>
+            <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 md:mb-6 rounded-full flex items-center justify-center text-3xl md:text-5xl shadow-xl shrink-0 ${currentNode.result === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{currentNode.result === 'success' ? '🌟' : '💔'}</div>
             <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-800 mb-2 md:mb-4 tracking-tight leading-tight">{selectedLevel.id === 'tutorial' && currentNode.result === 'success' ? 'Training Complete' : currentNode.result === 'success' ? 'Mission Complete' : 'Mission Failed'}</h2>
             <p className="text-slate-600 text-sm md:text-xl font-medium leading-relaxed mb-6 md:mb-8">{currentNode.message}</p>
             {currentNode.result === 'failure' && <p className="text-[10px] md:text-xs text-orange-500 font-bold uppercase tracking-widest bg-orange-50 p-2 md:p-3 rounded-xl border border-orange-100 mb-6 md:mb-8">Tip: Try Validation First. Listen more.</p>}
@@ -1220,7 +918,9 @@ const App = () => {
         </div>
       )}
 
-      <ResourceWallet isOpen={isWalletOpen} setIsOpen={setIsWalletOpen} selectedResource={selectedResource} onSelectResource={setSelectedResource} trust={trust} resources={walletResources} />
+      {gameState === 'DIALOGUE' && (
+        <ResourceWallet isOpen={isWalletOpen} setIsOpen={setIsWalletOpen} selectedResource={selectedResource} onSelectResource={setSelectedResource} trust={trust} resources={walletResources} />
+      )}
 
     </div>
   );
