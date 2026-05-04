@@ -73,10 +73,7 @@ const LevelSelectScreen = ({
                 isPaused={isPaused}
                 setIsPaused={setIsPaused}
                 gameState="LEVEL_SELECT"
-            />
-
-
-            <Scenery theme={selectedLevel.theme} trust={trust} />
+            />            <Scenery theme={selectedLevel.theme} trust={trust} />
 
             {/* Header */}
             <div className="relative z-20 text-center mb-6 mt-0 px-4 animate-fade-in">

@@ -13,15 +13,10 @@ import StartScreen from './pages/StartScreen';
 import NamingScreen from './pages/NamingScreen';
 import GenderSelectScreen from './pages/GenderSelectScreen';
 import LevelSelectScreen from './pages/LevelSelectScreen';
-import QuizGameScreen from './pages/QuizGameScreen';
 import ResourcesScreen from './pages/ResourcesScreen';
 import FinalSuccessScreen from './pages/FinalSuccessScreen';
 import ResolutionScreen from './pages/ResolutionScreen';
 import HandoffScreen from './pages/HandoffScreen';
-import ResourceRelayScreen from './pages/ResourceRelayScreen';
-
-import SignalScoutScreen from './pages/SignalScoutScreen'; // New Game
-import WordsOfHopeScreen from './pages/WordsOfHopeScreen'; // New Game
 import TutorialOverlay from './pages/TutorialOverlay';
 
 // Data
@@ -30,11 +25,10 @@ import { MISSIONS } from './data/missions';
 import { INNER_THOUGHTS, CLUE_POSITIONS, CLUE_DETAILS, BACKGROUND_NPCS } from './data/gameData';
 import { audioManager } from './utils/audio';
 import { REAL_RESOURCES } from './data/resources';
-import { PLAYER_CARDS } from './data/resourceRelayData';
 
 const App = () => {
   // Game State
-  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, QUIZ_MODE, RESOURCES, VALIDATION_CATCH, RESOURCE_RELAY, WORDS_OF_HOPE
+  const [gameState, setGameState] = useState('SPLASH'); // SPLASH, START, NAMING, GENDER_SELECT, LEVEL_SELECT, APPROACH, DIALOGUE, RESOLUTION, HANDOFF, FINAL_SUCCESS, RESOURCES
 
   // Settings
   const [settings, setSettings] = useState(() => {
@@ -136,12 +130,7 @@ const App = () => {
   const currentScenario = dialogueData[selectedLevel.id] || dialogueData[selectedLevel.theme] || dialogueData['park'];
   const currentNode = (currentScenario?.nodes && currentScenario.nodes[currentNodeId]) || {};
   const currentClue = CLUE_POSITIONS[selectedLevel.id] || CLUE_POSITIONS[selectedLevel.theme];
-  const resetCardGame = () => setGameState('LEVEL_SELECT'); // Used in some callbacks
-
-  const walletResources = [
-    // Standard Cards Only (Generic)
-    ...(PLAYER_CARDS || []).map(c => ({ id: c.id, name: c.title, description: c.desc }))
-  ];
+  const walletResources = [];
 
   // Clean bubbles on exit
   useEffect(() => {
@@ -637,15 +626,10 @@ const App = () => {
       setIsPaused={setIsPaused}
     />
   );
-  if (gameState === 'QUIZ_MODE') return <QuizGameScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
   if (gameState === 'RESOURCES') return <ResourcesScreen onBack={() => setGameState(prev => ['START', 'LEVEL_SELECT'].includes(prev) ? prev : 'START')} />;
   if (gameState === 'FINAL_SUCCESS') return <FinalSuccessScreen onRestart={() => { setGameState('START'); setCompletedLevels([]); audioManager.playVictory(); }} />;
   if (gameState === 'RESOLUTION') return <ResolutionScreen resolutionPhase={resolutionPhase} setGameState={setGameState} audioManager={audioManager} playerGender={playerGender} selectedLevel={selectedLevel} playerName={playerName} playerPos={playerPos} samPos={samPos} />;
   if (gameState === 'HANDOFF') return <HandoffScreen selectedLevel={selectedLevel} trust={trust} audioManager={audioManager} setGameState={setGameState} setResolutionPhase={setResolutionPhase} />;
-  if (gameState === 'RESOURCE_RELAY') return <ResourceRelayScreen audioManager={audioManager} onComplete={() => setGameState('LEVEL_SELECT')} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
-
-  if (gameState === 'SIGNAL_SCOUT') return <SignalScoutScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} />;
-  if (gameState === 'WORDS_OF_HOPE') return <WordsOfHopeScreen audioManager={audioManager} onExit={() => setGameState('LEVEL_SELECT')} isPaused={isPaused} playerGender={playerGender} />;
 
   return (
     <div className="game-container min-h-screen w-full bg-slate-100 overflow-hidden relative" onTouchStart={() => { if (!audioManager.initialized) audioManager.init(); }}>
@@ -658,9 +642,7 @@ const App = () => {
         isPaused={isPaused}
         setIsPaused={setIsPaused}
         gameState={gameState}
-      />
-
-      <div className={`fixed inset-0 z-[999] bg-black pointer-events-none transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-100' : 'opacity-0'}`} />
+      />      <div className={`fixed inset-0 z-[999] bg-black pointer-events-none transition-opacity duration-700 ease-in-out ${isTransitioning ? 'opacity-100' : 'opacity-0'}`} />
 
       {/* Stress Vignette (Tunnel Vision / Inside Voice) */}
       <div className={`fixed inset-0 z-[45] pointer-events-none tunnel-vision transition-opacity duration-1000 ${trust < 40 ? 'opacity-100' : 'opacity-0'}`} />
