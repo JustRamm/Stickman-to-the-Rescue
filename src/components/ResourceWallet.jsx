@@ -70,9 +70,11 @@ const ResourceWallet = ({ isOpen, resources, onSelectResource, selectedResource 
                                         </h4>
                                         {badge && <span className="text-[9px] font-bold px-1.5 py-0.5 bg-red-100 text-red-600 rounded uppercase tracking-wider">{badge}</span>}
                                     </div>
-                                    <p className={`text-xs leading-normal font-medium mt-1 ${isSelected ? 'text-teal-700' : 'text-slate-400'}`}>
-                                        {resource.description}
-                                    </p>
+                                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSelected ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+                                        <p className="text-xs leading-normal font-medium text-teal-700">
+                                            {resource.description}
+                                        </p>
+                                    </div>
                                 </div>
                                 {isSelected && (
                                     <div className="absolute inset-y-0 right-0 w-1.5 bg-teal-500 rounded-r-xl"></div>
@@ -83,10 +85,10 @@ const ResourceWallet = ({ isOpen, resources, onSelectResource, selectedResource 
                 </div>
             </div>
 
-            <div className="p-4 border-t border-slate-200 bg-white">
-                <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-center">
-                    <p className="text-[10px] text-slate-400 font-bold italic">"Connecting causes action."</p>
-                </div>
+            <div className="mt-12 bg-teal-50 rounded-2xl p-6 border border-teal-100">
+                <p className="text-[10px] text-teal-800 leading-relaxed font-bold italic text-center">
+                    "Connect them to help. Select the resource Sam needs most right now."
+                </p>
             </div>
         </div>
     );
